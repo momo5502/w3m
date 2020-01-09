@@ -61,13 +61,13 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "momo5502"
-            VALUE "FileDescription", "Open-IW5"
+            VALUE "CompanyName", "momo5502 & RektInator"
+            VALUE "FileDescription", "Witcher 3: Online"
             VALUE "FileVersion", "1.0.0.0"
-            VALUE "InternalName", "Open-IW5"
+            VALUE "InternalName", "Witcher 3: Online"
             VALUE "LegalCopyright", "All rights reserved."
-            VALUE "OriginalFilename", "open-iw5.exe"
-            VALUE "ProductName", "open-iw5"
+            VALUE "OriginalFilename", "w3x.exe"
+            VALUE "ProductName", "w3x"
             VALUE "ProductVersion", "1.0.0.0"
         END
     END

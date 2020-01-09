@@ -1,6 +1,7 @@
 #include <std_include.hpp>
 #include "loader/loader.hpp"
 #include "utils/string.hpp"
+#include "loader/module_loader.hpp"
 
 void verify_tls()
 {
@@ -22,23 +23,34 @@ void verify_tls()
 int main()
 {
 	FARPROC entry_point;
-	
-	try
-	{
-		verify_tls();
 
-		const auto module = loader::load("witcher3.exe");
-		entry_point = FARPROC(module.get_entry_point());
-	}
-	catch (std::exception & e)
 	{
-		MessageBoxA(nullptr, e.what(), "ERROR", MB_ICONERROR);
-		return 1;
+		auto premature_shutdown = true;
+		const auto _ = gsl::finally([&premature_shutdown]()
+			{
+				if (premature_shutdown)
+				{
+					module_loader::pre_destroy();
+				}
+			});
+
+		try
+		{
+			verify_tls();
+			if (!module_loader::post_start()) return 0;
+
+			const auto module = loader::load("witcher3.exe");
+			entry_point = FARPROC(module.get_entry_point());
+
+			if (!module_loader::post_load()) return 0;
+			premature_shutdown = false;
+		}
+		catch (std::exception & e)
+		{
+			MessageBoxA(nullptr, e.what(), "ERROR", MB_ICONERROR);
+			return 1;
+		}
 	}
 
-	if(!entry_point) {
-		return 1;
-	}
-	
 	return int(entry_point());
 }

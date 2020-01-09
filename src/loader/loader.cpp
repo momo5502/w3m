@@ -1,10 +1,17 @@
 #include <std_include.hpp>
 #include "loader.hpp"
 #include "utils/string.hpp"
+#include "module_loader.hpp"
 
 namespace loader
 {
 	utils::nt::module main_module;
+
+	DECLSPEC_NORETURN void WINAPI exit_hook(const int code)
+	{
+		module_loader::pre_destroy();
+		exit(code);
+	}
 
 	HMODULE __stdcall get_module_handle_a(LPCSTR module_name)
 	{
@@ -67,6 +74,11 @@ namespace loader
 		if (function == "GetModuleFileNameW")
 		{
 			return get_module_file_name_w;
+		}
+
+		if (function == "ExitProcess")
+		{
+			return exit_hook;
 		}
 
 		return nullptr;

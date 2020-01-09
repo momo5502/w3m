@@ -50,6 +50,8 @@
 #include <filesystem>
 #include <functional>
 
+#include <gsl/gsl>
+
 #pragma warning(pop)
 #pragma warning(disable: 4100)
 
