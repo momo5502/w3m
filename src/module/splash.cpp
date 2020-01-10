@@ -8,15 +8,64 @@ public:
 	void post_start() override
 	{
 		this->show();
-		std::thread([this]()
+
+		this->kill_ = false;
+		this->thread_ = std::thread([this]()
 		{
-			std::this_thread::sleep_for(10s);
+			while (!this->kill_ && !is_game_ready())
+			{
+				std::this_thread::sleep_for(10ms);
+			}
+
 			this->destroy();
-		}).detach();
+		});
+	}
+
+	void pre_destroy() override
+	{
+		this->kill_ = true;
+		if (this->thread_.joinable())
+		{
+			this->thread_.join();
+		}
 	}
 
 private:
 	HWND window_{};
+	bool kill_ = false;
+	std::thread thread_;
+
+	static BOOL CALLBACK enum_windows_proc(const HWND window, const LPARAM param)
+	{
+		DWORD process = 0;
+		GetWindowThreadProcessId(window, &process);
+
+		if (process == GetCurrentProcessId())
+		{
+			char title[500] = { 0 };
+			GetWindowText(GetForegroundWindow(), title, sizeof(title));
+
+			if (title == "The Witcher 3"s)
+			{
+				*reinterpret_cast<HWND*>(param) = window;
+			}
+		}
+
+		return TRUE;
+	}
+
+	static HWND get_game_window()
+	{
+		HWND window = nullptr;
+		EnumWindows(enum_windows_proc, LPARAM(&window));
+
+		return window;
+	}
+
+	static bool is_game_ready()
+	{
+		return get_game_window() != nullptr;
+	}
 
 	void destroy()
 	{
@@ -57,7 +106,7 @@ private:
 			auto image = HWND(LoadImageA(main, MAKEINTRESOURCE(IMAGE_SPLASH), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR));
 			if (image)
 			{
-				this->window_ = CreateWindowExA(WS_EX_APPWINDOW, "Witcher Splash Screen", "Witcher 3: Online", WS_POPUP | WS_SYSMENU, (x_pixels - 320) / 2, (y_pixels - 100) / 2, 320, 100, 0, 0, main, 0);
+				this->window_ = CreateWindowExA(WS_EX_APPWINDOW, "Witcher Splash Screen", "Witcher 3: Online", WS_POPUP | WS_SYSMENU, (x_pixels - 320) / 2, (y_pixels - 100) / 2, 320, 100, nullptr, nullptr, main, nullptr);
 
 				if (this->window_)
 				{
@@ -77,7 +126,7 @@ private:
 						rect.right = rect.left + width;
 						rect.bottom = rect.top + height;
 						AdjustWindowRect(&rect, WS_CHILD | WS_VISIBLE | 0xEu, 0);
-						SetWindowPos(this->window_, 0, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOZORDER);
+						SetWindowPos(this->window_, nullptr, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOZORDER);
 
 						ShowWindow(this->window_, SW_SHOW);
 						UpdateWindow(this->window_);
