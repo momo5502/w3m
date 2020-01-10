@@ -17,9 +17,9 @@ public:
 	}
 
 private:
-	static HICON __stdcall load_icon_w(HINSTANCE instance, const wchar_t* name)
+	static HICON __stdcall load_icon_w(const HINSTANCE instance, const wchar_t* name)
 	{
-		if (!name || size_t(name) >= 100 && size_t(name) <= 110 && instance == loader::get_module())
+		if (size_t(name) <= 300 && instance == loader::get_module())
 		{
 			return LoadIconA(GetModuleHandleA(nullptr), MAKEINTRESOURCE(102));
 		}

@@ -1,6 +1,7 @@
 #include <std_include.hpp>
 #include "loader/module_loader.hpp"
 #include "utils/nt.hpp"
+#include "window.hpp"
 
 class splash final : public module
 {
@@ -12,21 +13,32 @@ public:
 		this->kill_ = false;
 		this->thread_ = std::thread([this]()
 		{
-			while (!this->kill_ && !is_game_ready())
+			while (!this->kill_ && !window::get_game_window())
 			{
 				std::this_thread::sleep_for(10ms);
 			}
 
 			this->destroy();
+			this->thread_.detach();
 		});
 	}
 
 	void pre_destroy() override
 	{
 		this->kill_ = true;
-		if (this->thread_.joinable())
+
+		MSG msg;
+		while (this->thread_.joinable())
 		{
-			this->thread_.join();
+			if (PeekMessageA(&msg, nullptr, NULL, NULL, PM_REMOVE))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+			else
+			{
+				std::this_thread::sleep_for(1ms);
+			}
 		}
 	}
 
@@ -34,38 +46,6 @@ private:
 	HWND window_{};
 	bool kill_ = false;
 	std::thread thread_;
-
-	static BOOL CALLBACK enum_windows_proc(const HWND window, const LPARAM param)
-	{
-		DWORD process = 0;
-		GetWindowThreadProcessId(window, &process);
-
-		if (process == GetCurrentProcessId())
-		{
-			char title[500] = { 0 };
-			GetWindowText(GetForegroundWindow(), title, sizeof(title));
-
-			if (title == "The Witcher 3"s)
-			{
-				*reinterpret_cast<HWND*>(param) = window;
-			}
-		}
-
-		return TRUE;
-	}
-
-	static HWND get_game_window()
-	{
-		HWND window = nullptr;
-		EnumWindows(enum_windows_proc, LPARAM(&window));
-
-		return window;
-	}
-
-	static bool is_game_ready()
-	{
-		return get_game_window() != nullptr;
-	}
 
 	void destroy()
 	{
