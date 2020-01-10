@@ -7,12 +7,6 @@ namespace loader
 {
 	utils::nt::module main_module;
 
-	DECLSPEC_NORETURN void WINAPI exit_hook(const int code)
-	{
-		module_loader::pre_destroy();
-		exit(code);
-	}
-
 	HMODULE __stdcall get_module_handle_a(LPCSTR module_name)
 	{
 		if (!module_name)
@@ -58,33 +52,28 @@ namespace loader
 	{
 		if (function == "GetModuleHandleA")
 		{
-			return get_module_handle_a;
+			return &get_module_handle_a;
 		}
 
 		if (function == "GetModuleHandleW")
 		{
-			return get_module_handle_w;
+			return &get_module_handle_w;
 		}
 
 		if (function == "GetModuleHandleExW")
 		{
-			return get_module_handle_ex_w;
+			return &get_module_handle_ex_w;
 		}
 
 		if (function == "GetModuleFileNameW")
 		{
-			return get_module_file_name_w;
-		}
-
-		if (function == "ExitProcess")
-		{
-			return exit_hook;
+			return &get_module_file_name_w;
 		}
 
 		return nullptr;
 	}
 
-	void load_imports(const utils::nt::module& target)
+	void load_imports(const utils::nt::module& target, const resolver& import_resolver)
 	{
 		const auto import_directory = &target.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
 		auto descriptor = PIMAGE_IMPORT_DESCRIPTOR(target.get_ptr() + import_directory->VirtualAddress);
@@ -121,6 +110,11 @@ namespace loader
 					auto import = PIMAGE_IMPORT_BY_NAME(target.get_ptr() + *name_table_entry);
 					function_name = import->Name;
 					function = FARPROC(resolve_special_imports(name, function_name));
+					
+					if (!function && import_resolver)
+					{
+						function = FARPROC(import_resolver(name, function_name));
+					}
 
 					if (!function)
 					{
@@ -154,7 +148,7 @@ namespace loader
 		return main_module;
 	}
 
-	utils::nt::module load(const std::string& name)
+	utils::nt::module load(const std::string& name, const resolver& import_resolver)
 	{
 		main_module = utils::nt::module::load(name);
 		if(!main_module)
@@ -162,7 +156,7 @@ namespace loader
 			throw std::runtime_error(utils::string::va("Unable to load '%s'", name.data()));
 		}
 
-		load_imports(main_module);
+		load_imports(main_module, import_resolver);
 
 		return main_module;
 	}

@@ -93,7 +93,7 @@ private:
 		wnd_class.lpszMenuName = nullptr;
 		wnd_class.lpfnWndProc = DefWindowProcA;
 		wnd_class.hInstance = main;
-		wnd_class.hIcon = LoadIconA(main, LPCSTR(1));
+		wnd_class.hIcon = LoadIconA(main, LPCSTR(102));
 		wnd_class.hCursor = LoadCursorA(nullptr, IDC_APPSTARTING);
 		wnd_class.hbrBackground = HBRUSH(6);
 		wnd_class.lpszClassName = "Witcher Splash Screen";

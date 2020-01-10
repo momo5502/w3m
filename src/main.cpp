@@ -3,6 +3,12 @@
 #include "utils/string.hpp"
 #include "loader/module_loader.hpp"
 
+DECLSPEC_NORETURN void WINAPI exit_hook(const int code)
+{
+	module_loader::pre_destroy();
+	exit(code);
+}
+
 void verify_tls()
 {
 	const utils::nt::module self;
@@ -27,19 +33,28 @@ int main()
 	{
 		auto premature_shutdown = true;
 		const auto _ = gsl::finally([&premature_shutdown]()
+		{
+			if (premature_shutdown)
 			{
-				if (premature_shutdown)
-				{
-					module_loader::pre_destroy();
-				}
-			});
+				module_loader::pre_destroy();
+			}
+		});
 
 		try
 		{
 			verify_tls();
 			if (!module_loader::post_start()) return 0;
 
-			const auto module = loader::load("witcher3.exe");
+			const auto module = loader::load("witcher3.exe", [](const std::string& module, const std::string& function) -> void*
+			{
+				if (function == "ExitProcess")
+				{
+					return &exit_hook;
+				}
+
+				return module_loader::load_import(module, function);
+			});
+			
 			entry_point = FARPROC(module.get_entry_point());
 
 			if (!module_loader::post_load()) return 0;
