@@ -1,3 +1,6 @@
 [submodule "deps/GSL"]
 	path = deps/GSL
 	url = https://github.com/Microsoft/GSL.git
+[submodule "deps/asmjit"]
+	path = deps/asmjit
+	url = https://github.com/asmjit/asmjit.git

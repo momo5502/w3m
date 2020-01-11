@@ -8,3 +8,6 @@ namespace loader
 	utils::nt::module get_module();
 	utils::nt::module load(const std::string& name, const resolver& import_resolver = {});
 }
+
+// Outside the namespace for easier use
+size_t operator"" _g(const size_t val);
