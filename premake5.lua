@@ -58,8 +58,6 @@ workspace "w3x"
 	warnings "Extra"
 	characterset "ASCII"
 	
-	linkoptions "/IGNORE:4254 /DYNAMICBASE:NO /SAFESEH:NO /LARGEADDRESSAWARE"
-
 	flags {
 		"NoIncrementalLink",
 		"NoMinimalRebuild",
