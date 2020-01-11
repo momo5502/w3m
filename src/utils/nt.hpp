@@ -29,6 +29,7 @@ namespace utils::nt
 		bool is_valid() const;
 		std::string get_name() const;
 		std::string get_path() const;
+		std::string get_folder() const;
 		std::uint8_t* get_ptr() const;
 		void free();
 

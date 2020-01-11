@@ -130,6 +130,14 @@ namespace utils::nt
 		return name;
 	}
 
+	std::string module::get_folder() const
+	{
+		if (!this->is_valid()) return "";
+
+		const auto path = std::filesystem::path(this->get_path());
+		return path.parent_path().generic_string();
+	}
+
 	void module::free()
 	{
 		if (this->is_valid())

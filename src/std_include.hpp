@@ -6,6 +6,7 @@
 #pragma warning(disable: 4244)
 #pragma warning(disable: 4458)
 #pragma warning(disable: 4702)
+#pragma warning(disable: 5054)
 #pragma warning(disable: 6011)
 #pragma warning(disable: 6297)
 #pragma warning(disable: 6385)
@@ -28,6 +29,7 @@
 #include <fcntl.h>
 #include <shellapi.h>
 #include <csetjmp>
+#include <shlobj.h>
 
 // min and max is required by gdi, therefore NOMINMAX won't work
 #ifdef max
@@ -52,6 +54,10 @@
 #include <functional>
 
 #include <gsl/gsl>
+
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 #pragma warning(pop)
 #pragma warning(disable: 4100)
