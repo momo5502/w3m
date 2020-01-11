@@ -6,6 +6,7 @@
 #pragma warning(disable: 4244)
 #pragma warning(disable: 4458)
 #pragma warning(disable: 4702)
+#pragma warning(disable: 6011)
 #pragma warning(disable: 6297)
 #pragma warning(disable: 6385)
 #pragma warning(disable: 6386)

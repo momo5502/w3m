@@ -26,7 +26,7 @@ void verify_tls()
 	}
 }
 
-int main()
+int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 {
 	FARPROC entry_point;
 

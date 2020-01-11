@@ -9,7 +9,7 @@ namespace utils::hook
 
 		const auto start = reinterpret_cast<char*>(this->start_);
 
-		const unsigned int sig_count = this->signatures_.size();
+		const auto sig_count = this->signatures_.size();
 		const auto containers = this->signatures_.data();
 
 		for (size_t i = 0; i < this->length_; ++i)
@@ -47,7 +47,7 @@ namespace utils::hook
 		DWORD old_protect;
 		VirtualProtect(place, length, PAGE_EXECUTE_READWRITE, &old_protect);
 
-		memset(place, 0x90, length);
+		std::memset(place, 0x90, length);
 
 		VirtualProtect(place, length, old_protect, &old_protect);
 		FlushInstructionCache(GetCurrentProcess(), place, length);

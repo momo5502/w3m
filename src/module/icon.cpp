@@ -1,7 +1,6 @@
 #include <std_include.hpp>
 #include "loader/module_loader.hpp"
 #include "loader/loader.hpp"
-#include "utils/nt.hpp"
 
 class icon final : public module
 {

@@ -2,6 +2,7 @@
 #include "loader/module_loader.hpp"
 #include "utils/nt.hpp"
 #include "window.hpp"
+#include "scheduler.hpp"
 
 class splash final : public module
 {
@@ -10,25 +11,24 @@ public:
 	{
 		this->show();
 
-		this->kill_ = false;
-		this->thread_ = std::thread([this]()
+		scheduler::frame([this]()
 		{
-			while (!this->kill_ && !window::get_game_window())
+			if(window::get_game_window())
 			{
-				std::this_thread::sleep_for(10ms);
+				this->destroy();
+				return scheduler::cond_end;
 			}
 
-			this->destroy();
-			this->thread_.detach();
+			return scheduler::cond_continue;
 		});
 	}
 
 	void pre_destroy() override
 	{
-		this->kill_ = true;
-
+		this->destroy();
+		
 		MSG msg;
-		while (this->thread_.joinable())
+		while (this->window_ && IsWindow(this->window_))
 		{
 			if (PeekMessageA(&msg, nullptr, NULL, NULL, PM_REMOVE))
 			{
@@ -40,25 +40,21 @@ public:
 				std::this_thread::sleep_for(1ms);
 			}
 		}
+
+		this->window_ = nullptr;
 	}
 
 private:
 	HWND window_{};
-	bool kill_ = false;
-	std::thread thread_;
 
-	void destroy()
+	void destroy() const
 	{
-		const utils::nt::module main;
-
-		if (IsWindow(this->window_))
+		if (this->window_ && IsWindow(this->window_))
 		{
 			ShowWindow(this->window_, SW_HIDE);
 			DestroyWindow(this->window_);
-			UnregisterClassA("Witcher Splash Screen", main);
+			UnregisterClassA("Witcher Splash Screen", utils::nt::module());
 		}
-
-		this->window_ = nullptr;
 	}
 
 	void show()

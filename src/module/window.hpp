@@ -5,7 +5,6 @@ class window final : public module
 {
 public:
 	void post_load() override;
-	void pre_destroy() override;
 
 	static HWND get_game_window();
 

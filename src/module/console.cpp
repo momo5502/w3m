@@ -6,11 +6,6 @@
 class console final : public module
 {
 public:
-	void post_start() override
-	{
-		FreeConsole();
-	}
-	
 	void post_load() override
 	{
 		// Enable ingame console

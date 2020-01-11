@@ -1,30 +1,19 @@
 #include <std_include.hpp>
 #include "window.hpp"
+#include "scheduler.hpp"
 
 void window::post_load()
 {
-	this->kill_ = false;
-	this->thread_ = std::thread([this]()
+	scheduler::frame([]()
 	{
-		while (!this->kill_ && !get_game_window())
-		{
-			std::this_thread::sleep_for(1ms);
-		}
-
 		if (const auto game_window = get_game_window())
 		{
 			SetWindowTextA(game_window, "Witcher 3: Online");
+			return scheduler::cond_end;
 		}
-	});
-}
 
-void window::pre_destroy()
-{
-	this->kill_ = true;
-	if (this->thread_.joinable())
-	{
-		this->thread_.join();
-	}
+		return scheduler::cond_continue;
+	});
 }
 
 HWND window::get_game_window()

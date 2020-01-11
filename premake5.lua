@@ -96,7 +96,7 @@ workspace "w3x"
 	configuration {}
 
 	project "w3x"
-		kind "ConsoleApp"
+		kind "WindowedApp"
 		language "C++"
 
 		pchheader "std_include.hpp"
