@@ -17,7 +17,7 @@ void verify_tls()
 
 	const auto ref = DWORD64(&tls_data);
 	const auto tls_index = *reinterpret_cast<PDWORD>(self_tls->AddressOfIndex);
-	const auto tls_vector = *reinterpret_cast<PDWORD>(__readgsqword(0x58) + 4 * tls_index);
+	const auto tls_vector = *reinterpret_cast<PDWORD64>(__readgsqword(0x58) + 8 * tls_index);
 	const auto offset = ref - tls_vector;
 
 	if (offset != 0 && offset != 16) // Actually 16 is bad, but I think msvc places custom stuff before
