@@ -3,6 +3,7 @@
 #define TLS_PAYLOAD_SIZE 0x2000
 
 #pragma warning(push)
+#pragma warning(disable: 4127)
 #pragma warning(disable: 4244)
 #pragma warning(disable: 4458)
 #pragma warning(disable: 4702)
@@ -60,6 +61,8 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+
+#include "proto/test.pb.h"
 
 #pragma warning(pop)
 #pragma warning(disable: 4100)

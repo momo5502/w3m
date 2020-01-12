@@ -83,11 +83,6 @@ namespace steam
 					auto* operand_ptr = reinterpret_cast<char*>(ud_insn_len(&ud) + ud_insn_off(&ud) + operand->lval.sdword);
 					if (!utils::memory::is_bad_read_ptr(operand_ptr) && this->is_rdata(operand_ptr))
 					{
-						if(operand_ptr == "SpawnProcess"s)
-						{
-							//patch_steam_bug(method_ptr);
-						}
-
 						return operand_ptr;
 					}
 
