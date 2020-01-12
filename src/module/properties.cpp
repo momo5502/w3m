@@ -70,6 +70,11 @@ void properties::remove_internal(const std::string& name)
 template <>
 bool properties::get_internal(const std::string& name, std::string& value)
 {
+	if(!this->document_.HasMember(name.data()))
+	{
+		return false;
+	}
+
 	auto& val = this->document_[name.data()];
 	if(!val.IsString())
 	{
@@ -83,6 +88,11 @@ bool properties::get_internal(const std::string& name, std::string& value)
 template <>
 bool properties::get_internal(const std::string& name, int64_t& value)
 {
+	if (!this->document_.HasMember(name.data()))
+	{
+		return false;
+	}
+
 	auto& val = this->document_[name.data()];
 	if (!val.IsInt64())
 	{
@@ -96,6 +106,11 @@ bool properties::get_internal(const std::string& name, int64_t& value)
 template <>
 bool properties::get_internal(const std::string& name, double& value)
 {
+	if (!this->document_.HasMember(name.data()))
+	{
+		return false;
+	}
+
 	auto& val = this->document_[name.data()];
 	if (!val.IsDouble())
 	{

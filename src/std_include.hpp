@@ -55,6 +55,8 @@
 
 #include <gsl/gsl>
 
+#include <udis86.h>
+
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>

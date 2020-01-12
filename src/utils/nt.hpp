@@ -6,6 +6,7 @@ namespace utils::nt
 	{
 	public:
 		static module load(const std::string& name);
+		static module load(const std::filesystem::path& path);
 		static module get_by_address(void* address);
 
 		module();

@@ -8,6 +8,11 @@ namespace utils::nt
 		return module(LoadLibraryA(name.data()));
 	}
 
+	module module::load(const std::filesystem::path& path)
+	{
+		return module::load(path.generic_string());
+	}
+
 	module module::get_by_address(void* address)
 	{
 		HMODULE handle = nullptr;
