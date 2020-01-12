@@ -33,8 +33,52 @@ namespace utils::hook
 		std::vector<container> signatures_;
 	};
 
+	class detour
+	{
+	public:
+		detour() = default;
+		detour(void* place, void* target);
+		~detour();
+
+		detour(detour&& other)
+		{
+			this->operator=(std::move(other));
+		}
+		
+		detour& operator= (detour&& other) noexcept
+		{
+			if(this != &other)
+			{
+				this->~detour();
+				
+				this->place_ = other.place_;
+				this->original_ = other.original_;
+
+				other.place_ = nullptr;
+				other.original_ = nullptr;
+			}
+
+			return *this;
+		}
+
+		detour(const detour&) = delete;
+		detour& operator= (const detour&) = delete;
+
+		void enable() const;
+		void disable() const;
+
+		void* get_original() const;
+
+	private:
+		void* place_{};
+		void* original_{};
+	};
+
 	void nop(void* place, size_t length);
 	void nop(size_t place, size_t length);
+
+	void copy(void* place, const void* data, size_t length);
+	void copy(size_t place, const void* data, size_t length);
 
 	void jump(const size_t pointer, void* data);
 

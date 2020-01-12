@@ -55,8 +55,8 @@
 #include <functional>
 
 #include <gsl/gsl>
-
 #include <udis86.h>
+#include <MinHook.h>
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>

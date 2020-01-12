@@ -4,6 +4,7 @@
 #include "utils/string.hpp"
 #include "scheduler.hpp"
 #include "steam/interface.hpp"
+#include "loader/loader.hpp"
 
 class steam_proxy final : public module
 {
@@ -120,7 +121,7 @@ private:
 
 		this->client_utils_.invoke<void>("SetAppIDForCurrentPipe", app_id, false);
 
-		const utils::nt::module self;
+		const utils::nt::module self = loader::get_main_module();
 		const auto path = self.get_path();
 
 		char our_directory[MAX_PATH] = { 0 };

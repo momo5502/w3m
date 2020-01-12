@@ -1,8 +1,29 @@
 #include <std_include.hpp>
 #include "hook.hpp"
+#include "string.hpp"
 
 namespace utils::hook
 {
+	namespace
+	{
+		class _
+		{
+		public:
+			_()
+			{
+				if(MH_Initialize() != MH_OK)
+				{
+					throw std::runtime_error("Failed to initialize MinHook");
+				}
+			}
+
+			~_()
+			{
+				MH_Uninitialize();
+			}
+		} __;
+	}
+
 	void signature::process()
 	{
 		if (this->signatures_.empty()) return;
@@ -42,6 +63,42 @@ namespace utils::hook
 		signatures_.push_back(container);
 	}
 
+	detour::detour(void* place, void* target) : place_(place)
+	{
+		if (MH_CreateHook(this->place_, target, &this->original_) != MH_OK)
+		{
+			throw std::runtime_error(string::va("Unable to create hook at location: %p", this->place_));
+		}
+
+		this->enable();
+	}
+
+	detour::~detour()
+	{
+		if (this->place_)
+		{
+			MH_RemoveHook(this->place_);
+		}
+
+		this->place_ = nullptr;
+		this->original_ = nullptr;
+	}
+
+	void detour::enable() const
+	{
+		MH_EnableHook(this->place_);
+	}
+
+	void detour::disable() const
+	{
+		MH_DisableHook(this->place_);
+	}
+
+	void* detour::get_original() const
+	{
+		return this->original_;
+	}
+
 	void nop(void* place, const size_t length)
 	{
 		DWORD old_protect;
@@ -56,6 +113,22 @@ namespace utils::hook
 	void nop(const size_t place, const size_t length)
 	{
 		nop(reinterpret_cast<void*>(place), length);
+	}
+
+	void copy(void* place, const void* data, const size_t length)
+	{
+		DWORD old_protect;
+		VirtualProtect(place, length, PAGE_EXECUTE_READWRITE, &old_protect);
+
+		std::memmove(place, data, length);
+
+		VirtualProtect(place, length, old_protect, &old_protect);
+		FlushInstructionCache(GetCurrentProcess(), place, length);
+	}
+
+	void copy(const size_t place, const void* data, const size_t length)
+	{
+		copy(reinterpret_cast<void*>(place), data, length);
 	}
 
 	void jump(const size_t pointer, void* data)

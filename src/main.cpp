@@ -11,7 +11,7 @@ DECLSPEC_NORETURN void WINAPI exit_hook(const int code)
 
 void verify_tls()
 {
-	const utils::nt::module self;
+	const utils::nt::module self = loader::get_main_module();
 	const auto self_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(self.get_ptr()
 		+ self.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
 
@@ -29,6 +29,7 @@ void verify_tls()
 int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 {
 	FARPROC entry_point;
+	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
 	{
 		auto premature_shutdown = true;

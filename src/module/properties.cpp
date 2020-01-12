@@ -2,6 +2,7 @@
 #include "properties.hpp"
 #include "utils/nt.hpp"
 #include "utils/io.hpp"
+#include "loader/loader.hpp"
 
 properties::properties()
 {
@@ -54,7 +55,7 @@ void properties::create_member(const std::string& name)
 
 std::string properties::get_path()
 {
-	const auto out_folder = std::filesystem::path(utils::nt::module().get_folder());
+	const auto out_folder = std::filesystem::path(loader::get_main_module().get_folder());
 	const auto out_path = out_folder / "w3x.json";
 	return out_path.generic_string();
 }

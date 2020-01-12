@@ -5,73 +5,8 @@
 
 namespace loader
 {
+	utils::nt::module game_module;
 	utils::nt::module main_module;
-
-	HMODULE __stdcall get_module_handle_a(LPCSTR module_name)
-	{
-		if (!module_name)
-		{
-			return main_module;
-		}
-
-		return GetModuleHandleA(module_name);
-	}
-
-	HMODULE __stdcall get_module_handle_w(LPWSTR module_name)
-	{
-		if (!module_name)
-		{
-			return main_module;
-		}
-
-		return GetModuleHandleW(module_name);
-	}
-
-	BOOL __stdcall get_module_handle_ex_w(DWORD flags, LPCWSTR module_name, HMODULE* module)
-	{
-		if (!module_name)
-		{
-			*module = main_module;
-			return TRUE;
-		}
-
-		return GetModuleHandleExW(flags, module_name, module);
-	}
-
-	DWORD __stdcall get_module_file_name_w(HMODULE module, LPWSTR filename, DWORD size)
-	{
-		if (!module)
-		{
-			module = main_module;
-		}
-
-		return GetModuleFileNameW(module, filename, size);
-	}
-
-	void* resolve_special_imports(const std::string& module, const std::string& function)
-	{
-		if (function == "GetModuleHandleA")
-		{
-			return &get_module_handle_a;
-		}
-
-		if (function == "GetModuleHandleW")
-		{
-			return &get_module_handle_w;
-		}
-
-		if (function == "GetModuleHandleExW")
-		{
-			return &get_module_handle_ex_w;
-		}
-
-		if (function == "GetModuleFileNameW")
-		{
-			return &get_module_file_name_w;
-		}
-
-		return nullptr;
-	}
 
 	void load_imports(const utils::nt::module& target, const resolver& import_resolver)
 	{
@@ -109,9 +44,8 @@ namespace loader
 				{
 					auto import = PIMAGE_IMPORT_BY_NAME(target.get_ptr() + *name_table_entry);
 					function_name = import->Name;
-					function = FARPROC(resolve_special_imports(name, function_name));
-					
-					if (!function && import_resolver)
+
+					if (import_resolver)
 					{
 						function = FARPROC(import_resolver(name, function_name));
 					}
@@ -143,31 +77,36 @@ namespace loader
 		}
 	}
 
-	utils::nt::module get_module()
+	utils::nt::module get_game_module()
+	{
+		return game_module;
+	}
+
+	utils::nt::module get_main_module()
 	{
 		return main_module;
 	}
 
 	utils::nt::module load(const std::string& name, const resolver& import_resolver)
 	{
-		main_module = utils::nt::module::load(name);
-		if(!main_module)
+		game_module = utils::nt::module::load(name);
+		if(!game_module)
 		{
 			throw std::runtime_error(utils::string::va("Unable to load '%s'", name.data()));
 		}
 
-		load_imports(main_module, import_resolver);
+		load_imports(game_module, import_resolver);
 
-		return main_module;
+		return game_module;
 	}
 }
 
 size_t operator"" _g(const size_t val)
 {
-	static auto base = size_t(loader::get_module().get_ptr());
+	static auto base = size_t(loader::get_game_module().get_ptr());
 
 #ifdef DEBUG
-	if (base == size_t(utils::nt::module().get_ptr()))
+	if (base == size_t(loader::get_main_module().get_ptr()))
 	{
 		throw std::runtime_error("Resolved too early!");
 	}

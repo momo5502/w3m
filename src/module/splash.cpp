@@ -3,6 +3,7 @@
 #include "utils/nt.hpp"
 #include "window.hpp"
 #include "scheduler.hpp"
+#include "loader/loader.hpp"
 
 class splash final : public module
 {
@@ -53,7 +54,7 @@ private:
 		{
 			ShowWindow(this->window_, SW_HIDE);
 			DestroyWindow(this->window_);
-			UnregisterClassA("Witcher Splash Screen", utils::nt::module());
+			UnregisterClassA("Witcher Splash Screen", loader::get_main_module());
 		}
 	}
 
@@ -61,7 +62,7 @@ private:
 	{
 		WNDCLASSA wnd_class;
 
-		const utils::nt::module main;
+		const utils::nt::module main = loader::get_main_module();
 
 		wnd_class.style = 0;
 		wnd_class.cbClsExtra = 0;
