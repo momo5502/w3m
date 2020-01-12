@@ -99,11 +99,19 @@ namespace loader
 
 		return game_module;
 	}
+
+	size_t reverse_g(const size_t val)
+	{
+		static auto base = size_t(loader::get_game_module().get_ptr());
+		assert(base != size_t(loader::get_main_module().get_ptr()));
+		return 0x140000000 + (val - base);
+	}
+
 }
 
 size_t operator"" _g(const size_t val)
 {
 	static auto base = size_t(loader::get_game_module().get_ptr());
-	assert(base == size_t(loader::get_main_module().get_ptr()));
+	assert(base != size_t(loader::get_main_module().get_ptr()));
 	return base + (val - 0x140000000);
 }
