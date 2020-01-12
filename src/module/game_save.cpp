@@ -8,12 +8,15 @@
 class game_save final : public module
 {
 public:
+	void post_start() override
+	{
+		copy_settings();
+	}
+	
 	void post_load() override
 	{
 		// Patch the lookup of the save folder
 		utils::hook::jump(0x1400EFD40_g, &get_save_folder);
-
-		copy_settings();
 	}
 
 	void* load_import(const std::string& module, const std::string& function) override
@@ -30,15 +33,16 @@ private:
 	static void copy_settings()
 	{
 		const auto new_path = loader::get_main_module().get_folder() / std::filesystem::path("user");
-		
-		if (std::filesystem::exists(new_path)
-			|| MessageBoxA(nullptr, "Do you want to import your settings and savegames from Witcher 3?",
-				"Import from Witcher 3", MB_ICONINFORMATION | MB_YESNO) != IDYES) return;
 
 		CHAR documents[MAX_PATH];
 		SHGetFolderPath(nullptr, CSIDL_MYDOCUMENTS, nullptr, SHGFP_TYPE_CURRENT, documents);
 
 		const auto save_path = std::filesystem::path(documents) / "The Witcher 3";
+		
+		if (std::filesystem::exists(new_path)
+			|| !std::filesystem::exists(save_path)
+			|| MessageBoxA(nullptr, "Do you want to import your settings and savegames from Witcher 3?",
+				"Import from Witcher 3", MB_ICONINFORMATION | MB_YESNO) != IDYES) return;
 		
 		utils::io::copy_folder(save_path, new_path);
 	}
