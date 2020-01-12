@@ -8,7 +8,7 @@
 class steam_proxy final : public module
 {
 public:
-	void post_start() override
+	steam_proxy()
 	{
 		this->run_mod();
 	}
