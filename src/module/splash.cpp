@@ -52,6 +52,7 @@ private:
 		if (this->window_ && IsWindow(this->window_))
 		{
 			ShowWindow(this->window_, SW_HIDE);
+			ShowWindow(this->window_, SW_HIDE);
 			DestroyWindow(this->window_);
 			UnregisterClassA("Witcher Splash Screen", utils::nt::module());
 		}
