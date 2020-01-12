@@ -43,6 +43,10 @@ function nng.project()
 			path.join(nng.source, "src/transport/zerotier/**"),
 			path.join(nng.source, "src/supplemental/tls/**"),
 		}
+		
+		linkoptions {
+			"-IGNORE:4006"
+		}
 
 		warnings "Off"
 		kind "StaticLib"

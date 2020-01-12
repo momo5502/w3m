@@ -104,13 +104,6 @@ namespace loader
 size_t operator"" _g(const size_t val)
 {
 	static auto base = size_t(loader::get_game_module().get_ptr());
-
-#ifdef DEBUG
-	if (base == size_t(loader::get_main_module().get_ptr()))
-	{
-		throw std::runtime_error("Resolved too early!");
-	}
-#endif
-
+	assert(base == size_t(loader::get_main_module().get_ptr()));
 	return base + (val - 0x140000000);
 }

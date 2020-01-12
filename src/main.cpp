@@ -55,6 +55,11 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 
 				return module_loader::load_import(module, function);
 			});
+
+			if(*PDWORD64(0x1405A0FFE_g) != 0x4C54498B4C598D48)
+			{
+				throw std::runtime_error("Unsupported game version");
+			}
 			
 			entry_point = FARPROC(module.get_entry_point());
 
