@@ -1,10 +1,7 @@
 #include <std_include.hpp>
-#include "loader/loader.hpp"
 #include "loader/module_loader.hpp"
 #include "utils/io.hpp"
-#include "utils/nt.hpp"
 #include "utils/com.hpp"
-#include "utils/hook.hpp"
 #include "properties.hpp"
 
 class game_path final : public module
@@ -18,48 +15,7 @@ public:
 		}
 	}
 
-	void post_load() override
-	{
-		// Patch the lookup of the save folder
-		utils::hook::jump(0x1400EFD40_g, &get_save_folder);
-	}
-
-	void* load_import(const std::string& module, const std::string& function) override
-	{
-		if(function == "SHGetFolderPathW")
-		{
-			return &sh_get_folder_path_w;
-		}
-
-		return nullptr;
-	}
-
 private:
-	static void* get_save_folder()
-	{
-		static struct
-		{
-			const wchar_t* folder = L"user";
-			const size_t maybe_size = wcslen(folder);
-		} save_folder;
-		
-		return &save_folder;
-	}
-	
-	static HRESULT __stdcall sh_get_folder_path_w(const HWND hwnd, const int csidl, const HANDLE token, const DWORD flags, const LPWSTR path)
-	{
-		if(csidl == CSIDL_MYDOCUMENTS)
-		{
-			const auto main = loader::get_main_module();
-			const auto main_path = main.get_folder();
-			const std::wstring wide_path(main_path.begin(), main_path.end());
-			wcscpy_s(path, MAX_PATH, wide_path.data());
-			return S_OK;
-		}
-
-		return SHGetFolderPathW(hwnd, csidl, token, flags, path);
-	}
-	
 	static void set_witcher_path()
 	{
 		std::string path;
