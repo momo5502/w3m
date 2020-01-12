@@ -82,7 +82,7 @@ END
 // Binary Data
 //
 
-102       ICON   "resources/icon.ico"
+102       ICON   "resources/icon_dark.ico"
 
 IMAGE_SPLASH BITMAP "resources/splash.bmp"
 
