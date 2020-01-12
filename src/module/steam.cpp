@@ -70,7 +70,7 @@ private:
 				CloseHandle(process_handle);
 			}
 
-			module_loader::trigger_premature_shutdown();
+			TerminateProcess(GetCurrentProcess(), 0);
 		}
 	}
 
