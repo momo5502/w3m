@@ -67,6 +67,12 @@ namespace utils::hook
 		void enable() const;
 		void disable() const;
 
+		template <typename T>
+		T* get() const
+		{
+			return reinterpret_cast<T*>(this->get_original());
+		}
+
 		void* get_original() const;
 
 	private:
