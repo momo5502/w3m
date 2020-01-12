@@ -96,7 +96,7 @@ private:
 
 		utils::nt::module::load(steam_path / "tier0_s64.dll");
 		utils::nt::module::load(steam_path / "vstdlib_s64.dll");
-		this->steam_overlay_module_ = utils::nt::module::load(steam_path / "gameoverlay64.dll");
+		this->steam_overlay_module_ = utils::nt::module::load(steam_path / "gameoverlayrenderer64.dll");
 		this->steam_client_module_ = utils::nt::module::load(steam_path / "steamclient64.dll");
 		if (!this->steam_client_module_) return;
 
