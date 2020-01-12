@@ -46,11 +46,11 @@ private:
 		return &save_folder;
 	}
 	
-	static HRESULT __stdcall sh_get_folder_path_w(HWND hwnd, int csidl, HANDLE token, DWORD flags, LPWSTR path)
+	static HRESULT __stdcall sh_get_folder_path_w(const HWND hwnd, const int csidl, const HANDLE token, const DWORD flags, const LPWSTR path)
 	{
 		if(csidl == CSIDL_MYDOCUMENTS)
 		{
-			const utils::nt::module main = loader::get_main_module();
+			const auto main = loader::get_main_module();
 			const auto main_path = main.get_folder();
 			const std::wstring wide_path(main_path.begin(), main_path.end());
 			wcscpy_s(path, MAX_PATH, wide_path.data());
