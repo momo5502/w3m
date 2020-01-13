@@ -10,6 +10,7 @@ namespace loader
 	utils::nt::module load(const std::string& name, const resolver& import_resolver = {});
 
 	size_t reverse_g(const size_t val);
+	size_t reverse_g(const void* val);
 }
 
 // Outside the namespace for easier use

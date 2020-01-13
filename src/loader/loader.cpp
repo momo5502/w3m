@@ -107,6 +107,10 @@ namespace loader
 		return 0x140000000 + (val - base);
 	}
 
+	size_t reverse_g(const void* val)
+	{
+		return reverse_g(size_t(val));
+	}
 }
 
 size_t operator"" _g(const size_t val)
