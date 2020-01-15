@@ -3,6 +3,7 @@
 #include "loader/loader.hpp"
 #include "window.hpp"
 #include "utils/string.hpp"
+#include "utils/hook.hpp"
 
 struct CR4Player_Vtable
 {
@@ -60,17 +61,28 @@ static CR4Game* get_global_game()
 	return *(CR4Game**)0x142C5DD38_g;
 }
 
+utils::hook::detour register_script_hook;
+
+void register_script_function(const size_t idk, const wchar_t* function)
+{
+	//OutputDebugStringW(function);
+	//OutputDebugStringA("\n");
+	register_script_hook.invoke<void>(idk, function);
+}
+
 class experiments final : public module
 {
 public:
 	void post_load() override
 	{
+		register_script_hook = utils::hook::detour(0x140030C50_g, &register_script_function);
+
 		std::thread([]()
 		{
 			while (true)
 			{
 				const auto game = get_global_game();
-				if (game)
+				if (game && game->vftbl)
 				{
 					const auto player = game->vftbl->get_player(game);
 					if (player)

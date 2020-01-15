@@ -63,6 +63,11 @@ namespace utils::hook
 		signatures_.push_back(container);
 	}
 
+	detour::detour(const size_t place, void* target) : detour(reinterpret_cast<void*>(place), target)
+	{
+
+	}
+
 	detour::detour(void* place, void* target) : place_(place)
 	{
 		if (MH_CreateHook(this->place_, target, &this->original_) != MH_OK)

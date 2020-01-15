@@ -38,6 +38,7 @@ namespace utils::hook
 	public:
 		detour() = default;
 		detour(void* place, void* target);
+		detour(size_t place, void* target);
 		~detour();
 
 		detour(detour&& other)
@@ -71,6 +72,12 @@ namespace utils::hook
 		T* get() const
 		{
 			return reinterpret_cast<T*>(this->get_original());
+		}
+
+		template <typename T, typename... Args>
+		T invoke(Args... args)
+		{
+			return reinterpret_cast<T(*)(Args ...)>(this->get_original())(args...);
 		}
 
 		void* get_original() const;

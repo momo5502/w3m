@@ -31,7 +31,7 @@ private:
 			return loader::get_game_module();
 		}
 
-		return handle_a_hook_.get<decltype(GetModuleHandleA)>()(module_name);
+		return handle_a_hook_.invoke<HMODULE>(module_name);
 	}
 
 	static HMODULE __stdcall get_module_handle_w(const LPWSTR module_name)
@@ -41,7 +41,7 @@ private:
 			return loader::get_game_module();
 		}
 
-		return handle_w_hook_.get<decltype(GetModuleHandleW)>()(module_name);
+		return handle_w_hook_.invoke<HMODULE>(module_name);
 	}
 
 	static BOOL __stdcall get_module_handle_ex_a(const DWORD flags, const LPCSTR module_name, HMODULE* module)
@@ -52,7 +52,7 @@ private:
 			return TRUE;
 		}
 
-		return handle_ex_a_hook_.get<decltype(GetModuleHandleExA)>()(flags, module_name, module);
+		return handle_ex_a_hook_.invoke<BOOL>(flags, module_name, module);
 	}
 
 	static BOOL __stdcall get_module_handle_ex_w(const DWORD flags, const LPCWSTR module_name, HMODULE* module)
@@ -63,7 +63,7 @@ private:
 			return TRUE;
 		}
 
-		return handle_ex_w_hook_.get<decltype(GetModuleHandleExW)>()(flags, module_name, module);
+		return handle_ex_w_hook_.invoke<BOOL>(flags, module_name, module);
 	}
 
 	static DWORD __stdcall get_module_file_name_a(HMODULE module, const LPSTR filename, const DWORD size)
@@ -73,7 +73,7 @@ private:
 			module = loader::get_game_module();
 		}
 
-		return file_name_a_hook_.get<decltype(GetModuleFileNameA)>()(module, filename, size);
+		return file_name_a_hook_.invoke<DWORD>(module, filename, size);
 	}
 
 	static DWORD __stdcall get_module_file_name_w(HMODULE module, const LPWSTR filename, const DWORD size)
@@ -83,7 +83,7 @@ private:
 			module = loader::get_game_module();
 		}
 
-		return file_name_w_hook_.get<decltype(GetModuleFileNameW)>()(module, filename, size);
+		return file_name_w_hook_.invoke<DWORD>(module, filename, size);
 	}
 };
 
