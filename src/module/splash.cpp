@@ -62,7 +62,7 @@ private:
 	{
 		WNDCLASSA wnd_class;
 
-		const utils::nt::module main = loader::get_main_module();
+		const auto main = loader::get_main_module();
 
 		wnd_class.style = 0;
 		wnd_class.cbClsExtra = 0;

@@ -5,6 +5,44 @@
 #include "utils/string.hpp"
 #include "utils/hook.hpp"
 
+template<typename T>
+struct rva
+{
+	uint32_t value;
+
+	using type = T*;
+	type operator->() const
+	{
+		const auto addr =  loader::get_game_module().get_ptr() + this->value;
+		return type(addr);
+	}
+};
+
+static_assert(sizeof(rva<void>) == 4);
+
+struct rtti_type_descriptor
+{
+	void* typeInfo;
+	size_t runtime_reference;
+	char name[1];
+};
+
+struct rtti_object_locator
+{
+	uint32_t signature;
+	uint32_t offset_in_class;
+	uint32_t offset_of_constructor;
+	rva<rtti_type_descriptor> type_description;
+	rva<void> hierarchy_description;
+	rva<void> object_base;
+};
+
+rtti_object_locator* get_rtti(void* object)
+{
+	auto* vtable = *reinterpret_cast<void**>(object);
+	return reinterpret_cast<rtti_object_locator**>(vtable)[-1];
+}
+
 struct CR4Player_Vtable
 {
 	void* x;
@@ -58,8 +96,19 @@ static_assert(offsetof(CR4Game, camera) == 0x548);
 
 static CR4Game* get_global_game()
 {
-	return *(CR4Game**)0x142C5DD38_g;
+	return *reinterpret_cast<CR4Game**>(0x142C5DD38_g);
 }
+
+struct IDK
+{
+	void* viewport;
+};
+
+struct CRendererInterface
+{
+	void* vftbl;
+	IDK* idk;
+};
 
 utils::hook::detour register_script_hook;
 
@@ -68,6 +117,32 @@ void register_script_function(const size_t idk, const wchar_t* function)
 	//OutputDebugStringW(function);
 	//OutputDebugStringA("\n");
 	register_script_hook.invoke<void>(idk, function);
+}
+
+void execute_command(const std::string& command)
+{
+	auto* renderer = *reinterpret_cast<CRendererInterface**>(0x142BCBB48_g);
+	const auto viewport = renderer->idk->viewport;
+
+	auto* console = *reinterpret_cast<void**>(0x142BD98C8_g);
+	const auto handler = 0x140243A20_g;
+
+	const auto in = [&](const uint64_t chr)
+	{
+		utils::hook::invoke<bool>(handler, console, viewport, 1, chr, 0.0f);
+		utils::hook::invoke<bool>(handler, console, viewport, 2, chr, 0.0f);
+	};
+
+	in(192);
+
+	/*
+	for (const auto& chr : command)
+	{
+		in(chr);
+	}
+
+	in(13);
+	*/
 }
 
 class experiments final : public module
@@ -84,6 +159,12 @@ public:
 				const auto game = get_global_game();
 				if (game && game->vftbl)
 				{
+					/*
+					const auto game_rtti = get_rtti(game);
+					const auto type_desc = game_rtti->type_description;
+					OutputDebugStringA(type_desc->name);
+					*/
+
 					const auto player = game->vftbl->get_player(game);
 					if (player)
 					{
@@ -94,6 +175,9 @@ public:
 							player->position[0], player->position[1], player->position[2],
 							orientation[0], orientation[1], orientation[2]);
 						SetWindowTextA(window::get_game_window(), title);
+
+						/*MessageBoxA(0, 0, 0, 0);
+						execute_command("spawn('witcher', 1)");*/
 					}
 				}
 
@@ -103,4 +187,4 @@ public:
 	}
 };
 
-//REGISTER_MODULE(experiments)
+REGISTER_MODULE(experiments)
