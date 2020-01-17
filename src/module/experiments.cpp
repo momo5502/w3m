@@ -110,7 +110,55 @@ struct CRendererInterface
 	IDK* idk;
 };
 
+struct StrInfo
+{
+	void* idk;
+	size_t strlen;
+	void* idk2;
+	size_t strlen2;
+};
+
+struct SubTextRenderStruct
+{
+	const wchar_t* text;
+	size_t length;
+	size_t length2;
+	void* idk;
+	StrInfo* info;
+};
+
+struct SomeTextRenderStruct
+{
+	char pad[0x30];
+	SubTextRenderStruct* sub_struct;
+};
+
 utils::hook::detour register_script_hook;
+utils::hook::detour render_text_hook;
+
+void* render_text_function(SomeTextRenderStruct* r, const size_t idk)
+{
+	auto old = r->sub_struct->text;
+	/*auto old_len = r->sub_struct->length;
+	auto old_len2 = r->sub_struct->length2;
+	auto old_info = *r->sub_struct->info;*/
+
+	r->sub_struct->text = L"LUUUL";
+	/*r->sub_struct->info->strlen = wcslen(r->sub_struct->text);
+	r->sub_struct->info->strlen2 = r->sub_struct->info->strlen;
+	r->sub_struct->length = r->sub_struct->info->strlen + 1;
+	r->sub_struct->length2 = r->sub_struct->length;*/
+	
+	auto _ = gsl::finally([&]()
+	{
+		r->sub_struct->text = old;
+		/*r->sub_struct->length = old_len;
+		r->sub_struct->length2 = old_len2;
+		*r->sub_struct->info = old_info;*/
+	});
+	
+	return render_text_hook.invoke<void*>(r, idk);
+}
 
 void register_script_function(const size_t idk, const wchar_t* function)
 {
@@ -151,6 +199,7 @@ public:
 	void post_load() override
 	{
 		register_script_hook = utils::hook::detour(0x140030C50_g, &register_script_function);
+		render_text_hook = utils::hook::detour(0x141394F90_g, &render_text_function);
 
 		std::thread([]()
 		{
@@ -187,4 +236,4 @@ public:
 	}
 };
 
-REGISTER_MODULE(experiments)
+//REGISTER_MODULE(experiments)
