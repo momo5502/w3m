@@ -112,14 +112,14 @@ namespace utils::hook
 		VirtualProtect(patch_pointer, sizeof(jump_data), old_protect, &old_protect);
 	}
 
-	void* assembler(const std::function<void(asmjit::x86::Assembler&)>& asm_function)
+	void* assemble(const std::function<void(assembler&)>& asm_function)
 	{
 		static asmjit::JitRuntime runtime;
 		
 		asmjit::CodeHolder code;
 		code.init(runtime.codeInfo());
 
-		asmjit::x86::Assembler a(&code);
+		assembler a(&code);
 
 		asm_function(a);
 

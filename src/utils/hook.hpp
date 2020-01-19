@@ -1,8 +1,56 @@
 #pragma once
 #include "signature.hpp"
 
+using namespace asmjit::x86;
+
 namespace utils::hook
 {
+	class assembler : public asmjit::x86::Assembler
+	{
+	public:
+		using asmjit::x86::Assembler::Assembler;
+		using asmjit::x86::Assembler::call;
+		using asmjit::x86::Assembler::jmp;
+
+		void pushad()
+		{
+			this->push(asmjit::x86::rax);
+			this->push(asmjit::x86::rcx);
+			this->push(asmjit::x86::rdx);
+			this->push(asmjit::x86::rbx);
+			this->push(asmjit::x86::rsp);
+			this->push(asmjit::x86::rbp);
+			this->push(asmjit::x86::rsi);
+			this->push(asmjit::x86::rdi);
+
+			this->sub(asmjit::x86::rsp, 0x40);
+		}
+
+		void popad()
+		{
+			this->add(asmjit::x86::rsp, 0x40);
+
+			this->pop(asmjit::x86::rdi);
+			this->pop(asmjit::x86::rsi);
+			this->pop(asmjit::x86::rbp);
+			this->pop(asmjit::x86::rsp);
+			this->pop(asmjit::x86::rbx);
+			this->pop(asmjit::x86::rdx);
+			this->pop(asmjit::x86::rcx);
+			this->pop(asmjit::x86::rax);
+		}
+
+		asmjit::Error call(void* target)
+		{
+			return asmjit::x86::Assembler::call(size_t(target));
+		}
+
+		asmjit::Error jmp(void* target)
+		{
+			return asmjit::x86::Assembler::jmp(size_t(target));
+		}
+	};
+
 	class detour
 	{
 	public:
@@ -11,7 +59,7 @@ namespace utils::hook
 		detour(size_t place, void* target);
 		~detour();
 
-		detour(detour&& other)
+		detour(detour&& other) noexcept
 		{
 			this->operator=(std::move(other));
 		}
@@ -65,7 +113,7 @@ namespace utils::hook
 
 	void jump(const size_t pointer, void* data);
 
-	void* assembler(const std::function<void(asmjit::x86::Assembler&)>& asm_function);
+	void* assemble(const std::function<void(assembler&)>& asm_function);
 
 	template <typename T>
 	static void set(void* place, T value)

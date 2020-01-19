@@ -4,6 +4,7 @@
 #include "window.hpp"
 #include "utils/string.hpp"
 #include "utils/hook.hpp"
+#include "renderer.hpp"
 
 template<typename T>
 struct rva
@@ -221,61 +222,55 @@ class experiments final : public module
 public:
 	void post_load() override
 	{
-		register_script_hook = utils::hook::detour(utils::hook::signature("E8 ? ? ? ? 8B 4D 94").process().get(0), &register_script_function);
+		//register_script_hook = utils::hook::detour(utils::hook::signature("E8 ? ? ? ? 8B 4D 94").process().get(0), &register_script_function);
 		//render_text_hook = utils::hook::detour(0x141394F90_g, &render_text_function);
 
-		const auto frame_stub = utils::hook::assembler([](asmjit::x86::Assembler& a)
+		/*const auto frame_stub = utils::hook::assemble([](utils::hook::assembler& a)
 		{
 			const auto return_no_frame = a.newLabel();
 
-			a.test(ptr(asmjit::x86::rcx, 0x15B, 1), 3);
+			a.test(ptr(rcx, 0x15B, 1), 3);
 			a.jz(return_no_frame);
 
-			a.mov(asmjit::x86::rax, 0x1413B7740_g);
-			a.call(asmjit::x86::rax);
+			a.mov(rax, 0x1413B7740_g);
+			a.call(rax);
 
 			a.bind(return_no_frame);
-			a.mov(asmjit::x86::rax, size_t(frame_loop));
-			a.call(asmjit::x86::rax);
+			a.mov(rax, size_t(frame_loop));
+			a.call(rax);
 
-			a.mov(asmjit::x86::rax, 0x1413A8FFE_g);
-			a.jmp(asmjit::x86::rax);
-		});
+			a.mov(rax, 0x1413A8FFE_g);
+			a.jmp(rax);
+		});*/
 
-		utils::hook::jump(0x1413A8FF0_g, frame_stub);
+		//utils::hook::jump(0x1413A8FF0_g, frame_stub);
+		//utils::hook::nop(0x00000001402433D5_g, 5);
 
-		std::thread([]()
+		renderer::frame([]()
 		{
-			while (false)
+			const auto game = get_global_game();
+			if (game && game->vftbl)
 			{
-				const auto game = get_global_game();
-				if (game && game->vftbl)
+				/*
+				const auto game_rtti = get_rtti(game);
+				const auto type_desc = game_rtti->type_description;
+				OutputDebugStringA(type_desc->name);
+				*/
+
+				const auto player = game->vftbl->get_player(game);
+				if (player)
 				{
-					/*
-					const auto game_rtti = get_rtti(game);
-					const auto type_desc = game_rtti->type_description;
-					OutputDebugStringA(type_desc->name);
-					*/
+					float orientation[3];
+					player->get_orientation(orientation);
 
-					const auto player = game->vftbl->get_player(game);
-					if (player)
-					{
-						float orientation[3];
-						player->get_orientation(orientation);
+					const std::string text = utils::string::va("Position: %.2f %.2f %.2f | Orientation: %.2f %.2f %.2f",
+						player->position[0], player->position[1], player->position[2],
+						orientation[0], orientation[1], orientation[2]);
 
-						const auto title = utils::string::va("Position: %.2f %.2f %.2f | Orientation: %.2f %.2f %.2f",
-							player->position[0], player->position[1], player->position[2],
-							orientation[0], orientation[1], orientation[2]);
-						SetWindowTextA(window::get_game_window(), title);
-
-						/*MessageBoxA(0, 0, 0, 0);
-						execute_command("spawn('witcher', 1)");*/
-					}
+					renderer::draw_text(text, { 10.0f, 20.0f }, { 0xFF, 0xFF, 0xFF, 0xB4 });
 				}
-
-				std::this_thread::sleep_for(100ms);
 			}
-		}).detach();
+		});
 	}
 };
 
