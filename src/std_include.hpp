@@ -12,10 +12,15 @@
 #pragma warning(disable: 6297)
 #pragma warning(disable: 6385)
 #pragma warning(disable: 6386)
+#pragma warning(disable: 6387)
+#pragma warning(disable: 26110)
 #pragma warning(disable: 26451)
 #pragma warning(disable: 26444)
 #pragma warning(disable: 26451)
+#pragma warning(disable: 26489)
 #pragma warning(disable: 26495)
+#pragma warning(disable: 26498)
+#pragma warning(disable: 26812)
 #pragma warning(disable: 28020)
 
 #define WIN32_LEAN_AND_MEAN

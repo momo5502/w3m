@@ -14,7 +14,7 @@ namespace utils::hook
 				
 			}
 
-			uint8_t* get(const size_t index) const
+			[[nodiscard]] uint8_t* get(const size_t index) const
 			{
 				if(index >= this->count())
 				{
@@ -24,7 +24,7 @@ namespace utils::hook
 				return reinterpret_cast<uint8_t*>(this->matches_[index]);
 			}
 
-			size_t count() const
+			[[nodiscard]] size_t count() const
 			{
 				return this->matches_.size();
 			}
@@ -49,8 +49,7 @@ namespace utils::hook
 			this->load_pattern(pattern);
 		}
 
-		signature_result process();
-		signature_result process_parallel();
+		signature_result process() const;
 
 	private:
 		std::string mask_;
@@ -61,6 +60,12 @@ namespace utils::hook
 
 		void load_pattern(const std::string& pattern);
 
-		std::vector<size_t> process_range(void* start, size_t length);
+		signature_result process_parallel() const;
+		signature_result process_serial() const;
+		std::vector<size_t> process_range(uint8_t* start, size_t length) const;
+		std::vector<size_t> process_range_linear(uint8_t* start, size_t length) const;
+		std::vector<size_t> process_range_vectorized(uint8_t* start, size_t length) const;
+
+		bool has_sse_support() const;
 	};
 }
