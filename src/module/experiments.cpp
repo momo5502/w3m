@@ -193,17 +193,85 @@ void execute_command(const std::string& command)
 	*/
 }
 
+static auto last_time = std::chrono::high_resolution_clock::now();
+static auto last_update = std::chrono::high_resolution_clock::now();
+
+void frame_loop()
+{
+	auto now_ = std::chrono::high_resolution_clock::now();
+	auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(now_ - last_time);
+	if((now_ - last_update) > 100ms) {
+		last_update = now_;
+
+		auto fps = 1000.0 / delta.count();
+		const auto title = utils::string::va("FPS: %d | %lldms", (int)fps, delta.count());
+		SetWindowTextA(window::get_game_window(), title);
+		
+	}
+	
+	last_time = std::chrono::high_resolution_clock::now();
+
+	
+	//OutputDebugStringA("Frame");
+	//utils::hook::invoke<void>(0x1413B7740_g);
+}
+
 class experiments final : public module
 {
 public:
 	void post_load() override
 	{
 		register_script_hook = utils::hook::detour(0x140030C50_g, &register_script_function);
-		render_text_hook = utils::hook::detour(0x141394F90_g, &render_text_function);
+		//render_text_hook = utils::hook::detour(0x141394F90_g, &render_text_function);
+
+		const auto frame_stub = utils::hook::assembler([](asmjit::x86::Assembler& a)
+		{
+			using namespace asmjit::x86;
+			const auto return_no_frame = a.newLabel();
+
+			a.test(ptr(rcx, 0x15B, 1), 3);
+			a.jz(return_no_frame);
+
+			a.mov(rax, 0x1413B7740_g);
+			a.call(rax);
+
+			a.bind(return_no_frame);
+			a.mov(rax, size_t(frame_loop));
+			a.call(rax);
+
+			a.mov(rax, 0x1413A8FFE_g);
+			a.jmp(rax);
+		});
+
+
+		auto measure = [](auto x)
+		{
+			const auto n = std::chrono::high_resolution_clock::now();
+			x();
+			return std::chrono::high_resolution_clock::now() - n;
+		};
+
+		auto x = measure([]()
+			{
+				utils::hook::signature("48 83 EC 28 48 8B 05 ? ? ? ? 0F B6 90").process();
+			});
+
+		auto y = measure([]()
+			{
+				utils::hook::signature("48 83 EC 28 48 8B 05 ? ? ? ? 0F B6 90").process_parallel();
+			});
+
+		if(x > y) {
+			MessageBoxA(0, "Parallel is faster", 0, 0);
+		} else {
+			MessageBoxA(0, "Serial is faster", 0, 0);
+		}
+		
+		utils::hook::jump(0x1413A8FF0_g, frame_stub);
 
 		std::thread([]()
 		{
-			while (true)
+			while (false)
 			{
 				const auto game = get_global_game();
 				if (game && game->vftbl)
@@ -236,4 +304,4 @@ public:
 	}
 };
 
-//REGISTER_MODULE(experiments)
+REGISTER_MODULE(experiments)

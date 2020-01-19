@@ -24,45 +24,6 @@ namespace utils::hook
 		} __;
 	}
 
-	void signature::process()
-	{
-		if (this->signatures_.empty()) return;
-
-		const auto start = reinterpret_cast<char*>(this->start_);
-
-		const auto sig_count = this->signatures_.size();
-		const auto containers = this->signatures_.data();
-
-		for (size_t i = 0; i < this->length_; ++i)
-		{
-			const auto address = start + i;
-
-			for (unsigned int k = 0; k < sig_count; ++k)
-			{
-				const auto container = &containers[k];
-
-				unsigned int j;
-				for (j = 0; j < strlen(container->mask); ++j)
-				{
-					if (container->mask[j] != '?' && container->signature[j] != address[j])
-					{
-						break;
-					}
-				}
-
-				if (j == strlen(container->mask))
-				{
-					container->callback(address);
-				}
-			}
-		}
-	}
-
-	void signature::add(const container& container)
-	{
-		signatures_.push_back(container);
-	}
-
 	detour::detour(const size_t place, void* target) : detour(reinterpret_cast<void*>(place), target)
 	{
 
@@ -149,5 +110,22 @@ namespace utils::hook
 		std::memmove(patch_pointer + 2, &data, sizeof(data));
 
 		VirtualProtect(patch_pointer, sizeof(jump_data), old_protect, &old_protect);
+	}
+
+	void* assembler(const std::function<void(asmjit::x86::Assembler&)>& asm_function)
+	{
+		static asmjit::JitRuntime runtime;
+		
+		asmjit::CodeHolder code;
+		code.init(runtime.codeInfo());
+
+		asmjit::x86::Assembler a(&code);
+
+		asm_function(a);
+
+		void* result = nullptr;
+		runtime.add(&result, &code);
+
+		return result;
 	}
 }

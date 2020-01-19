@@ -1,38 +1,8 @@
 #pragma once
+#include "signature.hpp"
 
 namespace utils::hook
 {
-	class signature final
-	{
-	public:
-		struct container final
-		{
-			const char* signature;
-			const char* mask;
-			std::function<void(char*)> callback;
-		};
-
-		signature(void* start, const size_t length) : start_(start), length_(length)
-		{
-		}
-
-		signature(const size_t start, const size_t length) : signature(reinterpret_cast<void*>(start), length)
-		{
-		}
-
-		signature() : signature(0x400000, 0x800000)
-		{
-		}
-
-		void process();
-		void add(const container& container);
-
-	private:
-		void* start_;
-		size_t length_;
-		std::vector<container> signatures_;
-	};
-
 	class detour
 	{
 	public:
@@ -80,7 +50,7 @@ namespace utils::hook
 			return reinterpret_cast<T(*)(Args ...)>(this->get_original())(args...);
 		}
 
-		void* get_original() const;
+		[[nodiscard]] void* get_original() const;
 
 	private:
 		void* place_{};
@@ -94,6 +64,8 @@ namespace utils::hook
 	void copy(size_t place, const void* data, size_t length);
 
 	void jump(const size_t pointer, void* data);
+
+	void* assembler(const std::function<void(asmjit::x86::Assembler&)>& asm_function);
 
 	template <typename T>
 	static void set(void* place, T value)
