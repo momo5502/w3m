@@ -194,29 +194,6 @@ void execute_command(const std::string& command)
 	*/
 }
 
-static auto last_time = std::chrono::high_resolution_clock::now();
-static auto last_update = std::chrono::high_resolution_clock::now();
-
-void frame_loop()
-{
-	auto now_ = std::chrono::high_resolution_clock::now();
-	auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(now_ - last_time);
-	if((now_ - last_update) > 100ms) {
-		last_update = now_;
-
-		auto fps = 1000.0 / delta.count();
-		const auto title = utils::string::va("FPS: %d | %lldms", (int)fps, delta.count());
-		SetWindowTextA(window::get_game_window(), title);
-		
-	}
-	
-	last_time = std::chrono::high_resolution_clock::now();
-
-	
-	//OutputDebugStringA("Frame");
-	//utils::hook::invoke<void>(0x1413B7740_g);
-}
-
 class experiments final : public module
 {
 public:
@@ -225,29 +202,10 @@ public:
 		//register_script_hook = utils::hook::detour(utils::hook::signature("E8 ? ? ? ? 8B 4D 94").process().get(0), &register_script_function);
 		//render_text_hook = utils::hook::detour(0x141394F90_g, &render_text_function);
 
-		/*const auto frame_stub = utils::hook::assemble([](utils::hook::assembler& a)
-		{
-			const auto return_no_frame = a.newLabel();
-
-			a.test(ptr(rcx, 0x15B, 1), 3);
-			a.jz(return_no_frame);
-
-			a.mov(rax, 0x1413B7740_g);
-			a.call(rax);
-
-			a.bind(return_no_frame);
-			a.mov(rax, size_t(frame_loop));
-			a.call(rax);
-
-			a.mov(rax, 0x1413A8FFE_g);
-			a.jmp(rax);
-		});*/
-
-		//utils::hook::jump(0x1413A8FF0_g, frame_stub);
-		//utils::hook::nop(0x00000001402433D5_g, 5);
-
 		renderer::frame([]()
 		{
+			static auto last_time = std::chrono::high_resolution_clock::now();
+			
 			const auto game = get_global_game();
 			if (game && game->vftbl)
 			{
@@ -263,11 +221,16 @@ public:
 					float orientation[3];
 					player->get_orientation(orientation);
 
-					const std::string text = utils::string::va("Position: %.2f %.2f %.2f | Orientation: %.2f %.2f %.2f",
-						player->position[0], player->position[1], player->position[2],
-						orientation[0], orientation[1], orientation[2]);
+					const auto duration = std::chrono::high_resolution_clock::now() - last_time;
+					const auto fps = int(1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+					last_time = std::chrono::high_resolution_clock::now();
 
-					renderer::draw_text(text, { 10.0f, 20.0f }, { 0xFF, 0xFF, 0xFF, 0xB4 });
+					const std::string text = utils::string::va("Position: %.2f %.2f %.2f\nOrientation: %.2f %.2f %.2f\nFPS: %d",
+						player->position[0], player->position[1], player->position[2],
+						orientation[0], orientation[1], orientation[2],
+						fps);
+
+					renderer::draw_text(text, { 10.0f, 30.0f }, { 0x0, 0xFF, 0x0, 0xB4 });
 				}
 			}
 		});
