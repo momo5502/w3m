@@ -57,8 +57,16 @@ namespace utils::com
 		{
 			file_dialog->ClearClientData();
 
-			IShellItem* shell_item = nullptr;
 			std::wstring wide_selected_folder(selected_folder.begin(), selected_folder.end());
+			for (auto& chr : wide_selected_folder)
+			{
+				if (chr == L'/')
+				{
+					chr = L'\\';
+				}
+			}
+
+			IShellItem* shell_item = nullptr;
 			if(FAILED(SHCreateItemFromParsingName(wide_selected_folder.data(), NULL, IID_PPV_ARGS(&shell_item))))
 			{
 				throw std::runtime_error("Failed to create item from parsing name");
