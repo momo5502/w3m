@@ -3,6 +3,7 @@
 #include "utils/io.hpp"
 #include "utils/com.hpp"
 #include "properties.hpp"
+#include "steam_proxy.hpp"
 
 class game_path final : public module
 {
@@ -24,7 +25,7 @@ private:
 			return;
 		}
 
-		if(!utils::com::select_folder(path, "Select Witcher 3 installation path"))
+		if(!utils::com::select_folder(path, "Select Witcher 3 installation path", get_default_witcher_path()))
 		{
 			module_loader::trigger_premature_shutdown();
 		}
@@ -60,6 +61,17 @@ private:
 	{
 		SetDllDirectoryA(path.data());
 		SetCurrentDirectoryA(path.data());
+	}
+
+	static std::string get_default_witcher_path()
+	{
+		const auto steam_path = steam_proxy::get_steam_install_directory();
+		if (steam_path.empty()) return {};
+
+		const auto witcher_path = steam_path / "steamapps/common/The Witcher 3";
+		if (!std::filesystem::exists(witcher_path)) return {};
+
+		return witcher_path.generic_string();
 	}
 };
 
