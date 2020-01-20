@@ -225,12 +225,12 @@ public:
 					const auto fps = int(1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
 					last_time = std::chrono::high_resolution_clock::now();
 
-					const std::string text = utils::string::va("Position: %.2f %.2f %.2f\nOrientation: %.2f %.2f %.2f\nFPS: %d",
-						player->position[0], player->position[1], player->position[2],
-						orientation[0], orientation[1], orientation[2],
-						fps);
+					std::string text;
+					text += utils::string::va("Position: %.2f %.2f %.2f\n", player->position[0], player->position[1], player->position[2]);
+					text += utils::string::va("Orientation: %.2f %.2f %.2f\n", orientation[0], orientation[1], orientation[2]);
+					text += utils::string::va("FPS: %d", fps);
 
-					renderer::draw_text(text, { 10.0f, 30.0f }, { 0x0, 0xFF, 0x0, 0xB4 });
+					renderer::draw_text(text, { 10.0f, 30.0f }, "#7BFF00");
 				}
 			}
 		});

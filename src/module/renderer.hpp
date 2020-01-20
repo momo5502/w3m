@@ -15,6 +15,11 @@ public:
 	class color
 	{
 	public:
+		color() = default;
+		color(const std::string& hex);
+		color(const char* hex) : color(std::string(hex)) {}
+		color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha);
+
 		uint8_t r = 0xFF;
 		uint8_t g = 0xFF;
 		uint8_t b = 0xFF;

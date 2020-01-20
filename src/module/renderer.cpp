@@ -3,6 +3,37 @@
 #include "loader/loader.hpp"
 #include "renderer.hpp"
 
+renderer::color::color(const std::string& hex)
+{
+	static const std::regex color_pattern("^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$");
+
+	if(!std::regex_match(hex, color_pattern))
+	{
+		throw std::runtime_error("Invalid color");
+	}
+
+	const auto parse_byte = [&](const size_t index)
+	{
+		char byte_text[3] = { hex[index], hex[index + 1], 0 };
+		return uint8_t(strtoul(byte_text, nullptr, 16));
+	};
+
+	this->r = parse_byte(1);
+	this->g = parse_byte(3);
+	this->b = parse_byte(5);
+
+	if(hex.size() == 9)
+	{
+		this->a = parse_byte(7);
+	}
+}
+
+renderer::color::color(const uint8_t red, const uint8_t green, const uint8_t blue, const uint8_t alpha)
+	: r(red), g(green), b(blue), a(alpha)
+{
+
+}
+
 void renderer::draw_text(const std::string& text, const position position, const color color)
 {
 	auto* instance = module_loader::get<renderer>();
