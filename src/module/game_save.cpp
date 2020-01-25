@@ -15,8 +15,8 @@ public:
 	
 	void post_load() override
 	{
-		// Patch the lookup of the save folder
-		utils::hook::jump(0x1400EFD40_g, &get_save_folder);
+		const auto get_save_folder_call = utils::hook::signature("E8 ? ? ? ? 83 78 08 01 76 03 48 8B 18 4C 8D 44 24 ?").process().get(0);
+		utils::hook::jump(utils::hook::follow_branch(get_save_folder_call), &get_save_folder);
 	}
 
 	void* load_import(const std::string& module, const std::string& function) override

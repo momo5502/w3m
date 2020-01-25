@@ -111,9 +111,13 @@ namespace utils::hook
 	void copy(void* place, const void* data, size_t length);
 	void copy(size_t place, const void* data, size_t length);
 
-	void jump(const size_t pointer, void* data);
+	void jump(void* pointer, void* data);
+	void jump(size_t pointer, void* data);
 
 	void* assemble(const std::function<void(assembler&)>& asm_function);
+
+	void* follow_branch(void* address);
+	void* extract(void* address);
 
 	template <typename T>
 	static void set(void* place, T value)

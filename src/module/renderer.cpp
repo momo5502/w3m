@@ -60,7 +60,8 @@ void renderer::frame(const std::function<void()>& callback)
 
 void renderer::post_load()
 {
-	const auto render_stub = utils::hook::assemble([](utils::hook::assembler& a)
+	const auto console_draw_code = utils::hook::signature("33 D2 8B 88 ? ? ? ?").process().get(0) + 0x3A;
+	const auto render_stub = utils::hook::assemble([console_draw_code](utils::hook::assembler& a)
 	{
 		const auto skip_console = a.newLabel();
 
@@ -70,16 +71,16 @@ void renderer::post_load()
 		a.jz(skip_console);
 
 		a.pushad();
-		a.call(0x140243180_g);
+		a.call(utils::hook::follow_branch(console_draw_code + 0x8));
 		a.popad();
 
 		a.call(&execute_frame_static);
 
 		a.bind(skip_console);
-		a.jmp(0x14021D9D5_g);
+		a.jmp(console_draw_code + 0xD);
 	});
 
-	utils::hook::jump(0x14021D9C8_g, render_stub);
+	utils::hook::jump(console_draw_code, render_stub);
 }
 
 void renderer::execute_frame(void* a1, void* a2)
@@ -113,7 +114,8 @@ void renderer::draw_text_internal(void* a1, void* a2, const text_command& comman
 	text.text = command.text.data();
 	text.length = uint32_t(command.text.size());
 
-	utils::hook::invoke<void>(0x1402445D0_g, a1, a2, command.position.x, command.position.y, &text, command.color);
+	static const auto draw_text_func = utils::hook::follow_branch(utils::hook::signature("E8 ? ? ? ? 44 39 77 38").process().get(0));
+	utils::hook::invoke<void>(draw_text_func, a1, a2, command.position.x, command.position.y, &text, command.color);
 }
 
 REGISTER_MODULE(renderer);

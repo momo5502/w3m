@@ -97,7 +97,7 @@ namespace utils::hook
 		copy(reinterpret_cast<void*>(place), data, length);
 	}
 
-	void jump(const size_t pointer, void* data)
+	void jump(void* pointer, void* data)
 	{
 		static const unsigned char jump_data[] = { 0x48, 0xb8, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0xff, 0xe0 };
 
@@ -110,6 +110,11 @@ namespace utils::hook
 		std::memmove(patch_pointer + 2, &data, sizeof(data));
 
 		VirtualProtect(patch_pointer, sizeof(jump_data), old_protect, &old_protect);
+	}
+
+	void jump(const size_t pointer, void* data)
+	{
+		return jump(reinterpret_cast<void*>(pointer), data);
 	}
 
 	void* assemble(const std::function<void(assembler&)>& asm_function)
@@ -127,5 +132,24 @@ namespace utils::hook
 		runtime.add(&result, &code);
 
 		return result;
+	}
+
+	void* follow_branch(void* address)
+	{
+		const auto data = static_cast<uint8_t*>(address);
+		if(*data != 0xE8 && *data != 0xE9)
+		{
+			throw std::runtime_error("No branch instruction found");
+		}
+
+		const auto offset = *reinterpret_cast<int32_t*>(data + 1);
+		return extract(data + 1);
+	}
+
+	void* extract(void* address)
+	{
+		const auto data = static_cast<uint8_t*>(address);
+		const auto offset = *reinterpret_cast<int32_t*>(data);
+		return data + offset + 4;
 	}
 }

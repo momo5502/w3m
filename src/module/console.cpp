@@ -9,7 +9,18 @@ public:
 	void post_load() override
 	{
 		// Enable ingame console
-		utils::hook::set<BYTE>(0x141B4D183_g, 1);
+		const auto config_vars = utils::hook::signature("4C 8D 05 ? ? ? ? 48 8D 15 ? ? ? ? 48 8D 0D ? ? ? ? 45 33 C9 C7 44 24").process();
+
+		for(size_t i = 0; i < config_vars.count(); ++i)
+		{
+			const auto var = config_vars.get(i);
+			const auto string = utils::hook::extract(var + 3);
+			if(static_cast<char*>(string) == "DBGConsoleOn"s)
+			{
+				utils::hook::set<BYTE>(var + 0x6F, 1);
+				break;
+			}
+		}
 	}
 };
 

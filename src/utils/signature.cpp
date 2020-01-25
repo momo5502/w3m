@@ -141,7 +141,7 @@ namespace utils::hook
 	{
 		const auto sub = this->has_sse_support() ? 16 : this->mask_.size();
 		const auto range = this->length_ - sub;
-		const auto cores = std::max(1u, std::thread::hardware_concurrency());
+		const auto cores = std::max(1u, std::thread::hardware_concurrency() / 2); // Only use half of the available cores
 		const auto grid = range / cores;
 
 		std::mutex mutex;
