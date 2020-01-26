@@ -11,13 +11,13 @@ DECLSPEC_NORETURN void WINAPI exit_hook(const int code)
 
 void verify_tls()
 {
-	const utils::nt::module self = loader::get_main_module();
+	const auto self = loader::get_main_module();
 	const auto self_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(self.get_ptr()
 		+ self.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
 
 	const auto ref = DWORD64(&tls_data);
 	const auto tls_index = *reinterpret_cast<PDWORD>(self_tls->AddressOfIndex);
-	const auto tls_vector = *reinterpret_cast<PDWORD64>(__readgsqword(0x58) + 8 * tls_index);
+	const auto tls_vector = *reinterpret_cast<PDWORD64>(__readgsqword(0x58) + 8ull * tls_index);
 	const auto offset = ref - tls_vector;
 
 	if (offset != 0 && offset != 16) // Actually 16 is bad, but I think msvc places custom stuff before

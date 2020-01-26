@@ -36,13 +36,13 @@ namespace utils::com
 			file_dialog->Release();
 		});
 
-		DWORD dwOptions;
-		if(FAILED(file_dialog->GetOptions(&dwOptions)))
+		DWORD dw_options;
+		if(FAILED(file_dialog->GetOptions(&dw_options)))
 		{
 			throw std::runtime_error("Failed to get options");
 		}
 
-		if(FAILED(file_dialog->SetOptions(dwOptions | FOS_PICKFOLDERS)))
+		if(FAILED(file_dialog->SetOptions(dw_options | FOS_PICKFOLDERS)))
 		{
 			throw std::runtime_error("Failed to set options");
 		}

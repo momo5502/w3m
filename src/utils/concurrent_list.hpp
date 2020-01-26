@@ -32,7 +32,7 @@ namespace utils
 				}
 			}
 
-			std::shared_ptr<element> get_next() const
+			[[nodiscard]] std::shared_ptr<element> get_next() const
 			{
 				std::lock_guard _(*this->mutex_);
 				return this->next_;

@@ -70,9 +70,9 @@ void renderer::post_load()
 		a.test(rcx, rcx);
 		a.jz(skip_console);
 
-		a.pushad();
+		a.pushad64();
 		a.call(utils::hook::follow_branch(console_draw_code + 0x8));
-		a.popad();
+		a.popad64();
 
 		a.call(&execute_frame_static);
 

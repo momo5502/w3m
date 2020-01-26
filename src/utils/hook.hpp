@@ -5,49 +5,49 @@ using namespace asmjit::x86;
 
 namespace utils::hook
 {
-	class assembler : public asmjit::x86::Assembler
+	class assembler : public Assembler
 	{
 	public:
-		using asmjit::x86::Assembler::Assembler;
-		using asmjit::x86::Assembler::call;
-		using asmjit::x86::Assembler::jmp;
+		using Assembler::Assembler;
+		using Assembler::call;
+		using Assembler::jmp;
 
-		void pushad()
+		void pushad64()
 		{
-			this->push(asmjit::x86::rax);
-			this->push(asmjit::x86::rcx);
-			this->push(asmjit::x86::rdx);
-			this->push(asmjit::x86::rbx);
-			this->push(asmjit::x86::rsp);
-			this->push(asmjit::x86::rbp);
-			this->push(asmjit::x86::rsi);
-			this->push(asmjit::x86::rdi);
+			this->push(rax);
+			this->push(rcx);
+			this->push(rdx);
+			this->push(rbx);
+			this->push(rsp);
+			this->push(rbp);
+			this->push(rsi);
+			this->push(rdi);
 
-			this->sub(asmjit::x86::rsp, 0x40);
+			this->sub(rsp, 0x40);
 		}
 
-		void popad()
+		void popad64()
 		{
-			this->add(asmjit::x86::rsp, 0x40);
+			this->add(rsp, 0x40);
 
-			this->pop(asmjit::x86::rdi);
-			this->pop(asmjit::x86::rsi);
-			this->pop(asmjit::x86::rbp);
-			this->pop(asmjit::x86::rsp);
-			this->pop(asmjit::x86::rbx);
-			this->pop(asmjit::x86::rdx);
-			this->pop(asmjit::x86::rcx);
-			this->pop(asmjit::x86::rax);
+			this->pop(rdi);
+			this->pop(rsi);
+			this->pop(rbp);
+			this->pop(rsp);
+			this->pop(rbx);
+			this->pop(rdx);
+			this->pop(rcx);
+			this->pop(rax);
 		}
 
 		asmjit::Error call(void* target)
 		{
-			return asmjit::x86::Assembler::call(size_t(target));
+			return Assembler::call(size_t(target));
 		}
 
 		asmjit::Error jmp(void* target)
 		{
-			return asmjit::x86::Assembler::jmp(size_t(target));
+			return Assembler::jmp(size_t(target));
 		}
 	};
 

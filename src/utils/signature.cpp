@@ -45,6 +45,12 @@ namespace utils::hook
 			}
 		}
 
+		while (!this->mask_.empty() && this->mask_.back() == '?')
+		{
+			this->mask_.pop_back();
+			this->pattern_.pop_back();
+		}
+
 		if(this->has_sse_support())
 		{
 			while (this->pattern_.size() < 16)

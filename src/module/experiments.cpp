@@ -97,7 +97,8 @@ static_assert(offsetof(CR4Game, camera) == 0x548);
 
 static CR4Game* get_global_game()
 {
-	return *reinterpret_cast<CR4Game**>(0x142C5DD38_g);
+	static const auto game = utils::hook::extract(utils::hook::signature("E8 ? ? ? ? 48 8B 0D ? ? ? ? 48 8B 55 C0").process().get(0) + 8);
+	return *reinterpret_cast<CR4Game**>(game);
 }
 
 struct IDK
