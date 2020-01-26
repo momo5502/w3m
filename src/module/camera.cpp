@@ -8,7 +8,7 @@ class camera final : public module
 public:
 	void post_load() override
 	{
-		const auto handle_input = utils::hook::signature("48 83 EC 38 80 3D ? ? ? ? ? 74 3D").process().get(0);
+		const auto handle_input = "48 83 EC 38 80 3D ? ? ? ? ? 74 3D"_sig.get(0);
 		handle_input_hook = utils::hook::detour(handle_input, &handle_debug_input);
 	}
 
@@ -17,7 +17,7 @@ private:
 
 	static bool handle_debug_input(void* this_ptr, void* viewport, const uint64_t input_key, const uint64_t input_action, const float tick)
 	{
-		static const auto handle_camera_input = utils::hook::signature("48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC 40 80 3D ? ? ? ? ?").process().get(0);
+		static const auto handle_camera_input = "48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC 40 80 3D ? ? ? ? ?"_sig.get(0);
 		if(utils::hook::invoke<bool>(handle_camera_input, this_ptr, input_key, input_action, tick))
 		{
 			return true;

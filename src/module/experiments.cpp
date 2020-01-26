@@ -58,7 +58,8 @@ struct CR4Player
 
 	void get_orientation(float* orientation)
 	{
-		reinterpret_cast<void(*)(float*, float*)>(0x1400F7FD0_g)(this->rotation, orientation);
+		static const auto get_player_orientation = utils::hook::follow_branch("E8 ? ? ? ? 45 8B 0C 24 "_sig.get(0));
+		utils::hook::invoke<void>(get_player_orientation, this->rotation, orientation);
 	}
 };
 
@@ -97,8 +98,8 @@ static_assert(offsetof(CR4Game, camera) == 0x548);
 
 static CR4Game* get_global_game()
 {
-	static const auto game = utils::hook::extract(utils::hook::signature("E8 ? ? ? ? 48 8B 0D ? ? ? ? 48 8B 55 C0").process().get(0) + 8);
-	return *reinterpret_cast<CR4Game**>(game);
+	static const auto game = utils::hook::extract<CR4Game**>("E8 ? ? ? ? 48 8B 0D ? ? ? ? 48 8B 55 C0"_sig.get(0) + 8);
+	return *game;
 }
 
 struct IDK

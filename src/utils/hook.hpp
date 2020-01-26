@@ -116,8 +116,15 @@ namespace utils::hook
 
 	void* assemble(const std::function<void(assembler&)>& asm_function);
 
+	template <typename T>
+	T extract(void* address)
+	{
+		const auto data = static_cast<uint8_t*>(address);
+		const auto offset = *reinterpret_cast<int32_t*>(data);
+		return  reinterpret_cast<T>(data + offset + 4);
+	}
+
 	void* follow_branch(void* address);
-	void* extract(void* address);
 
 	template <typename T>
 	static void set(void* place, T value)

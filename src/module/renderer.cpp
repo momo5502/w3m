@@ -60,7 +60,7 @@ void renderer::frame(const std::function<void()>& callback)
 
 void renderer::post_load()
 {
-	const auto console_draw_code = utils::hook::signature("33 D2 8B 88 ? ? ? ?").process().get(0) + 0x3A;
+	const auto console_draw_code = "33 D2 8B 88 ? ? ? ?"_sig.get(0) + 0x3A;
 	const auto render_stub = utils::hook::assemble([console_draw_code](utils::hook::assembler& a)
 	{
 		const auto skip_console = a.newLabel();
@@ -114,7 +114,7 @@ void renderer::draw_text_internal(void* a1, void* a2, const text_command& comman
 	text.text = command.text.data();
 	text.length = uint32_t(command.text.size());
 
-	static const auto draw_text_func = utils::hook::follow_branch(utils::hook::signature("E8 ? ? ? ? 44 39 77 38").process().get(0));
+	static const auto draw_text_func = utils::hook::follow_branch("E8 ? ? ? ? 44 39 77 38"_sig.get(0));
 	utils::hook::invoke<void>(draw_text_func, a1, a2, command.position.x, command.position.y, &text, command.color);
 }
 

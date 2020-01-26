@@ -6,7 +6,7 @@ class module_loader final
 public:
 	class premature_shutdown_trigger final : public std::exception
 	{
-		const char* what() const noexcept override
+		[[nodiscard]] const char* what() const noexcept override
 		{
 			return "Premature shutdown requested";
 		}

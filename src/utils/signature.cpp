@@ -200,3 +200,8 @@ namespace utils::hook
 		return false;
 	}
 }
+
+utils::hook::signature::signature_result operator"" _sig(const char* str, const size_t len)
+{
+	return utils::hook::signature(std::string(str, len)).process();
+}

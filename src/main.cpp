@@ -2,6 +2,7 @@
 #include "loader/loader.hpp"
 #include "utils/string.hpp"
 #include "loader/module_loader.hpp"
+#include "utils/hook.hpp"
 
 DECLSPEC_NORETURN void WINAPI exit_hook(const int code)
 {
@@ -56,7 +57,8 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 				return module_loader::load_import(module, function);
 			});
 
-			if(*PDWORD64(0x1405A0FFE_g) != 0x4C54498B4C598D48)
+			const auto version_sig = "48 FF 42 30 48 8D 05 ? ? ? ?"_sig;
+			if(version_sig.count() != 1 || utils::hook::extract<char*>(version_sig.get(0) + 0x7) != "v 1.32"s)
 			{
 				throw std::runtime_error("Unsupported game version");
 			}

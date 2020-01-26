@@ -9,13 +9,13 @@ public:
 	void post_load() override
 	{
 		// Enable ingame console
-		const auto config_vars = utils::hook::signature("4C 8D 05 ? ? ? ? 48 8D 15 ? ? ? ? 48 8D 0D ? ? ? ? 45 33 C9 C7 44 24").process();
+		const auto config_vars = "4C 8D 05 ? ? ? ? 48 8D 15 ? ? ? ? 48 8D 0D ? ? ? ? 45 33 C9 C7 44 24"_sig;
 
 		for(size_t i = 0; i < config_vars.count(); ++i)
 		{
 			const auto var = config_vars.get(i);
-			const auto string = utils::hook::extract(var + 3);
-			if(static_cast<char*>(string) == "DBGConsoleOn"s)
+			const auto string = utils::hook::extract<char*>(var + 3);
+			if(string == "DBGConsoleOn"s)
 			{
 				utils::hook::set<BYTE>(var + 0x6F, 1);
 				break;

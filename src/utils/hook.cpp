@@ -143,13 +143,6 @@ namespace utils::hook
 		}
 
 		const auto offset = *reinterpret_cast<int32_t*>(data + 1);
-		return extract(data + 1);
-	}
-
-	void* extract(void* address)
-	{
-		const auto data = static_cast<uint8_t*>(address);
-		const auto offset = *reinterpret_cast<int32_t*>(data);
-		return data + offset + 4;
+		return extract<void*>(data + 1);
 	}
 }

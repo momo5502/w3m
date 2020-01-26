@@ -69,3 +69,5 @@ namespace utils::hook
 		bool has_sse_support() const;
 	};
 }
+
+utils::hook::signature::signature_result operator"" _sig(const char* str, const size_t len);
