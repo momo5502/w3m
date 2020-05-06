@@ -1,7 +1,6 @@
 #include <std_include.hpp>
 #include "loader.hpp"
 #include "utils/string.hpp"
-#include "module_loader.hpp"
 
 namespace loader
 {

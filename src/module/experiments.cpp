@@ -1,7 +1,6 @@
 #include <std_include.hpp>
 #include "loader/module_loader.hpp"
 #include "loader/loader.hpp"
-#include "window.hpp"
 #include "utils/string.hpp"
 #include "utils/hook.hpp"
 #include "renderer.hpp"
@@ -40,8 +39,8 @@ struct rtti_object_locator
 
 rtti_object_locator* get_rtti(void* object)
 {
-	auto* vtable = *reinterpret_cast<void**>(object);
-	return reinterpret_cast<rtti_object_locator**>(vtable)[-1];
+	auto* vtable = *static_cast<void**>(object);
+	return static_cast<rtti_object_locator**>(vtable)[-1];
 }
 
 struct CR4Player_Vtable
@@ -224,7 +223,7 @@ public:
 					player->get_orientation(orientation);
 
 					const auto duration = std::chrono::high_resolution_clock::now() - last_time;
-					const auto fps = int(1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
+					const auto fps = static_cast<int>(1000.0 / std::chrono::duration_cast<std::chrono::milliseconds>(duration).count());
 					last_time = std::chrono::high_resolution_clock::now();
 
 					std::string text;

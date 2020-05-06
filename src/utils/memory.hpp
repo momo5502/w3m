@@ -16,7 +16,7 @@ namespace utils
 
 			void free(const void* data);
 
-			void* allocate(const size_t length);
+			void* allocate(size_t length);
 
 			template <typename T>
 			inline T* allocate()

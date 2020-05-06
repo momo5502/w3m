@@ -89,7 +89,7 @@ namespace utils
 
 	bool memory::is_set(const void* mem, const char chr, const size_t length)
 	{
-		const auto mem_arr = reinterpret_cast<const char*>(mem);
+		const auto mem_arr = static_cast<const char*>(mem);
 
 		for (size_t i = 0; i < length; ++i)
 		{

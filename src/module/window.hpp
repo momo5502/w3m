@@ -12,5 +12,5 @@ private:
 	std::thread thread_;
 	bool kill_ = false;
 
-	static BOOL __stdcall enum_windows_proc(const HWND window, const LPARAM param);
+	static BOOL __stdcall enum_windows_proc(HWND window, LPARAM param);
 };

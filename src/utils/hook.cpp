@@ -6,7 +6,7 @@ namespace utils::hook
 {
 	namespace
 	{
-		class _
+		[[maybe_unused]] class _
 		{
 		public:
 			_()
@@ -67,7 +67,7 @@ namespace utils::hook
 
 	void nop(void* place, const size_t length)
 	{
-		DWORD old_protect;
+		DWORD old_protect{};
 		VirtualProtect(place, length, PAGE_EXECUTE_READWRITE, &old_protect);
 
 		std::memset(place, 0x90, length);
@@ -83,7 +83,7 @@ namespace utils::hook
 
 	void copy(void* place, const void* data, const size_t length)
 	{
-		DWORD old_protect;
+		DWORD old_protect{};
 		VirtualProtect(place, length, PAGE_EXECUTE_READWRITE, &old_protect);
 
 		std::memmove(place, data, length);
@@ -103,7 +103,7 @@ namespace utils::hook
 
 		auto* patch_pointer = PBYTE(pointer);
 
-		DWORD old_protect;
+		DWORD old_protect{};
 		VirtualProtect(patch_pointer, sizeof(jump_data), PAGE_EXECUTE_READWRITE, &old_protect);
 
 		std::memmove(patch_pointer, jump_data, sizeof(jump_data));
@@ -136,13 +136,12 @@ namespace utils::hook
 
 	void* follow_branch(void* address)
 	{
-		const auto data = static_cast<uint8_t*>(address);
+		auto* const data = static_cast<uint8_t*>(address);
 		if(*data != 0xE8 && *data != 0xE9)
 		{
 			throw std::runtime_error("No branch instruction found");
 		}
 
-		const auto offset = *reinterpret_cast<int32_t*>(data + 1);
 		return extract<void*>(data + 1);
 	}
 }

@@ -75,5 +75,5 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 		}
 	}
 
-	return int(entry_point());
+	return static_cast<int>(entry_point());
 }

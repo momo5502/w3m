@@ -70,4 +70,4 @@ namespace utils::hook
 	};
 }
 
-utils::hook::signature::signature_result operator"" _sig(const char* str, const size_t len);
+utils::hook::signature::signature_result operator"" _sig(const char* str, size_t len);

@@ -89,13 +89,13 @@ namespace utils::hook
 		template <typename T>
 		T* get() const
 		{
-			return reinterpret_cast<T*>(this->get_original());
+			return static_cast<T*>(this->get_original());
 		}
 
 		template <typename T, typename... Args>
 		T invoke(Args... args)
 		{
-			return reinterpret_cast<T(*)(Args ...)>(this->get_original())(args...);
+			return static_cast<T(*)(Args ...)>(this->get_original())(args...);
 		}
 
 		[[nodiscard]] void* get_original() const;
@@ -153,6 +153,6 @@ namespace utils::hook
 	template <typename T, typename... Args>
 	static T invoke(void* func, Args... args)
 	{
-		return reinterpret_cast<T(*)(Args ...)>(func)(args...);
+		return static_cast<T(*)(Args ...)>(func)(args...);
 	}
 }

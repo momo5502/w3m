@@ -47,7 +47,7 @@ namespace utils::nt
 		std::function<T> get(const std::string& process) const
 		{
 			if (!this->is_valid()) std::function<T>();
-			return reinterpret_cast<T*>(this->get_proc<void*>(process));
+			return static_cast<T*>(this->get_proc<void*>(process));
 		}
 
 		template <typename T, typename... Args>

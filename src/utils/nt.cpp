@@ -16,7 +16,7 @@ namespace utils::nt
 	module module::get_by_address(void* address)
 	{
 		HMODULE handle = nullptr;
-		GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, reinterpret_cast<LPCSTR>(address), &handle);
+		GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, static_cast<LPCSTR>(address), &handle);
 		return module(handle);
 	}
 

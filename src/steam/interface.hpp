@@ -58,7 +58,7 @@ namespace steam
 				throw std::runtime_error("Unable to find desired method");
 			}
 
-			return reinterpret_cast<T(__thiscall*)(void*, Args ...)>(method)(this->interface_ptr_, args...);
+			return static_cast<T(__thiscall*)(void*, Args ...)>(method)(this->interface_ptr_, args...);
 		}
 
 		template <typename T, typename... Args>
@@ -69,7 +69,7 @@ namespace steam
 				throw std::runtime_error("Invalid interface pointer");
 			}
 
-			return reinterpret_cast<T(__thiscall*)(void*, Args ...)>((*this->interface_ptr_)[table_entry])(this->interface_ptr_, args...);
+			return static_cast<T(__thiscall*)(void*, Args ...)>((*this->interface_ptr_)[table_entry])(this->interface_ptr_, args...);
 		}
 
 	private:

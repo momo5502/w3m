@@ -5,7 +5,7 @@ namespace utils::com
 {
 	namespace
 	{
-		class _
+		[[maybe_unused]] class _
 		{
 		public:
 			_()
