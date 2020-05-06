@@ -45,7 +45,8 @@ function protobuf.project()
 		
 		defines {
 			"_SCL_SECURE_NO_WARNINGS",
-			"_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS"
+			"_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS",
+			"_SILENCE_ALL_CXX20_DEPRECATION_WARNINGS",
 		}
 		
 		linkoptions {

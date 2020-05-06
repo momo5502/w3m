@@ -19,7 +19,7 @@ public:
 	{
 	}
 
-	virtual void* load_import(const std::string& module, const std::string& function)
+	virtual void* load_import([[maybe_unused]] const std::string& module, [[maybe_unused]] const std::string& function)
 	{
 		return nullptr;
 	}

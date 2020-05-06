@@ -19,7 +19,7 @@ public:
 		utils::hook::jump(utils::hook::follow_branch(get_save_folder_call), &get_save_folder);
 	}
 
-	void* load_import(const std::string& module, const std::string& function) override
+	void* load_import([[maybe_unused]] const std::string& module, const std::string& function) override
 	{
 		if(function == "SHGetFolderPathW")
 		{

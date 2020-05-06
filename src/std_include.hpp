@@ -7,6 +7,7 @@
 #pragma warning(disable: 4244)
 #pragma warning(disable: 4458)
 #pragma warning(disable: 4702)
+#pragma warning(disable: 4996)
 #pragma warning(disable: 5054)
 #pragma warning(disable: 6011)
 #pragma warning(disable: 6297)
@@ -25,17 +26,8 @@
 
 #define WIN32_LEAN_AND_MEAN
 
-#include <windows.h>
-#include <mshtml.h>
-#include <mshtmhst.h>
-#include <ExDisp.h>
-#include <WinSock2.h>
-#include <Ws2tcpip.h>
-#include <corecrt_io.h>
-#include <fcntl.h>
-#include <shellapi.h>
-#include <csetjmp>
-#include <shlobj.h>
+#include <Windows.h>
+#include <ShlObj.h>
 
 // min and max is required by gdi, therefore NOMINMAX won't work
 #ifdef max
@@ -73,7 +65,6 @@
 #include "proto/test.pb.h"
 
 #pragma warning(pop)
-#pragma warning(disable: 4100)
 
 #include "resource.hpp"
 

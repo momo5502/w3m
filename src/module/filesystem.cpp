@@ -23,7 +23,7 @@ public:
 		game_path.length = wide_path.size() + 1;
 		wcscpy_s(game_path.path, wide_path.data());
 
-		const auto mods_path_stub = utils::hook::assemble([](utils::hook::assembler& a)
+		[[maybe_unused]] const auto mods_path_stub = utils::hook::assemble([](utils::hook::assembler& a)
 		{
 			a.mov(rcx, size_t(&game_path));
 
@@ -34,7 +34,7 @@ public:
 
 		//utils::hook::jump(0x140049B68_g, mods_path_stub);
 
-		const auto mods_path_stub_2 = utils::hook::assemble([](utils::hook::assembler& a)
+		[[maybe_unused]] const auto mods_path_stub_2 = utils::hook::assemble([](utils::hook::assembler& a)
 		{
 			a.mov(rcx, size_t(&game_path));
 			a.lea(r8, ptr(rsp, 0x40, 8));

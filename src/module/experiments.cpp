@@ -170,7 +170,7 @@ void register_script_function(const size_t idk, const wchar_t* function)
 	register_script_hook.invoke<void>(idk, function);
 }
 
-void execute_command(const std::string& command)
+void execute_command([[maybe_unused]] const std::string& command)
 {
 	auto* renderer = *reinterpret_cast<CRendererInterface**>(0x142BCBB48_g);
 	const auto viewport = renderer->idk->viewport;
