@@ -122,7 +122,7 @@ namespace utils::hook
 		static asmjit::JitRuntime runtime;
 		
 		asmjit::CodeHolder code;
-		code.init(runtime.codeInfo());
+		code.init(runtime.environment());
 
 		assembler a(&code);
 
