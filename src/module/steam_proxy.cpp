@@ -105,7 +105,7 @@ void steam_proxy::start_mod(const std::string& title, size_t app_id)
 
 	this->client_utils_.invoke<void>("SetAppIDForCurrentPipe", app_id, false);
 
-	const utils::nt::module self = loader::get_main_module();
+	const auto self = loader::get_main_module();
 	const auto path = self.get_path();
 
 	char our_directory[MAX_PATH] = {0};
@@ -118,11 +118,11 @@ void steam_proxy::start_mod(const std::string& title, size_t app_id)
 	game_id.raw.type = 1; // k_EGameIDTypeGameMod
 	game_id.raw.app_id = app_id & 0xFFFFFF;
 
-	const auto mod_id = "W3X.";
+	const auto* mod_id = "W3X.";
 	game_id.raw.mod_id = *reinterpret_cast<const unsigned int*>(mod_id) | 0x80000000;
 
-	this->client_user_.invoke<bool>("SpawnProcess", self.get_path().data(), cmdline.data(), 0, our_directory,
-	                                &game_id.bits, title.data(), 0, 0);
+	this->client_user_.invoke<bool>("SpawnProcess", self.get_path().data(), cmdline.data(), our_directory,
+	                                &game_id.bits, title.data(), 0, 0, 0);
 }
 
 void steam_proxy::clean_up_on_error()
