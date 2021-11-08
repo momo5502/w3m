@@ -17,11 +17,3 @@
 [submodule "deps/minhook"]
 	path = deps/minhook
 	url = https://github.com/TsudaKageyu/minhook.git
-[submodule "deps/nng"]
-	path = deps/nng
-	url = https://github.com/nanomsg/nng.git
-	branch = master
-[submodule "deps/nngpp"]
-	path = deps/nngpp
-	url = https://github.com/cwzx/nngpp.git
-	branch = master

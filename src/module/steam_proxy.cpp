@@ -79,10 +79,10 @@ void steam_proxy::load_client()
 	const auto steam_path = get_steam_install_directory();
 	if (steam_path.empty()) return;
 
-	utils::nt::module::load(steam_path / "tier0_s64.dll");
-	utils::nt::module::load(steam_path / "vstdlib_s64.dll");
-	this->steam_overlay_module_ = utils::nt::module::load(steam_path / "gameoverlayrenderer64.dll");
-	this->steam_client_module_ = utils::nt::module::load(steam_path / "steamclient64.dll");
+	utils::nt::library::load(steam_path / "tier0_s64.dll");
+	utils::nt::library::load(steam_path / "vstdlib_s64.dll");
+	this->steam_overlay_module_ = utils::nt::library::load(steam_path / "gameoverlayrenderer64.dll");
+	this->steam_client_module_ = utils::nt::library::load(steam_path / "steamclient64.dll");
 	if (!this->steam_client_module_) return;
 
 	this->client_engine_ = load_client_engine();
@@ -145,7 +145,7 @@ void steam_proxy::clean_up_on_error()
 		this->steam_pipe_ = nullptr;
 		this->global_user_ = nullptr;
 
-		this->steam_client_module_ = utils::nt::module{nullptr};
+		this->steam_client_module_ = utils::nt::library{nullptr};
 
 		return scheduler::cond_end;
 	});

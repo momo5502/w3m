@@ -14,8 +14,8 @@ public:
 	static std::filesystem::path get_steam_install_directory();
 
 private:
-	utils::nt::module steam_client_module_{};
-	utils::nt::module steam_overlay_module_{};
+	utils::nt::library steam_client_module_{};
+	utils::nt::library steam_overlay_module_{};
 
 	steam::interface client_engine_ {};
 	steam::interface client_user_ {};

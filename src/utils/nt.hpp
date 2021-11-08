@@ -1,24 +1,40 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+
+// min and max is required by gdi, therefore NOMINMAX won't work
+#ifdef max
+#undef max
+#endif
+
+#ifdef min
+#undef min
+#endif
+
+#include <string>
+#include <functional>
+#include <filesystem>
+
 namespace utils::nt
 {
-	class module final
+	class library final
 	{
 	public:
-		static module load(const std::string& name);
-		static module load(const std::filesystem::path& path);
-		static module get_by_address(void* address);
+		static library load(const std::string& name);
+		static library load(const std::filesystem::path& path);
+		static library get_by_address(void* address);
 
-		module();
-		explicit module(const std::string& name);
-		explicit module(HMODULE handle);
+		library();
+		explicit library(const std::string& name);
+		explicit library(HMODULE handle);
 
-		module(const module& a) : module_(a.module_)
+		library(const library& a) : module_(a.module_)
 		{
 		}
 
-		bool operator!=(const module& obj) const { return !(*this == obj); };
-		bool operator==(const module& obj) const;
+		bool operator!=(const library& obj) const { return !(*this == obj); };
+		bool operator==(const library& obj) const;
 
 		operator bool() const;
 		operator HMODULE() const;
@@ -46,7 +62,7 @@ namespace utils::nt
 		template <typename T>
 		std::function<T> get(const std::string& process) const
 		{
-			if (!this->is_valid()) std::function<T>();
+			if (!this->is_valid()) return std::function<T>();
 			return static_cast<T*>(this->get_proc<void*>(process));
 		}
 
@@ -86,5 +102,9 @@ namespace utils::nt
 		HMODULE module_;
 	};
 
-	void raise_hard_exception();
+	__declspec(noreturn) void raise_hard_exception();
+	std::string load_resource(int id);
+
+	void relaunch_self();
+	__declspec(noreturn) void terminate(uint32_t code = 0);
 }

@@ -3,71 +3,71 @@
 
 namespace utils::nt
 {
-	module module::load(const std::string& name)
+	library library::load(const std::string& name)
 	{
-		return module(LoadLibraryA(name.data()));
+		return library(LoadLibraryA(name.data()));
 	}
 
-	module module::load(const std::filesystem::path& path)
+	library library::load(const std::filesystem::path& path)
 	{
-		return module::load(path.generic_string());
+		return library::load(path.generic_string());
 	}
 
-	module module::get_by_address(void* address)
+	library library::get_by_address(void* address)
 	{
 		HMODULE handle = nullptr;
-		GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, static_cast<LPCSTR>(address), &handle);
-		return module(handle);
+		GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, static_cast<LPCSTR>(address), &handle);
+		return library(handle);
 	}
 
-	module::module()
+	library::library()
 	{
 		this->module_ = GetModuleHandleA(nullptr);
 	}
 
-	module::module(const std::string& name)
+	library::library(const std::string& name)
 	{
 		this->module_ = GetModuleHandleA(name.data());
 	}
 
-	module::module(const HMODULE handle)
+	library::library(const HMODULE handle)
 	{
 		this->module_ = handle;
 	}
 
-	bool module::operator==(const module& obj) const
+	bool library::operator==(const library& obj) const
 	{
 		return this->module_ == obj.module_;
 	}
 
-	module::operator bool() const
+	library::operator bool() const
 	{
 		return this->is_valid();
 	}
 
-	module::operator HMODULE() const
+	library::operator HMODULE() const
 	{
 		return this->get_handle();
 	}
 
-	PIMAGE_NT_HEADERS module::get_nt_headers() const
+	PIMAGE_NT_HEADERS library::get_nt_headers() const
 	{
 		if (!this->is_valid()) return nullptr;
 		return reinterpret_cast<PIMAGE_NT_HEADERS>(this->get_ptr() + this->get_dos_header()->e_lfanew);
 	}
 
-	PIMAGE_DOS_HEADER module::get_dos_header() const
+	PIMAGE_DOS_HEADER library::get_dos_header() const
 	{
 		return reinterpret_cast<PIMAGE_DOS_HEADER>(this->get_ptr());
 	}
 
-	PIMAGE_OPTIONAL_HEADER module::get_optional_header() const
+	PIMAGE_OPTIONAL_HEADER library::get_optional_header() const
 	{
 		if (!this->is_valid()) return nullptr;
 		return &this->get_nt_headers()->OptionalHeader;
 	}
 
-	std::vector<PIMAGE_SECTION_HEADER> module::get_section_headers() const
+	std::vector<PIMAGE_SECTION_HEADER> library::get_section_headers() const
 	{
 		std::vector<PIMAGE_SECTION_HEADER> headers;
 
@@ -83,12 +83,12 @@ namespace utils::nt
 		return headers;
 	}
 
-	std::uint8_t* module::get_ptr() const
+	std::uint8_t* library::get_ptr() const
 	{
 		return reinterpret_cast<std::uint8_t*>(this->module_);
 	}
 
-	void module::unprotect() const
+	void library::unprotect() const
 	{
 		if (!this->is_valid()) return;
 
@@ -97,24 +97,24 @@ namespace utils::nt
 		               &protection);
 	}
 
-	size_t module::get_relative_entry_point() const
+	size_t library::get_relative_entry_point() const
 	{
 		if (!this->is_valid()) return 0;
 		return this->get_nt_headers()->OptionalHeader.AddressOfEntryPoint;
 	}
 
-	void* module::get_entry_point() const
+	void* library::get_entry_point() const
 	{
 		if (!this->is_valid()) return nullptr;
 		return this->get_ptr() + this->get_relative_entry_point();
 	}
 
-	bool module::is_valid() const
+	bool library::is_valid() const
 	{
 		return this->module_ != nullptr && this->get_dos_header()->e_magic == IMAGE_DOS_SIGNATURE;
 	}
 
-	std::string module::get_name() const
+	std::string library::get_name() const
 	{
 		if (!this->is_valid()) return "";
 
@@ -125,7 +125,7 @@ namespace utils::nt
 		return path.substr(pos + 1);
 	}
 
-	std::string module::get_path() const
+	std::string library::get_path() const
 	{
 		if (!this->is_valid()) return "";
 
@@ -135,7 +135,7 @@ namespace utils::nt
 		return name;
 	}
 
-	std::string module::get_folder() const
+	std::string library::get_folder() const
 	{
 		if (!this->is_valid()) return "";
 
@@ -143,7 +143,7 @@ namespace utils::nt
 		return path.parent_path().generic_string();
 	}
 
-	void module::free()
+	void library::free()
 	{
 		if (this->is_valid())
 		{
@@ -152,19 +152,19 @@ namespace utils::nt
 		}
 	}
 
-	HMODULE module::get_handle() const
+	HMODULE library::get_handle() const
 	{
 		return this->module_;
 	}
 
-	void** module::get_iat_entry(const std::string& module_name, const std::string& proc_name) const
+	void** library::get_iat_entry(const std::string& module_name, const std::string& proc_name) const
 	{
 		if (!this->is_valid()) return nullptr;
 
-		const module other_module(module_name);
+		const library other_module(module_name);
 		if (!other_module.is_valid()) return nullptr;
 
-		const auto target_function = other_module.get_proc<void*>(proc_name);
+		auto* const target_function = other_module.get_proc<void*>(proc_name);
 		if (!target_function) return nullptr;
 
 		auto* header = this->get_optional_header();
@@ -210,8 +210,46 @@ namespace utils::nt
 	void raise_hard_exception()
 	{
 		int data = false;
-		const module ntdll("ntdll.dll");
+		const library ntdll("ntdll.dll");
 		ntdll.invoke_pascal<void>("RtlAdjustPrivilege", 19, true, false, &data);
 		ntdll.invoke_pascal<void>("NtRaiseHardError", 0xC000007B, 0, nullptr, nullptr, 6, &data);
+	}
+
+	std::string load_resource(const int id)
+	{
+		auto* const res = FindResource(library(), MAKEINTRESOURCE(id), RT_RCDATA);
+		if (!res) return {};
+
+		auto* const handle = LoadResource(nullptr, res);
+		if (!handle) return {};
+
+		return std::string(LPSTR(LockResource(handle)), SizeofResource(nullptr, res));
+	}
+
+	void relaunch_self()
+	{
+		const utils::nt::library self;
+
+		STARTUPINFOA startup_info;
+		PROCESS_INFORMATION process_info;
+
+		ZeroMemory(&startup_info, sizeof(startup_info));
+		ZeroMemory(&process_info, sizeof(process_info));
+		startup_info.cb = sizeof(startup_info);
+
+		char current_dir[MAX_PATH];
+		GetCurrentDirectoryA(sizeof(current_dir), current_dir);
+		auto* const command_line = GetCommandLineA();
+
+		CreateProcessA(self.get_path().data(), command_line, nullptr, nullptr, false, NULL, nullptr, current_dir,
+		               &startup_info, &process_info);
+
+		if (process_info.hThread && process_info.hThread != INVALID_HANDLE_VALUE) CloseHandle(process_info.hThread);
+		if (process_info.hProcess && process_info.hProcess != INVALID_HANDLE_VALUE) CloseHandle(process_info.hProcess);
+	}
+
+	void terminate(const uint32_t code)
+	{
+		TerminateProcess(GetCurrentProcess(), code);
 	}
 }

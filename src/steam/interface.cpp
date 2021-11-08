@@ -97,7 +97,7 @@ namespace steam
 
 	bool interface::is_rdata(void* pointer)
 	{
-		const auto pointer_lib = utils::nt::module::get_by_address(pointer);
+		const auto pointer_lib = utils::nt::library::get_by_address(pointer);
 
 		for (const auto& section : pointer_lib.get_section_headers())
 		{

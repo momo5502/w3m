@@ -4,10 +4,10 @@
 
 namespace loader
 {
-	utils::nt::module game_module;
-	utils::nt::module main_module;
+	utils::nt::library game_module;
+	utils::nt::library main_module;
 
-	void load_imports(const utils::nt::module& target, const resolver& import_resolver)
+	void load_imports(const utils::nt::library& target, const resolver& import_resolver)
 	{
 		const auto import_directory = &target.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
 		auto descriptor = PIMAGE_IMPORT_DESCRIPTOR(target.get_ptr() + import_directory->VirtualAddress);
@@ -31,7 +31,7 @@ namespace loader
 
 				if (IMAGE_SNAP_BY_ORDINAL(*name_table_entry))
 				{
-					auto module = utils::nt::module::load(name);
+					auto module = utils::nt::library::load(name);
 					if (module)
 					{
 						function = GetProcAddress(module, MAKEINTRESOURCEA(IMAGE_ORDINAL(*name_table_entry)));
@@ -51,7 +51,7 @@ namespace loader
 
 					if (!function)
 					{
-						auto module = utils::nt::module::load(name);
+						auto module = utils::nt::library::load(name);
 						if (module)
 						{
 							function = GetProcAddress(module, function_name.data());
@@ -76,19 +76,19 @@ namespace loader
 		}
 	}
 
-	utils::nt::module get_game_module()
+	utils::nt::library get_game_module()
 	{
 		return game_module;
 	}
 
-	utils::nt::module get_main_module()
+	utils::nt::library get_main_module()
 	{
 		return main_module;
 	}
 
-	utils::nt::module load(const std::string& name, const resolver& import_resolver)
+	utils::nt::library load(const std::string& name, const resolver& import_resolver)
 	{
-		game_module = utils::nt::module::load(name);
+		game_module = utils::nt::library::load(name);
 		if(!game_module)
 		{
 			throw std::runtime_error(utils::string::va("Unable to load '%s'", name.data()));
