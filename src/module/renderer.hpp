@@ -5,6 +5,14 @@
 class renderer final : public module
 {	
 public:
+	// TODO: Probably wrong
+	struct text_object
+	{
+		const wchar_t* text = nullptr;
+		uint32_t length = 0;
+		uint32_t idk = 0;
+	};
+	
 	class position
 	{
 	public:
@@ -38,14 +46,6 @@ private:
 		std::wstring text;
 		position position;
 		color color;
-	};
-
-	// TODO: Probably wrong
-	struct text_object
-	{
-		const wchar_t* text = nullptr;
-		uint32_t length = 0;
-		uint32_t idk = 0;
 	};
 
 	std::mutex mutex_;
