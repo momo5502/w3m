@@ -1,46 +1,67 @@
 #include <std_include.hpp>
 #include "scheduler.hpp"
 
-void scheduler::frame(const std::function<bool()>& callback)
-{
-	auto* instance = module_loader::get<scheduler>();
-	if (instance)
-	{
-		instance->callbacks_.add(callback);
-	}
-}
+#include "loader/component_loader.hpp"
+#include "utils/concurrent_list.hpp"
 
-void scheduler::execute()
+namespace scheduler
 {
-	for (auto callback : this->callbacks_)
+	namespace
 	{
-		const auto res = (*callback)();
-		if(res == cond_end)
+		std::atomic_bool kill{false};
+		std::thread thread;
+		utils::concurrent_list<std::function<bool()>> callbacks;
+
+		void execute()
 		{
-			this->callbacks_.remove(callback);
+			for (auto callback : callbacks)
+			{
+				const auto res = (*callback)();
+				if (res == cond_end)
+				{
+					callbacks.remove(callback);
+				}
+			}
 		}
-	}
-}
 
-void scheduler::post_start()
-{
-	this->thread_ = std::thread([this]()
-	{
-		while(!this->kill_)
+		class component final : public component_interface
 		{
-			this->execute();
-			std::this_thread::sleep_for(10ms);
-		}
-	});
-}
+		public:
+			~component() override
+			{
+				if (thread.joinable())
+				{
+					thread.detach();
+				}
+			}
 
-void scheduler::pre_destroy()
-{
-	this->kill_ = true;
-	if(this->thread_.joinable())
+			void post_start() override
+			{
+				thread = std::thread([this]()
+				{
+					while (!kill)
+					{
+						execute();
+						std::this_thread::sleep_for(10ms);
+					}
+				});
+			}
+
+			void pre_destroy() override
+			{
+				kill = true;
+				if (thread.joinable())
+				{
+					thread.join();
+				}
+			}
+		};
+	}
+
+	void frame(const std::function<bool()>& callback)
 	{
-		this->thread_.join();
+		callbacks.add(callback);
 	}
 }
 
-REGISTER_MODULE(scheduler);
+REGISTER_COMPONENT(scheduler::component)

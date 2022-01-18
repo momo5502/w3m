@@ -1,12 +1,12 @@
 #include <std_include.hpp>
 #include "loader/loader.hpp"
 #include "utils/string.hpp"
-#include "loader/module_loader.hpp"
+#include "loader/component_loader.hpp"
 #include "utils/hook.hpp"
 
 DECLSPEC_NORETURN void WINAPI exit_hook(const int code)
 {
-	module_loader::pre_destroy();
+	component_loader::pre_destroy();
 	exit(code);
 }
 
@@ -38,14 +38,14 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 		{
 			if (premature_shutdown)
 			{
-				module_loader::pre_destroy();
+				component_loader::pre_destroy();
 			}
 		});
 
 		try
 		{
 			verify_tls();
-			if (!module_loader::post_start()) return 0;
+			if (!component_loader::post_start()) return 0;
 
 			const auto module = loader::load("witcher3.exe", [](const std::string& module, const std::string& function) -> void*
 			{
@@ -54,7 +54,7 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 					return &exit_hook;
 				}
 
-				return module_loader::load_import(module, function);
+				return component_loader::load_import(module, function);
 			});
 
 			const auto version_sig = "48 FF 42 30 48 8D 05 ? ? ? ?"_sig;
@@ -65,7 +65,7 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 			
 			entry_point = FARPROC(module.get_entry_point());
 
-			if (!module_loader::post_load()) return 0;
+			if (!component_loader::post_load()) return 0;
 			premature_shutdown = false;
 		}
 		catch (std::exception & e)

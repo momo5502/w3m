@@ -1,11 +1,11 @@
 #pragma once
 
-class module
+#include <string>
+
+class component_interface
 {
 public:
-	virtual ~module()
-	{
-	}
+	virtual ~component_interface() = default;
 
 	virtual void post_start()
 	{
@@ -15,6 +15,8 @@ public:
 	{
 	}
 
+	// Thread cleanup.
+	// Must not necessarily be called
 	virtual void pre_destroy()
 	{
 	}

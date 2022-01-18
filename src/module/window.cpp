@@ -1,45 +1,63 @@
 #include <std_include.hpp>
 #include "window.hpp"
 #include "scheduler.hpp"
+#include "loader/component_loader.hpp"
 
-void window::post_load()
+namespace window
 {
-	scheduler::frame([]()
+	namespace
 	{
-		if (const auto game_window = get_game_window())
+		std::atomic_bool kill{false};
+		std::thread thread;
+
+		BOOL __stdcall enum_windows_proc(const HWND window, const LPARAM param)
 		{
-			SetWindowTextA(game_window, "Witcher 3: Online");
-			return scheduler::cond_end;
+			DWORD process = 0;
+			GetWindowThreadProcessId(window, &process);
+
+			if (process == GetCurrentProcessId())
+			{
+				char class_name[500] = {0};
+				GetClassNameA(window, class_name, sizeof(class_name));
+
+				if (class_name == "W2ViewportClass"s)
+				{
+					*reinterpret_cast<HWND*>(param) = window;
+				}
+			}
+
+			return TRUE;
 		}
 
-		return scheduler::cond_continue;
-	});
-}
-
-HWND window::get_game_window()
-{
-	HWND window = nullptr;
-	EnumWindows(enum_windows_proc, LPARAM(&window));
-	return window;
-}
-
-BOOL __stdcall window::enum_windows_proc(const HWND window, const LPARAM param)
-{
-	DWORD process = 0;
-	GetWindowThreadProcessId(window, &process);
-
-	if (process == GetCurrentProcessId())
-	{
-		char class_name[500] = { 0 };
-		GetClassNameA(window, class_name, sizeof(class_name));
-
-		if (class_name == "W2ViewportClass"s)
+		class component final : public component_interface
 		{
-			*reinterpret_cast<HWND*>(param) = window;
-		}
+		public:
+			void post_load() override
+			{
+				scheduler::frame([]()
+				{
+					if (const auto game_window = get_game_window())
+					{
+						SetWindowTextA(game_window, "Witcher 3: Online");
+						return scheduler::cond_end;
+					}
+
+					return scheduler::cond_continue;
+				});
+			}
+		};
 	}
 
-	return TRUE;
+	HWND get_game_window()
+	{
+		static HWND window = nullptr;
+		if (!window || !IsWindow(window))
+		{
+			EnumWindows(enum_windows_proc, LPARAM(&window));
+		}
+
+		return window;
+	}
 }
 
-REGISTER_MODULE(window);
+REGISTER_COMPONENT(window::component)

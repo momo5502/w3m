@@ -1,31 +1,36 @@
 #include <std_include.hpp>
-#include "loader/module_loader.hpp"
+#include "loader/component_loader.hpp"
 #include "utils/hook.hpp"
 
-class camera final : public module
+namespace
 {
-public:
-	void post_load() override
+	namespace camera
 	{
-		const auto handle_input = "48 83 EC 38 80 3D ? ? ? ? ? 74 3D"_sig.get(0);
-		handle_input_hook = utils::hook::detour(handle_input, &handle_debug_input);
-	}
+		utils::hook::detour handle_input_hook;
 
-private:
-	static utils::hook::detour handle_input_hook;
-
-	static bool handle_debug_input(void* this_ptr, void* viewport, const uint64_t input_key, const uint64_t input_action, const float tick)
-	{
-		static const auto handle_camera_input = "48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC 40 80 3D ? ? ? ? ?"_sig.get(0);
-		if(utils::hook::invoke<bool>(handle_camera_input, this_ptr, input_key, input_action, tick))
+		bool handle_debug_input(void* this_ptr, void* viewport, const uint64_t input_key,
+		                        const uint64_t input_action, const float tick)
 		{
-			return true;
+			static const auto handle_camera_input = "48 89 5C 24 ? 48 89 74 24 ? 57 48 83 EC 40 80 3D ? ? ? ? ?"_sig.
+				get(0);
+			if (utils::hook::invoke<bool>(handle_camera_input, this_ptr, input_key, input_action, tick))
+			{
+				return true;
+			}
+
+			return handle_input_hook.invoke<bool>(this_ptr, viewport, input_key, input_action, tick);
 		}
 
-		return handle_input_hook.invoke<bool>(this_ptr, viewport, input_key, input_action, tick);
+		class component final : public component_interface
+		{
+		public:
+			void post_load() override
+			{
+				const auto handle_input = "48 83 EC 38 80 3D ? ? ? ? ? 74 3D"_sig.get(0);
+				handle_input_hook = utils::hook::detour(handle_input, &handle_debug_input);
+			}
+		};
 	}
-};
+}
 
-utils::hook::detour camera::handle_input_hook;
-
-REGISTER_MODULE(camera)
+REGISTER_COMPONENT(camera::component)

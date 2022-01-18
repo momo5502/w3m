@@ -1,30 +1,35 @@
 #include <std_include.hpp>
-#include "loader/module_loader.hpp"
+#include "loader/component_loader.hpp"
 #include "loader/loader.hpp"
 
-class icon final : public module
+namespace
 {
-public:
-	void* load_import([[maybe_unused]] const std::string& module, const std::string& function) override
+	namespace icon
 	{
-		if (function == "LoadIconW")
+		HICON __stdcall load_icon_w(const HINSTANCE instance, const wchar_t* name)
 		{
-			return &load_icon_w;
+			if (size_t(name) <= 300 && instance == loader::get_game_module())
+			{
+				return LoadIconA(loader::get_main_module(), MAKEINTRESOURCE(102));
+			}
+
+			return LoadIconW(instance, name);
 		}
 
-		return nullptr;
-	}
-
-private:
-	static HICON __stdcall load_icon_w(const HINSTANCE instance, const wchar_t* name)
-	{
-		if (size_t(name) <= 300 && instance == loader::get_game_module())
+		class component final : public component_interface
 		{
-			return LoadIconA(loader::get_main_module(), MAKEINTRESOURCE(102));
-		}
+		public:
+			void* load_import([[maybe_unused]] const std::string& module, const std::string& function) override
+			{
+				if (function == "LoadIconW")
+				{
+					return &load_icon_w;
+				}
 
-		return LoadIconW(instance, name);
+				return nullptr;
+			}
+		};
 	}
-};
+}
 
-REGISTER_MODULE(icon)
+REGISTER_COMPONENT(icon::component)
