@@ -214,6 +214,8 @@ namespace
 				renderer::frame([]()
 				{
 					static auto last_time = std::chrono::high_resolution_clock::now();
+					static int frames[100]{0};
+					static int index = 0;
 
 					const auto game = get_global_game();
 					if (game && game->vftbl)
@@ -233,14 +235,24 @@ namespace
 							const auto duration = std::chrono::high_resolution_clock::now() - last_time;
 							const auto fps = static_cast<int>(1000.0 / std::chrono::duration_cast<
 								std::chrono::milliseconds>(duration).count());
+							frames[index] = fps;
+							index = (index +1) % ARRAYSIZE(frames);
 							last_time = std::chrono::high_resolution_clock::now();
+
+							int total_fps = 0;
+							for(auto frame : frames)
+							{
+								total_fps += frame;
+							}
+
+							total_fps /= ARRAYSIZE(frames);
 
 							std::string text;
 							text += utils::string::va("Position: %.2f %.2f %.2f\n", player->position[0],
 							                          player->position[1], player->position[2]);
 							text += utils::string::va("Orientation: %.2f %.2f %.2f\n", orientation[0], orientation[1],
 							                          orientation[2]);
-							text += utils::string::va("FPS: %d", fps);
+							text += utils::string::va("FPS: %d", total_fps);
 
 							renderer::draw_text(text, {10.0f, 30.0f}, "#7BFF00");
 						}

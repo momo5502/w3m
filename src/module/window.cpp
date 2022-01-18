@@ -7,9 +7,6 @@ namespace window
 {
 	namespace
 	{
-		std::atomic_bool kill{false};
-		std::thread thread;
-
 		BOOL __stdcall enum_windows_proc(const HWND window, const LPARAM param)
 		{
 			DWORD process = 0;
