@@ -3,7 +3,9 @@
 
 #ifdef _WIN32
 #define poll WSAPoll
-#define EWOULDBLOCK WSAEWOULDBLOCK
+#define SOCK_WOULDBLOCK WSAEWOULDBLOCK
+#else
+#define SOCK_WOULDBLOCK EWOULDBLOCK
 #endif
 
 using namespace std::literals;
