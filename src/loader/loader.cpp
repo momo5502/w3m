@@ -1,5 +1,6 @@
 #include <std_include.hpp>
 #include "loader.hpp"
+#include "utils/hook.hpp"
 #include "utils/string.hpp"
 
 namespace loader
@@ -76,6 +77,38 @@ namespace loader
 		}
 	}
 
+	void load_tls(const utils::nt::library& source, const utils::nt::library& target)
+	{
+		if (source.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size)
+		{
+			const auto* const target_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(target.get_ptr() + target.
+				get_optional_header()
+				->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+			const auto* const source_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(source.get_ptr() + source.
+				get_optional_header()
+				->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+
+			auto* target_tls_start = PVOID(target_tls->StartAddressOfRawData);
+			auto* tls_start = PVOID(source_tls->StartAddressOfRawData);
+			const auto tls_size = source_tls->EndAddressOfRawData - source_tls->StartAddressOfRawData;
+			const auto tls_index = *reinterpret_cast<DWORD*>(target_tls->AddressOfIndex);
+
+			utils::hook::set<DWORD>(source_tls->AddressOfIndex, tls_index);
+
+			if (target_tls->AddressOfCallBacks)
+			{
+				utils::hook::set<void*>(target_tls->AddressOfCallBacks, nullptr);
+			}
+
+			DWORD old_protect;
+			VirtualProtect(target_tls_start, tls_size, PAGE_READWRITE, &old_protect);
+
+			auto* const tls_base = *reinterpret_cast<LPVOID*>(__readgsqword(0x58) + 8ull * tls_index);
+			std::memmove(tls_base, tls_start, tls_size);
+			std::memmove(target_tls_start, tls_start, tls_size);
+		}
+	}
+
 	utils::nt::library get_game_module()
 	{
 		return game_module;
@@ -95,6 +128,7 @@ namespace loader
 		}
 
 		load_imports(game_module, import_resolver);
+		load_tls(game_module, main_module);
 
 		return game_module;
 	}

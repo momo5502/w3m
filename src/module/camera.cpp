@@ -33,4 +33,4 @@ namespace
 	}
 }
 
-REGISTER_COMPONENT(camera::component)
+//REGISTER_COMPONENT(camera::component)
