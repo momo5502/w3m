@@ -62,8 +62,6 @@
 #include <asmjit/core/jitruntime.h>
 #include <asmjit/x86/x86assembler.h>
 
-#include "proto/test.pb.h"
-
 #pragma warning(pop)
 
 #include "resource.hpp"
