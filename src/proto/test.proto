@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package proto.test;
-
-message lul 
-{
-	bytes lulul  = 1;
-}

@@ -1,29 +1,24 @@
 #include <std_include.hpp>
 #include "socket.hpp"
-#include "../utils/obfuscation.hpp"
 
 #ifdef _WIN32
-#define poll LOAD_FN(WSAPoll)
+#define poll WSAPoll
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #endif
 
 using namespace std::literals;
-
-constexpr auto create_socket = [] {
-	return LOAD_FN(socket);
-};
 
 namespace network
 {
 	socket::socket(const int af)
 	{
 		initialize_wsa();
-		this->socket_ = create_socket()(af, SOCK_DGRAM, IPPROTO_UDP);
+		this->socket_ = ::socket(af, SOCK_DGRAM, IPPROTO_UDP);
 
 		if (af == AF_INET6)
 		{
 			int i = 1;
-			LOAD_FN(setsockopt)(this->socket_, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<char*>(&i), static_cast<int>(sizeof(i)));
+			setsockopt(this->socket_, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<char*>(&i), static_cast<int>(sizeof(i)));
 		}
 	}
 
@@ -32,7 +27,7 @@ namespace network
 		if (this->socket_ != INVALID_SOCKET)
 		{
 #ifdef _WIN32
-			LOAD_FN(closesocket)(this->socket_);
+			closesocket(this->socket_);
 #else
 			close(this->socket_);
 #endif
@@ -58,7 +53,7 @@ namespace network
 
 	bool socket::bind_port(const address& target)
 	{
-		const auto result = LOAD_FN(bind)(this->socket_, &target.get_addr(), target.get_size()) == 0;
+		const auto result = bind(this->socket_, &target.get_addr(), target.get_size()) == 0;
 		if (result)
 		{
 			this->port_ = target.get_port();
@@ -69,7 +64,7 @@ namespace network
 
 	bool socket::send(const address& target, const std::string& data) const
 	{
-		const int res = LOAD_FN(sendto)(this->socket_, data.data(), static_cast<int>(data.size()), 0, &target.get_addr(),
+		const int res = sendto(this->socket_, data.data(), static_cast<int>(data.size()), 0, &target.get_addr(),
 		                       target.get_size());
 		return res == static_cast<int>(data.size());
 	}
@@ -79,7 +74,7 @@ namespace network
 		char buffer[0x2000];
 		socklen_t len = source.get_max_size();
 
-		const auto result = LOAD_FN(recvfrom)(this->socket_, buffer, static_cast<int>(sizeof(buffer)), 0, &source.get_addr(), &len);
+		const auto result = recvfrom(this->socket_, buffer, static_cast<int>(sizeof(buffer)), 0, &source.get_addr(), &len);
 		if (result == SOCKET_ERROR)
 		{
 			return false;
@@ -93,7 +88,7 @@ namespace network
 	{
 #ifdef _WIN32
 		unsigned long mode = blocking ? 0 : 1;
-		return LOAD_FN(ioctlsocket)(this->socket_, FIONBIO, &mode) == 0;
+		return ioctlsocket(this->socket_, FIONBIO, &mode) == 0;
 #else
 		int flags = fcntl(this->socket_, F_GETFL, 0);
 		if (flags == -1) return false;

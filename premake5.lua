@@ -65,13 +65,13 @@ workspace "w3x"
 		"No64BitChecks"
 	}
 
-	configuration "windows"
+	filter "platforms:x64"
 		defines {
 			"_WINDOWS",
 			"WIN32",
 		}
 
-	configuration "Release"
+	filter "configurations:Release"
 		optimize "Full"
 		buildoptions "/Os"
 
@@ -83,7 +83,7 @@ workspace "w3x"
 			"FatalCompileWarnings",
 		}
 
-	configuration "Debug"
+	filter "configurations:Debug"
 		optimize "Debug"
 
 		defines {
@@ -91,7 +91,7 @@ workspace "w3x"
 			"_DEBUG",
 		}
 
-	configuration {}
+	filter {}
 
 	project "w3x"
 		kind "WindowedApp"

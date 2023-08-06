@@ -1,7 +1,6 @@
 #include <std_include.hpp>
 #include "address.hpp"
 #include "../utils/finally.hpp"
-#include "../utils/obfuscation.hpp"
 
 #include <optional>
 #include <string_view>
@@ -22,15 +21,15 @@ namespace network
 			wsa_initializer()
 			{
 				WSADATA wsa_data;
-				if (LOAD_FN(WSAStartup)(MAKEWORD(2, 2), &wsa_data))
+				if (WSAStartup(MAKEWORD(2, 2), &wsa_data))
 				{
-					throw std::runtime_error(xorstr_("Unable to initialize WSA"));
+					throw std::runtime_error("Unable to initialize WSA");
 				}
 			}
 
 			~wsa_initializer()
 			{
-				LOAD_FN(WSACleanup)();
+				WSACleanup();
 			}
 		} _;
 #endif
@@ -126,7 +125,7 @@ namespace network
 		}
 		else
 		{
-			throw std::runtime_error(xorstr_("Invalid network address"));
+			throw std::runtime_error("Invalid network address");
 		}
 	}
 
@@ -135,13 +134,13 @@ namespace network
 		switch (this->address_.sa_family)
 		{
 		case AF_INET:
-			this->address4_.sin_port = LOAD_FN(htons)(port);
+			this->address4_.sin_port = htons(port);
 			break;
 		case AF_INET6:
-			this->address6_.sin6_port = LOAD_FN(htons)(port);
+			this->address6_.sin6_port = htons(port);
 			break;
 		default:
-			throw std::runtime_error(xorstr_("Invalid address family"));
+			throw std::runtime_error("Invalid address family");
 		}
 	}
 
@@ -150,9 +149,9 @@ namespace network
 		switch (this->address_.sa_family)
 		{
 		case AF_INET:
-			return LOAD_FN(ntohs)(this->address4_.sin_port);
+			return ntohs(this->address4_.sin_port);
 		case AF_INET6:
-			return LOAD_FN(ntohs)(this->address6_.sin6_port);
+			return ntohs(this->address6_.sin6_port);
 		default:
 			return 0;
 		}
@@ -334,7 +333,7 @@ namespace network
 		}
 
 		port_reset_action.cancel();
-		throw std::runtime_error{xorstr_("Unable to resolve hostname: ") + hostname};
+		throw std::runtime_error{"Unable to resolve hostname: " + hostname};
 	}
 
 	std::vector<address> address::resolve_multiple(const std::string& hostname)
@@ -342,11 +341,11 @@ namespace network
 		std::vector<address> results{};
 
 		addrinfo* result = nullptr;
-		if (!LOAD_FN(getaddrinfo)(hostname.data(), nullptr, nullptr, &result))
+		if (!getaddrinfo(hostname.data(), nullptr, nullptr, &result))
 		{
 			const auto _2 = utils::finally([&result]()
 			{
-				LOAD_FN(freeaddrinfo)(result);
+				freeaddrinfo(result);
 			});
 
 			for (auto* i = result; i; i = i->ai_next)
