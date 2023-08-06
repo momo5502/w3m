@@ -126,19 +126,3 @@ workspace "w3x"
 
 	group "Dependencies"
 		dependencies.projects()
-
-rule "ProtobufCompiler"
-	display "Protobuf compiler"
-	location "./build"
-	fileExtension ".proto"
-	buildmessage "Compiling %(Identity) with protoc..."
-	buildcommands {
-		'@echo off',
-		'path "$(SolutionDir)\\..\\tools"',
-		'if not exist "$(ProjectDir)\\src\\proto" mkdir "$(ProjectDir)\\src\\proto"',
-		'protoc --error_format=msvs -I=%(RelativeDir) --cpp_out=src\\proto %(Identity)',
-	}
-	buildoutputs {
-		'$(ProjectDir)\\src\\proto\\%(Filename).pb.cc',
-		'$(ProjectDir)\\src\\proto\\%(Filename).pb.h',
-	}
