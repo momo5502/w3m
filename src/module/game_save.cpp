@@ -80,4 +80,4 @@ namespace
 	}
 }
 
-REGISTER_COMPONENT(game_save::component)
+//REGISTER_COMPONENT(game_save::component)

@@ -102,11 +102,12 @@ namespace
 		static_assert(offsetof(CR4Game, free_camera_enabled) == 0x11F);
 		static_assert(offsetof(CR4Game, camera) == 0x548);
 
-		static CR4Game* get_global_game()
+		CR4Game* get_global_game()
 		{
-			static const auto game = utils::hook::extract<CR4Game**>(
-				"E8 ? ? ? ? 48 8B 0D ? ? ? ? 48 8B 55 C0"_sig.get(0) + 8);
-			return *game;
+			/*static const auto game = utils::hook::extract<CR4Game**>(
+				"E8 ? ? ? ? 48 8B 0D ? ? ? ? 48 8B 55 C0"_sig.get(0) + 8);*/
+			auto** game_ptr = reinterpret_cast<CR4Game**>(0x144DE5FB8);
+			return *game_ptr;
 		}
 
 		struct IDK
@@ -211,56 +212,64 @@ namespace
 				//register_script_hook = utils::hook::detour(utils::hook::signature("E8 ? ? ? ? 8B 4D 94").process().get(0), &register_script_function);
 				//render_text_hook = utils::hook::detour(0x141394F90_g, &render_text_function);
 
-				renderer::frame([]()
+				std::thread([]
 				{
 					static auto last_time = std::chrono::high_resolution_clock::now();
 					static int frames[100]{0};
 					static int index = 0;
 
-					const auto game = get_global_game();
-					if (game && game->vftbl)
-					{
-						/*
-						const auto game_rtti = get_rtti(game);
-						const auto type_desc = game_rtti->type_description;
-						OutputDebugStringA(type_desc->name);
-						*/
+					while (true) {
 
-						const auto player = game->vftbl->get_player(game);
-						if (player)
+						const auto game = get_global_game();
+						if (game && game->vftbl)
 						{
-							float orientation[3];
-							player->get_orientation(orientation);
+							/*
+							const auto game_rtti = get_rtti(game);
+							const auto type_desc = game_rtti->type_description;
+							OutputDebugStringA(type_desc->name);
+							*/
 
-							const auto duration = std::chrono::high_resolution_clock::now() - last_time;
-							const auto fps = static_cast<int>(1000.0 / std::chrono::duration_cast<
-								std::chrono::milliseconds>(duration).count());
-							frames[index] = fps;
-							index = (index +1) % ARRAYSIZE(frames);
-							last_time = std::chrono::high_resolution_clock::now();
-
-							int total_fps = 0;
-							for(auto frame : frames)
+							const auto player = game->vftbl->get_player(game);
+							if (player)
 							{
-								total_fps += frame;
+								/*float orientation[3];
+								player->get_orientation(orientation);
+								const auto str = utils::string::va("Position: %.2f %.2f %.2f\n", player->position[0],
+									player->position[1], player->position[2]);
+								OutputDebugStringA(str);*/
+
+								/*const auto duration = std::chrono::high_resolution_clock::now() - last_time;
+								const auto fps = static_cast<int>(1000.0 / std::chrono::duration_cast<
+									std::chrono::milliseconds>(duration).count());
+								frames[index] = fps;
+								index = (index + 1) % ARRAYSIZE(frames);
+								last_time = std::chrono::high_resolution_clock::now();
+
+								int total_fps = 0;
+								for (auto frame : frames)
+								{
+									total_fps += frame;
+								}
+
+								total_fps /= ARRAYSIZE(frames);
+
+								std::string text;
+								text += utils::string::va("Position: %.2f %.2f %.2f\n", player->position[0],
+														  player->position[1], player->position[2]);
+								text += utils::string::va("Orientation: %.2f %.2f %.2f\n", orientation[0], orientation[1],
+														  orientation[2]);
+								text += utils::string::va("FPS: %d", total_fps);
+
+								renderer::draw_text(text, {10.0f, 30.0f}, "#7BFF00");*/
 							}
-
-							total_fps /= ARRAYSIZE(frames);
-
-							std::string text;
-							text += utils::string::va("Position: %.2f %.2f %.2f\n", player->position[0],
-							                          player->position[1], player->position[2]);
-							text += utils::string::va("Orientation: %.2f %.2f %.2f\n", orientation[0], orientation[1],
-							                          orientation[2]);
-							text += utils::string::va("FPS: %d", total_fps);
-
-							renderer::draw_text(text, {10.0f, 30.0f}, "#7BFF00");
 						}
+
+						std::this_thread::sleep_for(1s);
 					}
-				});
+				}).detach();
 			}
 		};
 	}
 }
 
-REGISTER_COMPONENT(experiments::component)
+//REGISTER_COMPONENT(experiments::component)
