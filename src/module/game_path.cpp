@@ -11,8 +11,9 @@ namespace
 	{
 		void set_directory(const std::filesystem::path& path)
 		{
-			SetDllDirectoryW(path.generic_wstring().data());
-			SetCurrentDirectoryW(path.generic_wstring().data());
+			const auto wide_path = path.generic_wstring();
+			SetDllDirectoryW(wide_path.data());
+			SetCurrentDirectoryW(wide_path.data());
 		}
 
 		std::string get_default_witcher_path()
