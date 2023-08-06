@@ -10,10 +10,6 @@
 [submodule "deps/udis86"]
 	path = deps/udis86
 	url = https://github.com/vmt/udis86.git
-[submodule "deps/protobuf"]
-	path = deps/protobuf
-	url = https://github.com/google/protobuf.git
-	branch = 3.12.x
 [submodule "deps/minhook"]
 	path = deps/minhook
 	url = https://github.com/TsudaKageyu/minhook.git
