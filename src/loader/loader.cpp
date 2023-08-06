@@ -1,112 +1,203 @@
 #include <std_include.hpp>
 #include "loader.hpp"
-#include "utils/hook.hpp"
-#include "utils/string.hpp"
+
+#include <utils/hook.hpp>
+#include <utils/string.hpp>
 
 namespace loader
 {
-	utils::nt::library game_module;
-	utils::nt::library main_module;
-
-	void load_imports(const utils::nt::library& target, const resolver& import_resolver)
+	namespace
 	{
-		const auto import_directory = &target.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
-		auto descriptor = PIMAGE_IMPORT_DESCRIPTOR(target.get_ptr() + import_directory->VirtualAddress);
+		utils::nt::library game_module{};
+		utils::nt::library main_module{};
 
-		while (descriptor->Name)
+		template <typename T>
+		T offset_pointer(void* data, const ptrdiff_t offset)
 		{
-			std::string name = LPSTR(target.get_ptr() + descriptor->Name);
+			return reinterpret_cast<T>(reinterpret_cast<uintptr_t>(data) + offset);
+		}
 
-			auto name_table_entry = reinterpret_cast<uintptr_t*>(target.get_ptr() + descriptor->OriginalFirstThunk);
-			auto address_table_entry = reinterpret_cast<uintptr_t*>(target.get_ptr() + descriptor->FirstThunk);
+		void load_imports(const utils::nt::library& target, const resolver& import_resolver)
+		{
+			const auto* const import_directory = &target.get_optional_header()->DataDirectory[
+				IMAGE_DIRECTORY_ENTRY_IMPORT];
 
-			if (!descriptor->OriginalFirstThunk)
+			const auto* descriptor = PIMAGE_IMPORT_DESCRIPTOR(target.get_ptr() + import_directory->VirtualAddress);
+
+			while (descriptor->Name)
 			{
-				name_table_entry = reinterpret_cast<uintptr_t*>(target.get_ptr() + descriptor->FirstThunk);
-			}
+				std::string name = LPSTR(target.get_ptr() + descriptor->Name);
 
-			while (*name_table_entry)
-			{
-				FARPROC function = nullptr;
-				std::string function_name;
+				const auto* name_table_entry = reinterpret_cast<uintptr_t*>(target.get_ptr() + descriptor->
+					OriginalFirstThunk);
+				auto* address_table_entry = reinterpret_cast<uintptr_t*>(target.get_ptr() + descriptor->FirstThunk);
 
-				if (IMAGE_SNAP_BY_ORDINAL(*name_table_entry))
+				if (!descriptor->OriginalFirstThunk)
 				{
-					auto module = utils::nt::library::load(name);
-					if (module)
+					name_table_entry = reinterpret_cast<uintptr_t*>(target.get_ptr() + descriptor->FirstThunk);
+				}
+
+				while (*name_table_entry)
+				{
+					FARPROC function = nullptr;
+					std::string function_name;
+					const char* function_procname;
+
+					if (IMAGE_SNAP_BY_ORDINAL(*name_table_entry))
 					{
-						function = GetProcAddress(module, MAKEINTRESOURCEA(IMAGE_ORDINAL(*name_table_entry)));
+						function_name = "#" + std::to_string(IMAGE_ORDINAL(*name_table_entry));
+						function_procname = MAKEINTRESOURCEA(IMAGE_ORDINAL(*name_table_entry));
+					}
+					else
+					{
+						const auto* import = PIMAGE_IMPORT_BY_NAME(target.get_ptr() + *name_table_entry);
+						function_name = import->Name;
+						function_procname = function_name.data();
 					}
 
-					function_name = "#" + std::to_string(IMAGE_ORDINAL(*name_table_entry));
-				}
-				else
-				{
-					auto import = PIMAGE_IMPORT_BY_NAME(target.get_ptr() + *name_table_entry);
-					function_name = import->Name;
-
-					if (import_resolver)
+					auto library = utils::nt::library::load(name);
+					if (library)
 					{
-						function = FARPROC(import_resolver(name, function_name));
+						function = GetProcAddress(library, function_procname);
+					}
+
+					auto* resolved_function = import_resolver(name, function_name);
+					if (resolved_function)
+					{
+						function = FARPROC(resolved_function);
 					}
 
 					if (!function)
 					{
-						auto module = utils::nt::library::load(name);
-						if (module)
+						throw std::runtime_error(utils::string::va("Unable to load import '%s' from library '%s'",
+						                                           function_name.data(), name.data()));
+					}
+
+					utils::hook::set(address_table_entry, reinterpret_cast<uintptr_t>(function));
+
+					name_table_entry++;
+					address_table_entry++;
+				}
+
+				descriptor++;
+			}
+		}
+
+		void load_relocations(const utils::nt::library& target)
+		{
+			if (!utils::nt::is_wine())
+			{
+				return;
+			}
+
+			auto* current_base = target.get_ptr();
+			const auto initial_base = target.get_optional_header()->ImageBase;
+			const auto delta = reinterpret_cast<ptrdiff_t>(current_base) - initial_base;
+
+			const PIMAGE_DATA_DIRECTORY directory = &target.get_optional_header()->DataDirectory[
+				IMAGE_DIRECTORY_ENTRY_BASERELOC];
+			if (directory->Size == 0)
+			{
+				return;
+			}
+
+			auto* relocation = reinterpret_cast<PIMAGE_BASE_RELOCATION>(current_base + directory->VirtualAddress);
+			while (relocation->VirtualAddress > 0)
+			{
+				unsigned char* dest = current_base + relocation->VirtualAddress;
+
+				auto* rel_info = offset_pointer<uint16_t*>(relocation, sizeof(IMAGE_BASE_RELOCATION));
+				const auto* rel_info_end = offset_pointer<uint16_t*>(
+					rel_info, relocation->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION));
+
+				for (; rel_info < rel_info_end; ++rel_info)
+				{
+					const int type = *rel_info >> 12;
+					const int offset = *rel_info & 0xfff;
+
+					switch (type)
+					{
+					case IMAGE_REL_BASED_ABSOLUTE:
+						break;
+
+					case IMAGE_REL_BASED_HIGHLOW:
 						{
-							function = GetProcAddress(module, function_name.data());
+							auto* patch_address = reinterpret_cast<DWORD*>(dest + offset);
+							utils::hook::set(patch_address, *patch_address + static_cast<DWORD>(delta));
+							break;
 						}
+
+					case IMAGE_REL_BASED_DIR64:
+						{
+							auto* patch_address = reinterpret_cast<ULONGLONG*>(dest + offset);
+							utils::hook::set(patch_address, *patch_address + static_cast<ULONGLONG>(delta));
+							break;
+						}
+
+					default:
+						throw std::runtime_error("Unknown relocation type: " + std::to_string(type));
 					}
 				}
 
-				if (!function)
+				relocation = offset_pointer<PIMAGE_BASE_RELOCATION>(relocation, relocation->SizeOfBlock);
+			}
+		}
+
+		void load_tls(const utils::nt::library& source, const utils::nt::library& target)
+		{
+			if (source.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size)
+			{
+				const auto* const target_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(target.get_ptr() + target.
+					get_optional_header()
+					->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+				const auto* const source_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(source.get_ptr() + source.
+					get_optional_header()
+					->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+
+				auto* target_tls_start = PVOID(target_tls->StartAddressOfRawData);
+				const auto* tls_start = PVOID(source_tls->StartAddressOfRawData);
+				const auto tls_size = source_tls->EndAddressOfRawData - source_tls->StartAddressOfRawData;
+				const auto tls_index = *reinterpret_cast<DWORD*>(target_tls->AddressOfIndex);
+
+				utils::hook::set<DWORD>(source_tls->AddressOfIndex, tls_index);
+
+				if (target_tls->AddressOfCallBacks)
 				{
-					throw std::runtime_error(utils::string::va("Unable to load import '%s' from module '%s'", function_name.data(), name.data()));
+					utils::hook::set<void*>(target_tls->AddressOfCallBacks, nullptr);
 				}
 
 				DWORD old_protect;
-				VirtualProtect(address_table_entry, sizeof(*address_table_entry), PAGE_EXECUTE_READWRITE, &old_protect);
-				*address_table_entry = reinterpret_cast<uintptr_t>(function);
+				VirtualProtect(target_tls_start, tls_size, PAGE_READWRITE, &old_protect);
 
-				name_table_entry++;
-				address_table_entry++;
+				auto* const tls_base = *reinterpret_cast<LPVOID*>(__readgsqword(0x58) + 8ull * tls_index);
+				std::memmove(tls_base, tls_start, tls_size);
+				std::memmove(target_tls_start, tls_start, tls_size);
 			}
-
-			descriptor++;
 		}
 	}
 
-	void load_tls(const utils::nt::library& source, const utils::nt::library& target)
+	utils::nt::library load(const std::string& filename, const resolver& import_resolver)
 	{
-		if (source.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size)
+		const auto target = utils::nt::library::load(filename);
+		if (!target)
 		{
-			const auto* const target_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(target.get_ptr() + target.
-				get_optional_header()
-				->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
-			const auto* const source_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(source.get_ptr() + source.
-				get_optional_header()
-				->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
-
-			auto* target_tls_start = PVOID(target_tls->StartAddressOfRawData);
-			auto* tls_start = PVOID(source_tls->StartAddressOfRawData);
-			const auto tls_size = source_tls->EndAddressOfRawData - source_tls->StartAddressOfRawData;
-			const auto tls_index = *reinterpret_cast<DWORD*>(target_tls->AddressOfIndex);
-
-			utils::hook::set<DWORD>(source_tls->AddressOfIndex, tls_index);
-
-			if (target_tls->AddressOfCallBacks)
-			{
-				utils::hook::set<void*>(target_tls->AddressOfCallBacks, nullptr);
-			}
-
-			DWORD old_protect;
-			VirtualProtect(target_tls_start, tls_size, PAGE_READWRITE, &old_protect);
-
-			auto* const tls_base = *reinterpret_cast<LPVOID*>(__readgsqword(0x58) + 8ull * tls_index);
-			std::memmove(tls_base, tls_start, tls_size);
-			std::memmove(target_tls_start, tls_start, tls_size);
+			throw std::runtime_error{"Failed to map: " + filename};
 		}
+
+		load_relocations(target);
+		load_imports(target, import_resolver);
+		load_tls(target, main_module);
+
+		game_module = target;
+
+		return target;
+	}
+
+	void apply_main_module(const utils::nt::library& mod)
+	{
+		auto* const peb = reinterpret_cast<PPEB>(__readgsqword(0x60));
+		peb->Reserved3[1] = mod.get_ptr();
+		static_assert(offsetof(PEB, Reserved3[1]) == 0x10);
 	}
 
 	utils::nt::library get_game_module()
@@ -117,20 +208,6 @@ namespace loader
 	utils::nt::library get_main_module()
 	{
 		return main_module;
-	}
-
-	utils::nt::library load(const std::string& name, const resolver& import_resolver)
-	{
-		game_module = utils::nt::library::load(name);
-		if(!game_module)
-		{
-			throw std::runtime_error(utils::string::va("Unable to load '%s'", name.data()));
-		}
-
-		load_imports(game_module, import_resolver);
-		load_tls(game_module, main_module);
-
-		return game_module;
 	}
 
 	size_t reverse_g(const size_t val)

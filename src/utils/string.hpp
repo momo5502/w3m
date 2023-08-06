@@ -1,6 +1,9 @@
 #pragma once
 #include "memory.hpp"
 
+template <class Type, size_t n>
+constexpr auto ARRAY_COUNT(Type(&)[n]) { return n; }
+
 namespace utils::string
 {
 	template <size_t Buffers, size_t MinBufferSize>
@@ -15,7 +18,7 @@ namespace utils::string
 
 		char* get(const char* format, const va_list ap)
 		{
-			++this->current_buffer_ %= ARRAYSIZE(this->string_pool_);
+			++this->current_buffer_ %= ARRAY_COUNT(this->string_pool_);
 			auto entry = &this->string_pool_[this->current_buffer_];
 
 			if (!entry->size || !entry->buffer)
@@ -39,7 +42,7 @@ namespace utils::string
 		class entry final
 		{
 		public:
-			explicit entry(const size_t _size = MinBufferSize) : size(_size), buffer(nullptr)
+			entry(const size_t _size = MinBufferSize) : size(_size), buffer(nullptr)
 			{
 				if (this->size < MinBufferSize) this->size = MinBufferSize;
 				this->allocate();
@@ -64,18 +67,44 @@ namespace utils::string
 				this->allocate();
 			}
 
-			size_t size;
-			char* buffer;
+			size_t size{};
+			char* buffer{ nullptr };
 		};
 
-		size_t current_buffer_;
-		entry string_pool_[Buffers];
+		size_t current_buffer_{};
+		entry string_pool_[Buffers]{};
 	};
 
 	const char* va(const char* fmt, ...);
 
+	std::vector<std::string> split(const std::string& s, char delim);
+
 	std::string to_lower(std::string text);
 	std::string to_upper(std::string text);
+	bool starts_with(const std::string& text, const std::string& substring);
+	bool ends_with(const std::string& text, const std::string& substring);
+
+	bool is_numeric(const std::string& text);
 
 	std::string dump_hex(const std::string& data, const std::string& separator = " ");
+
+	std::string get_clipboard_data();
+
+	void strip(const char* in, char* out, size_t max);
+	void strip_material(const char* in, char* out, size_t max);
+
+	std::string convert(const std::wstring& wstr);
+	std::wstring convert(const std::string& str);
+
+	std::string replace(std::string str, const std::string& from, const std::string& to);
+
+	void trim(std::string& str);
+
+	void copy(char* dest, size_t max_size, const char* src);
+
+	template <size_t Size>
+	void copy(char(&dest)[Size], const char* src)
+	{
+		copy(dest, Size, src);
+	}
 }

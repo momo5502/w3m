@@ -28,6 +28,9 @@
 
 #include <Windows.h>
 #include <ShlObj.h>
+#include <d3d11.h>
+#include <shellscalingapi.h>
+#include <winternl.h>
 
 // min and max is required by gdi, therefore NOMINMAX won't work
 #ifdef max
@@ -65,6 +68,9 @@
 #pragma warning(pop)
 
 #include "resource.hpp"
+
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "dxgi.lib")
 
 using namespace std::literals;
 

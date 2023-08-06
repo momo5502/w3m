@@ -136,7 +136,7 @@ namespace steam_proxy
 				GetCurrentDirectoryA(sizeof(our_directory), our_directory);
 
 
-				const std::string cmdline = utils::string::va("\"%s\" -proc %d", path.data(), GetCurrentProcessId());
+				const std::string cmdline = utils::string::va("\"%s\" -proc %d", path.generic_string().data(), GetCurrentProcessId());
 
 				steam::game_id game_id;
 				game_id.raw.type = 1; // k_EGameIDTypeGameMod
@@ -145,7 +145,7 @@ namespace steam_proxy
 				const auto* mod_id = "W3X.";
 				game_id.raw.mod_id = *reinterpret_cast<const unsigned int*>(mod_id) | 0x80000000;
 
-				this->client_user_.invoke<bool>("SpawnProcess", self.get_path().data(), cmdline.data(), our_directory,
+				this->client_user_.invoke<bool>("SpawnProcess", self.get_path().generic_string().data(), cmdline.data(), our_directory,
 				                                &game_id.bits, title.data(), 0, 0, 0);
 			}
 

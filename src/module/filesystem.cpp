@@ -50,8 +50,7 @@ namespace
 			void post_load() override
 			{
 				const auto module = loader::get_main_module();
-				const auto path = module.get_folder() + "/";
-				const std::wstring wide_path(path.begin(), path.end());
+				const auto wide_path = module.get_folder().generic_wstring() + L"/";
 
 				static struct game_string
 				{
@@ -108,4 +107,4 @@ namespace
 	}
 }
 
-REGISTER_COMPONENT(filesystem::component)
+//REGISTER_COMPONENT(filesystem::component)

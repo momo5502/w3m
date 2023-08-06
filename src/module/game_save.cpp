@@ -44,9 +44,8 @@ namespace
 			if (csidl == CSIDL_MYDOCUMENTS)
 			{
 				const auto main = loader::get_main_module();
-				const auto main_path = main.get_folder();
-				const std::wstring wide_path(main_path.begin(), main_path.end());
-				wcscpy_s(path, MAX_PATH, wide_path.data());
+				const auto main_path = main.get_folder().generic_wstring();
+				wcscpy_s(path, MAX_PATH, main_path.data());
 				return S_OK;
 			}
 

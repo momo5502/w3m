@@ -9,10 +9,10 @@ namespace
 {
 	namespace game_path
 	{
-		void set_directory(const std::string& path)
+		void set_directory(const std::filesystem::path& path)
 		{
-			SetDllDirectoryA(path.data());
-			SetCurrentDirectoryA(path.data());
+			SetDllDirectoryW(path.generic_wstring().data());
+			SetCurrentDirectoryW(path.generic_wstring().data());
 		}
 
 		std::string get_default_witcher_path()
@@ -28,18 +28,21 @@ namespace
 
 		bool try_set_witcher_path(const std::filesystem::path& path)
 		{
-			if (path.empty()) return false;
+			if (path.empty())
+			{
+				return false;
+			}
 
 			if (std::filesystem::exists(path / "witcher3.exe"))
 			{
-				set_directory(path.generic_string());
+				set_directory(path);
 				return true;
 			}
 
-			const auto alt_path = std::filesystem::path(path) / "bin\\x64";
+			const auto alt_path = std::filesystem::path(path) / "bin" / "x64";
 			if (std::filesystem::exists(alt_path / "witcher3.exe"))
 			{
-				set_directory(alt_path.generic_string());
+				set_directory(alt_path);
 				return true;
 			}
 
