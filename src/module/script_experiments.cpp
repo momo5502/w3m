@@ -151,6 +151,9 @@ namespace
 					}
 				}).detach();
 
+				// Prevent pausing the game when focus is lost
+				utils::hook::set<uint8_t>(0x14035F039, 0xEB);
+
 				utils::hook::copy_string(0x1421133A0,
 				                         ("my-mutex-name-" + std::to_string((uint64_t)time(nullptr))).data());
 
