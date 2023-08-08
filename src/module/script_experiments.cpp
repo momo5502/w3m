@@ -89,7 +89,7 @@ namespace
 
 		//using script_function = void(*)(void* a1, unknown_script_context* ctx, uint64_t* return_value);
 
-		void test_func(void* a1, unknown_script_context* ctx, vec3_t* return_value)
+		void test_func(void* /*a1*/, unknown_script_context* ctx, vec3_t* return_value)
 		{
 			const auto argument = read_argument<vec3_t>(ctx);
 			/*const auto argument2 = read_argument<uint32_t>(ctx);
@@ -155,11 +155,11 @@ namespace
 				utils::hook::set<uint8_t>(0x14035F039, 0xEB);
 
 				utils::hook::copy_string(0x1421133A0,
-				                         ("my-mutex-name-" + std::to_string((uint64_t)time(nullptr))).data());
+				                         ("my-mutex-name-" + std::to_string(static_cast<uint64_t>(time(nullptr)))).data());
 
 				utils::hook::jump(0x140E68390, test_func);
 
-				utils::hook::call(0x140E6CDF8, +[](void* a1, const wchar_t* a2)
+				utils::hook::call(0x140E6CDF8, +[](void* a1, const wchar_t* /*a2*/)
 				{
 					reinterpret_cast<void(*)(void*, const wchar_t*)>(0x14029F360)(a1, L"MomoTestFunc");
 				});
