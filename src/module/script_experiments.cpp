@@ -168,4 +168,4 @@ namespace
 	}
 }
 
-REGISTER_COMPONENT(script_experiments::component)
+///REGISTER_COMPONENT(script_experiments::component)
