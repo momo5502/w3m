@@ -50,7 +50,7 @@ workspace "w3x"
 	architecture "x64"
 	platforms "x64"
 
-	buildoptions "/std:c++latest"
+	buildoptions "/std:c++20"
 	systemversion "latest"
 	symbols "On"
 	staticruntime "On"
