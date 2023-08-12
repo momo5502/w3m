@@ -19,7 +19,7 @@ namespace component_loader
 	template <typename T>
 	class installer final
 	{
-		static_assert(std::is_base_of<component_interface, T>::value, "Component has invalid base class");
+		static_assert(std::is_base_of_v<component_interface, T>, "Component has invalid base class");
 
 	public:
 		installer()
