@@ -108,7 +108,7 @@ namespace scripting
 		{
 			if (this->str_.string)
 			{
-				reinterpret_cast<void(*)(wchar_t*)>(0x140259710)(this->str_.string);
+				reinterpret_cast<void(*)(wchar_t*)>(0x140259710_g)(this->str_.string);
 			}
 		}
 
