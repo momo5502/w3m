@@ -137,7 +137,7 @@ namespace scripting
 		struct dispatcher_helper<Return(*)(Args...)>
 		{
 			template <auto Function>
-			static game::script_function* create_dispatcher()
+			game::script_function* create_dispatcher() const
 			{
 				return &dispatcher_function<Function, Return, std::remove_cvref_t<Args>...>;
 			}
@@ -147,7 +147,8 @@ namespace scripting
 		game::script_function* create_dispatcher_function()
 		{
 			using FunctionType = decltype(Function);
-			return dispatcher_helper<FunctionType>::template create_dispatcher<Function>();
+			const dispatcher_helper<FunctionType> helper{};
+			return helper.template create_dispatcher<Function>();
 		}
 	}
 
