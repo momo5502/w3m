@@ -6,9 +6,9 @@ namespace scripting
 	{
 		struct vec3_t
 		{
-			float x{ 0.0 };
-			float y{ 0.0 };
-			float z{ 0.0 };
+			float x{0.0};
+			float y{0.0};
+			float z{0.0};
 		};
 
 		struct CFunction
@@ -130,12 +130,13 @@ namespace scripting
 			++ctx->some_stack;
 		}
 
-		template <typename Func>
-		struct dispatcher_helper;
-
 		template <typename Return, typename... Args>
-		struct dispatcher_helper<Return(*)(Args...)>
+		struct dispatcher_helper
 		{
+			dispatcher_helper(Return (*)(Args...))
+			{
+			}
+
 			template <auto Function>
 			game::script_function* create_dispatcher() const
 			{
@@ -146,8 +147,7 @@ namespace scripting
 		template <auto Function>
 		game::script_function* create_dispatcher_function()
 		{
-			using FunctionType = decltype(Function);
-			const dispatcher_helper<FunctionType> helper{};
+			const dispatcher_helper helper{Function};
 			return helper.template create_dispatcher<Function>();
 		}
 	}
