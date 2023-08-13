@@ -32,7 +32,8 @@ namespace console
 
 			SetConsoleCtrlHandler(+[](DWORD /*ctrl_type*/) -> BOOL
 			{
-				_Exit(0);
+				TerminateProcess(GetCurrentProcess(), 0);
+				return TRUE;
 			}, TRUE);
 		}
 	}
