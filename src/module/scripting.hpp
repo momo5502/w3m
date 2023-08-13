@@ -1,15 +1,27 @@
 #pragma once
+#pragma warning(disable: 4324)
 
 namespace scripting
 {
 	namespace game
 	{
-		struct vec3_t
+		__declspec(align(16)) struct Vector
 		{
-			float x{0.0};
-			float y{0.0};
-			float z{0.0};
+			float X{0.0};
+			float Y{0.0};
+			float Z{0.0};
+			float W{0.0};
 		};
+
+#pragma pack(push)
+#pragma pack(1)
+		struct EulerAngles
+		{
+			float Pitch{ 0.0 };
+			float Yaw{ 0.0 };
+			float Roll{ 0.0 };
+		};
+#pragma pack(pop)
 
 		struct CFunction
 		{
@@ -25,11 +37,14 @@ namespace scripting
 			uint8_t* some_stack;
 		};
 
+#pragma pack(push)
+#pragma pack(1)
 		struct script_string
 		{
 			wchar_t* string{};
 			uint32_t length{};
 		};
+#pragma pack(pop)
 
 		using script_function = void(void* a1, script_execution_context* ctx, void* return_value);
 	}
@@ -40,8 +55,12 @@ namespace scripting
 		{
 		public:
 			managed_script_string();
+
 			managed_script_string(const std::string& str);
+			managed_script_string& operator=(const std::string& str);
+
 			managed_script_string(const std::wstring& str);
+			managed_script_string& operator=(const std::wstring& str);
 
 			~managed_script_string();
 
@@ -86,12 +105,12 @@ namespace scripting
 		template <typename T>
 		auto adapt_return_value(T val)
 		{
-			static_assert(std::is_arithmetic_v<T>);
+			//static_assert(std::is_arithmetic_v<T>);
 			return val;
 		}
 
 		template <>
-		inline auto adapt_return_value(game::vec3_t val)
+		inline auto adapt_return_value(game::Vector val)
 		{
 			return val;
 		}

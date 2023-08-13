@@ -95,6 +95,12 @@ namespace scripting
 		{
 		}
 
+		managed_script_string& managed_script_string::operator=(const std::string& str)
+		{
+			*this = managed_script_string(str);
+			return *this;
+		}
+
 		managed_script_string::managed_script_string(const std::wstring& str)
 		{
 			this->str_.length = static_cast<uint32_t>(str.size() + 1);
@@ -102,6 +108,12 @@ namespace scripting
 				0x1402597F0_g)(
 				0, 2ULL * this->str_.length, 2, 14);
 			memcpy(this->str_.string, str.data(), static_cast<size_t>(this->str_.length) * 2);
+		}
+
+		managed_script_string& managed_script_string::operator=(const std::wstring& str)
+		{
+			*this = managed_script_string(str);
+			return *this;
 		}
 
 		managed_script_string::~managed_script_string()
