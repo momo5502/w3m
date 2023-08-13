@@ -93,7 +93,7 @@ workspace "w3x"
 
 	filter {}
 
-	project "w3x"
+	project "w3m"
 		kind "WindowedApp"
 		language "C++"
 
