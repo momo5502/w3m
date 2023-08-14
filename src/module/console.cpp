@@ -43,9 +43,11 @@ namespace console
 	public:
 		void post_load() override
 		{
-			create_console();
-
-			utils::hook::jump(0x14025D5B0_g, log_message_stub);
+			if (!utils::nt::is_wine())
+			{
+				create_console();
+				utils::hook::jump(0x14025D5B0_g, log_message_stub);
+			}
 
 			// Enable ingame console
 			const auto config_vars = "48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8D 05 ? ? ? ? C6 05 ? ? ? ? ?"_sig;
