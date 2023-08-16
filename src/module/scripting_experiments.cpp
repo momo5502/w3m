@@ -22,6 +22,7 @@ namespace scripting_experiments
 			scripting::game::Vector position{};
 			scripting::game::Vector velocity{};
 			float speed;
+			int move_type{};
 		};
 
 		// ----------------------------------------------
@@ -32,13 +33,13 @@ namespace scripting_experiments
 		W3mPlayerState player_state{};
 		std::optional<network::socket> sock{};
 
-		W3mPlayerInfo get_player_info(int player_id)
+		W3mPlayerInfo get_player_info(int /*player_id*/)
 		{
 			W3mPlayerInfo info{};
 			return info;
 		}
 
-		W3mPlayerState get_player_state(int player_id)
+		W3mPlayerState get_player_state(int /*player_id*/)
 		{
 			std::lock_guard _{m};
 			return player_state;
@@ -90,7 +91,7 @@ namespace scripting_experiments
 			wchar_t name[MAX_PATH]{ 0 };
 			GetHostNameW(name, sizeof(name));
 
-			network::address oa{name == std::wstring(L"Maurice-Laptop") ? "192.168.178.34" : "192.168.178.47"};
+			network::address oa{name == std::wstring(L"Maurice-Laptop") ? "maurices-steamdeck" : "192.168.178.50", AF_INET};
 			oa.set_port(28960);
 			other_addr = oa;
 
