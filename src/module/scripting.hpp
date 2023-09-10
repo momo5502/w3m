@@ -17,9 +17,9 @@ namespace scripting
 #pragma pack(1)
 		struct EulerAngles
 		{
-			float Pitch{ 0.0 };
-			float Yaw{ 0.0 };
-			float Roll{ 0.0 };
+			float Pitch{0.0};
+			float Yaw{0.0};
+			float Roll{0.0};
 		};
 #pragma pack(pop)
 
@@ -51,16 +51,32 @@ namespace scripting
 
 	namespace detail
 	{
+		void* allocate_object(size_t size);
+		void destroy_object(void* game);
+
+		template <typename T>
+		T* allocate(const size_t count = 1)
+		{
+			auto* array = static_cast<T*>(allocate_object(sizeof(T) * count));
+
+			for (size_t i = 0; i < count; ++i)
+			{
+				new(array + i) T();
+			}
+
+			return array;
+		}
+
 		class managed_script_string
 		{
 		public:
-			managed_script_string();
+			managed_script_string() = default;
 
 			managed_script_string(const std::string& str);
 			managed_script_string& operator=(const std::string& str);
 
-			managed_script_string(const std::wstring& str);
-			managed_script_string& operator=(const std::wstring& str);
+			managed_script_string(const std::wstring_view& str);
+			managed_script_string& operator=(const std::wstring_view& str);
 
 			~managed_script_string();
 
@@ -70,8 +86,16 @@ namespace scripting
 			managed_script_string(managed_script_string&& obj) noexcept;
 			managed_script_string& operator=(managed_script_string&& obj) noexcept;
 
+			bool operator==(const managed_script_string& obj) const;
+
+			bool operator!=(const managed_script_string& obj) const
+			{
+				return !this->operator==(obj);
+			}
+
 			std::wstring to_wstring() const;
 			std::string to_string() const;
+			std::wstring_view to_view() const;
 
 			game::script_string str_{};
 		};

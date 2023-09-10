@@ -2,109 +2,209 @@
 #include "loader/component_loader.hpp"
 #include "loader/loader.hpp"
 #include "utils/hook.hpp"
+#include "utils/string.hpp"
 
-namespace
+#include "scripting.hpp"
+
+namespace filesystem
 {
-	namespace filesystem
+	namespace
 	{
-		HANDLE __stdcall find_first_file_ex_w(const wchar_t* file_name, const FINDEX_INFO_LEVELS info_level_id,
-		                                      const LPVOID find_file_data, const FINDEX_SEARCH_OPS search_op,
-		                                      const LPVOID search_filter, const DWORD additional_flags)
+		struct array_thing
 		{
-			OutputDebugStringW(file_name);
-			if (file_name == L"D:\\Games\\SteamLibrary\\steamapps\\common\\The Witcher 3\\mods\\*."s)
+			void** elements;
+			uint32_t count;
+		};
+
+		struct string_array
+		{
+			scripting::detail::managed_script_string* strings;
+			uint32_t count;
+		};
+
+		void* load_mod_scripts_stub(array_thing* a1, array_thing* a2)
+		{
+			auto*& game_path = *reinterpret_cast<scripting::detail::managed_script_string**>(0x144DE5F90_g);
+
+			const auto game_path_copy = game_path;
+
+			scripting::detail::managed_script_string new_path(
+				L"C:\\Users\\mauri\\source\\repos\\w3x\\build\\bin\\x64\\Debug\\");
+			game_path = &new_path;
+
+			const auto res = reinterpret_cast<void* (*)(array_thing*, array_thing*)>(0x1402A9D50_g)(a1, a2);
+
+			game_path = game_path_copy;
+
+			return res;
+		}
+
+		std::vector<std::filesystem::path> collect_custom_scripts_files(const std::filesystem::path& base)
+		{
+			std::vector<std::filesystem::path> files{};
+
+			std::error_code ec{};
+			for (const auto& file : std::filesystem::recursive_directory_iterator(
+				     base, std::filesystem::directory_options::skip_permission_denied, ec))
 			{
-				OutputDebugStringA("");
+				ec = {};
+				if (!file.is_regular_file(ec) || ec)
+				{
+					continue;
+				}
+
+				const auto& path = file.path();
+
+				if (path.extension() != ".ws")
+				{
+					continue;
+				}
+
+				files.push_back(path);
 			}
 
-			return FindFirstFileExW(file_name, info_level_id, find_file_data, search_op, search_filter,
-			                        additional_flags);
+			return files;
 		}
 
-		HANDLE __stdcall create_file_a(const char* filename, const DWORD desired_access,
-		                               const DWORD share_mode,
-		                               const LPSECURITY_ATTRIBUTES security_attributes,
-		                               const DWORD creation_disposition, const DWORD flags_and_attributes,
-		                               const HANDLE template_file)
+		std::vector<std::wstring> collect_custom_scripts(const std::filesystem::path& base)
 		{
-			//OutputDebugStringA(filename);
+			const auto files = collect_custom_scripts_files(base);
 
-			return CreateFileA(filename, desired_access, share_mode, security_attributes, creation_disposition,
-			                   flags_and_attributes, template_file);
+			std::vector<std::wstring> scripts{};
+			scripts.reserve(files.size());
+
+			for (const auto& file : files)
+			{
+				scripts.push_back(utils::string::to_lower(absolute(file).wstring()));
+			}
+
+			return scripts;
 		}
 
-		HANDLE __stdcall create_file_w(const wchar_t* filename, const DWORD desired_access,
-		                               const DWORD share_mode,
-		                               const LPSECURITY_ATTRIBUTES security_attributes,
-		                               const DWORD creation_disposition, const DWORD flags_and_attributes,
-		                               const HANDLE template_file)
+		void remove_overriden_base_scripts(std::vector<scripting::detail::managed_script_string>& base_scripts,
+		                                   const std::vector<std::wstring>& custom_scripts)
 		{
-			return CreateFileW(filename, desired_access, share_mode, security_attributes,
-			                   creation_disposition,
-			                   flags_and_attributes, template_file);
+			const std::wstring separator = L"\\scripts\\";
+
+			for (const auto& custom_script : custom_scripts)
+			{
+				const auto pos = custom_script.find(separator);
+				if (pos == std::wstring::npos)
+				{
+					continue;
+				}
+
+				const auto substring = custom_script.substr(pos + separator.size());
+
+				for (auto i = base_scripts.begin(); i != base_scripts.end();)
+				{
+					if (i->to_view().ends_with(substring))
+					{
+						i = base_scripts.erase(i);
+					}
+					else
+					{
+						++i;
+					}
+				}
+			}
 		}
+
+		std::vector<scripting::detail::managed_script_string> drain_script_array(string_array& scripts)
+		{
+			std::vector<scripting::detail::managed_script_string> script_vector{};
+			script_vector.reserve(scripts.count);
+
+			for (uint32_t i = 0; i < scripts.count; ++i)
+			{
+				script_vector.emplace_back(std::move(scripts.strings[i]));
+			}
+
+
+			scripting::detail::destroy_object(scripts.strings);
+
+			scripts.strings = nullptr;
+			scripts.count = 0;
+
+			return script_vector;
+		}
+
+		void transfer_to_script_array(string_array& scripts,
+		                              std::vector<scripting::detail::managed_script_string>&& script_vector)
+		{
+			scripts.count = static_cast<uint32_t>(script_vector.size());
+			scripts.strings = scripting::detail::allocate<scripting::detail::managed_script_string>(
+				script_vector.size());
+
+			for (size_t i = 0; i < script_vector.size(); ++i)
+			{
+				scripts.strings[i] = std::move(script_vector[i]);
+			}
+
+			script_vector.clear();
+		}
+
+		void collect_script(void* a1, string_array* scripts)
+		{
+			reinterpret_cast<void(*)(void*, string_array*)>(0x1402A3ED0_g)(a1, scripts);
+
+			const auto custom_scripts = collect_custom_scripts(loader::get_main_module().get_folder() / "mods");
+			if (custom_scripts.empty())
+			{
+				return;
+			}
+
+			auto base_scripts = drain_script_array(*scripts);
+			remove_overriden_base_scripts(base_scripts, custom_scripts);
+
+			for (const auto& script : custom_scripts)
+			{
+				base_scripts.emplace_back(script);
+			}
+
+			transfer_to_script_array(*scripts, std::move(base_scripts));
+		}
+
+#if 0
+		void compile_script(void* a1, scripting::detail::managed_script_string* script_file,
+		                    scripting::detail::managed_script_string* script_name)
+		{
+			printf("%s - %s\n", script_file->to_string().data(), script_name->to_string().data());
+
+			if (script_file->to_view() ==
+				L"C:\\Users\\mauri\\source\\repos\\w3x\\build\\bin\\x64\\Debug\\mods\\modW3M\\content\\scripts\\game\\r4game.ws")
+			{
+				scripting::detail::managed_script_string new_name("[modw3m]game\\r4game.ws");
+
+				reinterpret_cast<void (*)(void*, scripting::detail::managed_script_string*,
+				                          scripting::detail::managed_script_string*)>(0x14031E1B0_g)(
+					a1, script_file, &new_name);
+				return;
+			}
+
+			reinterpret_cast<void (*)(void*, scripting::detail::managed_script_string*,
+			                          scripting::detail::managed_script_string*)>(0x14031E1B0_g)(
+				a1, script_file, script_name);
+		}
+#endif
 
 		class component final : public component_interface
 		{
 		public:
 			void post_load() override
 			{
-				const auto module = loader::get_main_module();
-				const auto wide_path = module.get_folder().generic_wstring() + L"/";
+				//utils::hook::call(0x1402AB75D_g, load_mod_scripts_stub);
+				utils::hook::call(0x14037213D_g, collect_script);
+				utils::hook::call(0x140382F7D_g, collect_script);
 
-				static struct game_string
-				{
-					const wchar_t* string;
-					size_t length;
-					wchar_t path[MAX_PATH];
-				} game_path;
+#if 0
+				utils::hook::call(0x1402F1D26_g, compile_script);
+#endif
 
-				game_path.string = game_path.path;
-				game_path.length = wide_path.size() + 1;
-				wcscpy_s(game_path.path, wide_path.data());
-
-				[[maybe_unused]] const auto mods_path_stub = utils::hook::assemble([](utils::hook::assembler& a)
-				{
-					a.mov(rcx, size_t(&game_path));
-
-					a.lea(rdx, ptr(rbp, -0x48, 8));
-					a.mov(ptr(rsp, 0x2d8, 8), rbx);
-					a.jmp(0x140049B74_g);
-				});
-
-				//utils::hook::jump(0x140049B68_g, mods_path_stub);
-
-				[[maybe_unused]] const auto mods_path_stub_2 = utils::hook::assemble([](utils::hook::assembler& a)
-				{
-					a.mov(rcx, size_t(&game_path));
-					a.lea(r8, ptr(rsp, 0x40, 8));
-					a.jmp(0x140049BDD_g);
-				});
-
-				//utils::hook::jump(0x140049BD1_g, mods_path_stub_2);
-			}
-
-			void* load_import(const std::string& /*module*/, const std::string& function) override
-			{
-				if (function == "CreateFileA")
-				{
-					return &create_file_a;
-				}
-
-				if (function == "CreateFileW")
-				{
-					return &create_file_w;
-				}
-
-				if (function == "FindFirstFileExW")
-				{
-					return &find_first_file_ex_w;
-				}
-
-				return nullptr;
+				utils::hook::nop(0x140372FC8_g, 2);
 			}
 		};
 	}
 }
 
-//REGISTER_COMPONENT(filesystem::component)
+REGISTER_COMPONENT(filesystem::component)

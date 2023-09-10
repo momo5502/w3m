@@ -91,7 +91,7 @@ namespace scripting_experiments
 			wchar_t name[MAX_PATH]{ 0 };
 			GetHostNameW(name, sizeof(name));
 
-			network::address oa{name == std::wstring(L"Maurice-Laptop") ? "maurices-steamdeck" : "192.168.178.50", AF_INET};
+			network::address oa{name == std::wstring(L"Maurice-Laptop") ? "192.168.178.50" : "192.168.178.50", AF_INET};
 			oa.set_port(28960);
 			other_addr = oa;
 
