@@ -201,7 +201,8 @@ namespace filesystem
 				utils::hook::call(0x1402F1D26_g, compile_script);
 #endif
 
-				utils::hook::nop(0x140372FC8_g, 2);
+				// Force CRC checks
+				utils::hook::set<DWORD>(0x1410015C0_g, 0xC300B0);
 			}
 		};
 	}
