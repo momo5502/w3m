@@ -23,20 +23,21 @@ jobs:
           - configuration: Release
             preset: release
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Source
+        uses: actions/checkout@v3
         with:
           submodules: true
 
       - name: Enable Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1.12.1        
 
-      - name: Build
+      - name: CMake Build
         run: cmake --workflow --preset=${{matrix.preset}}
 
-      - name: Upload ${{matrix.configuration}} binaries
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{matrix.configuration}} binaries
+          name: ${{matrix.configuration}} Artifacts
           path: |
             build/${{matrix.preset}}/artifacts/w3m.exe
             build/${{matrix.preset}}/artifacts/w3m.pdb
