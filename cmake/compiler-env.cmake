@@ -2,6 +2,9 @@ include_guard()
 
 ##########################################
 
+cmake_policy(SET CMP0069 NEW) 
+set(CMAKE_POLICY_DEFAULT_CMP0069 NEW)
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
@@ -11,6 +14,7 @@ if(MSVC)
   momo_add_c_and_cxx_compile_options(
     /sdl
     /GS
+    /Gy
     /guard:cf
   )
 
@@ -18,6 +22,9 @@ if(MSVC)
     /Zc:__cplusplus
   )
 
+  add_link_options(
+    /INCREMENTAL:NO
+  )
 endif()
 
 ##########################################
