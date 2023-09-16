@@ -123,9 +123,11 @@ endmacro()
 ##########################################
 
 function(momo_add_compile_options language)
-  add_compile_options(
-    $<$<COMPILE_LANGUAGE:${language}>:${ARGN}>
-  )
+  foreach(option ${ARGN})
+    add_compile_options(
+      $<$<COMPILE_LANGUAGE:${language}>:${option}>
+    )
+  endforeach()
 endfunction()
 
 ##########################################

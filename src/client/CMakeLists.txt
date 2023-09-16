@@ -4,10 +4,14 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
   *.rc
 )
 
-add_executable(w3m WIN32 ${SRC_FILES})
+list(SORT SRC_FILES)
 
-target_precompile_headers(w3m PRIVATE std_include.hpp)
+add_executable(client WIN32 ${SRC_FILES})
 
-target_link_libraries(w3m PRIVATE
+target_precompile_headers(client PRIVATE std_include.hpp)
+
+target_link_libraries(client PRIVATE
   common
 )
+
+set_target_properties(client PROPERTIES OUTPUT_NAME "w3m")

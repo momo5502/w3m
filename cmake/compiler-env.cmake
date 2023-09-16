@@ -3,6 +3,7 @@ include_guard()
 ##########################################
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 ##########################################
 
@@ -16,6 +17,7 @@ if(MSVC)
   momo_add_compile_options(CXX
     /Zc:__cplusplus
   )
+
 endif()
 
 ##########################################

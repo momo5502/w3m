@@ -18,7 +18,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 ##########################################
 
 include(cmake/utils.cmake)
-#include(cmake/compiler-env.cmake)
+include(cmake/compiler-env.cmake)
 
 ##########################################
 
