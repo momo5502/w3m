@@ -19,7 +19,7 @@ namespace
 			{
 				this->show();
 
-				scheduler::frame([this]()
+				scheduler::loop([this]()
 				{
 					if (window::get_game_window())
 					{

@@ -34,7 +34,7 @@ namespace window
 		public:
 			void post_load() override
 			{
-				scheduler::frame([]()
+				scheduler::loop([]()
 				{
 					if (const auto game_window = get_game_window())
 					{
