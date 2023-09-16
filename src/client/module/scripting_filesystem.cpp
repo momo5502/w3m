@@ -8,7 +8,7 @@
 
 #include "scripting.hpp"
 
-namespace filesystem
+namespace scripting_filesystem
 {
 	namespace
 	{
@@ -176,4 +176,4 @@ namespace filesystem
 	}
 }
 
-REGISTER_COMPONENT(filesystem::component)
+REGISTER_COMPONENT(scripting_filesystem::component)
