@@ -54,7 +54,6 @@
 #include <filesystem>
 #include <functional>
 
-#include <gsl/gsl>
 #include <udis86.h>
 #include <MinHook.h>
 

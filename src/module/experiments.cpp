@@ -1,7 +1,7 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
 #include "loader/loader.hpp"
-#include "utils/string.hpp"
+#include "utils/finally.hpp"
 #include "utils/hook.hpp"
 #include "renderer.hpp"
 
@@ -160,7 +160,7 @@ namespace
 			r->sub_struct->length = r->sub_struct->info->strlen + 1;
 			r->sub_struct->length2 = r->sub_struct->length;*/
 
-			auto _ = gsl::finally([&]()
+			auto _ = utils::finally([&]()
 			{
 				r->sub_struct->text = old;
 				/*r->sub_struct->length = old_len;

@@ -3,6 +3,7 @@
 #include "utils/string.hpp"
 #include "loader/component_loader.hpp"
 #include "utils/hook.hpp"
+#include "utils/finally.hpp"
 
 namespace
 {
@@ -174,7 +175,7 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 
 	{
 		auto premature_shutdown = true;
-		const auto _ = gsl::finally([&premature_shutdown]()
+		const auto _ = utils::finally([&premature_shutdown]()
 			{
 				if (premature_shutdown)
 				{
