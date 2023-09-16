@@ -29,11 +29,11 @@ namespace network
 
 			if (family == AF_INET)
 			{
-				a.set_ipv6(in6addr_any);
+				a.set_ipv4(in4addr_any);
 			}
 			else if (family == AF_INET6)
 			{
-				a.set_ipv4(in4addr_any);
+				a.set_ipv6(in6addr_any);
 			}
 
 			a.set_port(port);

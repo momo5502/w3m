@@ -48,7 +48,11 @@ namespace network
 		{
 			this->~socket();
 			this->socket_ = obj.socket_;
+			this->port_ = obj.port_;
+			this->address_family_ = obj.address_family_;
+
 			obj.socket_ = INVALID_SOCKET;
+			obj.address_family_ = AF_UNSPEC;
 		}
 
 		return *this;
