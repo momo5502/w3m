@@ -17,40 +17,21 @@ jobs:
         configuration:
           - Debug
           - Release
+        include:
+          - configuration: Debug
+            preset: debug
+          - configuration: Release
+            preset: release
     steps:
-      - name: Wait for previous workflows
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        uses: softprops/turnstyle@v1
-        with:
-          poll-interval-seconds: 10
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
 
-      - name: Check out files
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-          fetch-depth: 0
-          # NOTE - If LFS ever starts getting used during builds, switch this to true!
-          lfs: false
-
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.0.2
-
-      - name: Generate project files
-        #run: tools/premake5 vs2019 --ci-build
-        run: tools/premake5 vs2019
-
-      - name: Set up problem matching
-        uses: ammaraskar/msvc-problem-matcher@master
-
-      - name: Build ${{matrix.configuration}} binaries
-        run: msbuild /m /v:minimal /p:Configuration=${{matrix.configuration}} /p:Platform=x64 build/w3x.sln
+      - name: Build
+        run: cmake --workflow --preset=${{matrix.preset}}
 
       - name: Upload ${{matrix.configuration}} binaries
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{matrix.configuration}} binaries
           path: |
-            build/bin/x64/${{matrix.configuration}}/w3x.exe
-            build/bin/x64/${{matrix.configuration}}/w3x.pdb
+            build/${{matrix.preset}}/artifacts/w3m.exe
+            build/${{matrix.preset}}/artifacts/w3m.pdb
