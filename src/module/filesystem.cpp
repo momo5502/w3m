@@ -24,17 +24,10 @@ namespace filesystem
 
 		void* load_mod_scripts_stub(array_thing* a1, array_thing* a2)
 		{
-			auto*& game_path = *reinterpret_cast<scripting::detail::managed_script_string**>(0x144DE5F90_g);
-
-			const auto game_path_copy = game_path;
-
-			scripting::detail::managed_script_string new_path(
-				L"C:\\Users\\mauri\\source\\repos\\w3x\\build\\bin\\x64\\Debug\\");
-			game_path = &new_path;
-
 			const auto res = reinterpret_cast<void* (*)(array_thing*, array_thing*)>(0x1402A9D50_g)(a1, a2);
 
-			game_path = game_path_copy;
+			// Always say we have mods
+			(*reinterpret_cast<uint8_t**>(0x144DE5FF8_g))[208] |= 1;
 
 			return res;
 		}
@@ -165,44 +158,17 @@ namespace filesystem
 			transfer_to_script_array(*scripts, std::move(base_scripts));
 		}
 
-#if 0
-		void compile_script(void* a1, scripting::detail::managed_script_string* script_file,
-		                    scripting::detail::managed_script_string* script_name)
-		{
-			printf("%s - %s\n", script_file->to_string().data(), script_name->to_string().data());
-
-			if (script_file->to_view() ==
-				L"C:\\Users\\mauri\\source\\repos\\w3x\\build\\bin\\x64\\Debug\\mods\\modW3M\\content\\scripts\\game\\r4game.ws")
-			{
-				scripting::detail::managed_script_string new_name("[modw3m]game\\r4game.ws");
-
-				reinterpret_cast<void (*)(void*, scripting::detail::managed_script_string*,
-				                          scripting::detail::managed_script_string*)>(0x14031E1B0_g)(
-					a1, script_file, &new_name);
-				return;
-			}
-
-			reinterpret_cast<void (*)(void*, scripting::detail::managed_script_string*,
-			                          scripting::detail::managed_script_string*)>(0x14031E1B0_g)(
-				a1, script_file, script_name);
-		}
-#endif
-
 		class component final : public component_interface
 		{
 		public:
 			void post_load() override
 			{
-				//utils::hook::call(0x1402AB75D_g, load_mod_scripts_stub);
+				utils::hook::call(0x1402AB75D_g, load_mod_scripts_stub);
 				utils::hook::call(0x14037213D_g, collect_script);
 				utils::hook::call(0x140382F7D_g, collect_script);
 
-#if 0
-				utils::hook::call(0x1402F1D26_g, compile_script);
-#endif
-
 				// Force CRC checks
-				utils::hook::set<DWORD>(0x1410015C0_g, 0xC300B0);
+				utils::hook::nop(0x140372FC8_g, 2);
 			}
 		};
 	}
