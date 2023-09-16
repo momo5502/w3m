@@ -31,6 +31,14 @@ namespace
 				});
 			}
 
+			void post_load() override
+			{
+				if (this->window_ && IsWindow(this->window_))
+				{
+					SetForegroundWindow(this->window_);
+				}
+			}
+
 			void pre_destroy() override
 			{
 				this->destroy();
@@ -84,8 +92,6 @@ namespace
 
 				if (RegisterClassA(&wnd_class))
 				{
-					constexpr int max_width = 800;
-
 					constexpr int initial_width = 320;
 					constexpr int initial_height = 100;
 

@@ -23,12 +23,12 @@ namespace console
 		{
 			AllocConsole();
 			AttachConsole(GetCurrentProcessId());
-			ShowWindow(GetConsoleWindow(), SW_SHOW);
+			ShowWindow(GetConsoleWindow(), SW_SHOWNOACTIVATE);
 
 			FILE* fp{};
-			freopen_s(&fp, "CONIN$", "r", stdin);
-			freopen_s(&fp, "CONOUT$", "w", stdout);
-			freopen_s(&fp, "CONOUT$", "w", stderr);
+			(void)freopen_s(&fp, "CONIN$", "r", stdin);
+			(void)freopen_s(&fp, "CONOUT$", "w", stdout);
+			(void)freopen_s(&fp, "CONOUT$", "w", stderr);
 
 			SetConsoleTitleA("Witcher 3: Console");
 
