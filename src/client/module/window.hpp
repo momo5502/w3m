@@ -2,6 +2,5 @@
 
 namespace window
 {
-	 HWND get_game_window();
+	HWND get_game_window();
 }
-

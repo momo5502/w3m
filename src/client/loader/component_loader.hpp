@@ -1,5 +1,7 @@
 #pragma once
+
 #include "component_interface.hpp"
+
 #include <memory>
 #include <vector>
 
@@ -7,7 +9,7 @@ namespace component_loader
 {
 	std::vector<std::unique_ptr<component_interface>>& get_components();
 	void register_component(std::unique_ptr<component_interface>&& component);
-	
+
 	class premature_shutdown_trigger final : public std::exception
 	{
 		[[nodiscard]] const char* what() const noexcept override

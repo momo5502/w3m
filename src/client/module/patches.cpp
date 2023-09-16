@@ -4,6 +4,7 @@
 #include "../loader/loader.hpp"
 
 #include <utils/hook.hpp>
+
 namespace patches
 {
 	class component final : public component_interface

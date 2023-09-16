@@ -1,8 +1,5 @@
 #include "../std_include.hpp"
 
-#include "../loader/component_loader.hpp"
-#include "../loader/loader.hpp"
-
 #include "socket.hpp"
 
 #ifdef _WIN32

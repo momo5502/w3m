@@ -3,10 +3,11 @@
 #include "../loader/component_loader.hpp"
 #include "../loader/loader.hpp"
 
-#include "scripting.hpp"
-#include "utils/string.hpp"
-
 #include "../network/socket.hpp"
+
+#include <utils/string.hpp>
+
+#include "scripting.hpp"
 
 namespace scripting_experiments
 {

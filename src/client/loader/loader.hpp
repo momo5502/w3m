@@ -1,10 +1,11 @@
 #pragma once
-#include "utils/nt.hpp"
+
+#include <utils/nt.hpp>
 
 namespace loader
 {
-	using resolver = std::function<void*(const std::string& module, const std::string & function)>;
-	
+	using resolver = std::function<void*(const std::string& module, const std::string& function)>;
+
 	utils::nt::library get_game_module();
 	utils::nt::library get_main_module();
 	utils::nt::library load(const std::string& name, const resolver& import_resolver = {});

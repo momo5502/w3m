@@ -3,7 +3,8 @@
 #include "../loader/component_loader.hpp"
 #include "../loader/loader.hpp"
 
-#include "utils/nt.hpp"
+#include <utils/nt.hpp>
+
 #include "window.hpp"
 #include "scheduler.hpp"
 

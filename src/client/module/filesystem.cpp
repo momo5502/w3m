@@ -3,8 +3,8 @@
 #include "../loader/component_loader.hpp"
 #include "../loader/loader.hpp"
 
-#include "utils/hook.hpp"
-#include "utils/string.hpp"
+#include <utils/hook.hpp>
+#include <utils/string.hpp>
 
 #include "scripting.hpp"
 

@@ -1,5 +1,6 @@
 #pragma once
-#include "utils/properties.hpp"
+
+#include <utils/properties.hpp>
 
 namespace properties
 {

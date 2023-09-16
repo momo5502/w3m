@@ -48,6 +48,9 @@
 #include <string>
 #include <chrono>
 #include <functional>
+#include <optional>
+#include <string_view>
+#include <stdexcept>
 
 #include <cassert>
 
