@@ -84,6 +84,11 @@ namespace
 
 				if (RegisterClassA(&wnd_class))
 				{
+					constexpr int max_width = 800;
+
+					constexpr int initial_width = 320;
+					constexpr int initial_height = 100;
+
 					const auto x_pixels = GetSystemMetrics(SM_CXFULLSCREEN);
 					const auto y_pixels = GetSystemMetrics(SM_CYFULLSCREEN);
 
@@ -92,14 +97,16 @@ namespace
 					if (image)
 					{
 						this->window_ = CreateWindowExA(WS_EX_APPWINDOW, "Witcher Splash Screen", "Witcher 3: Online",
-						                                WS_POPUP | WS_SYSMENU, (x_pixels - 320) / 2,
-						                                (y_pixels - 100) / 2, 320, 100, nullptr, nullptr, main,
+						                                WS_POPUP | WS_SYSMENU, (x_pixels - initial_width) / 2,
+						                                (y_pixels - initial_height) / 2, initial_width, initial_height,
+						                                nullptr, nullptr, main,
 						                                nullptr);
 
 						if (this->window_)
 						{
 							const auto image_window = CreateWindowExA(0, "Static", nullptr,
-							                                          WS_CHILD | WS_VISIBLE | 0xEu, 0, 0, 320, 100,
+							                                          WS_CHILD | WS_VISIBLE | 0xEu, 0, 0, initial_width,
+							                                          initial_height,
 							                                          this->window_, nullptr, main, nullptr);
 							if (image_window)
 							{
@@ -108,9 +115,9 @@ namespace
 								GetWindowRect(image_window, &rect);
 
 								const int width = rect.right - rect.left;
-								rect.left = (x_pixels - width) / 2;
-
 								const int height = rect.bottom - rect.top;
+
+								rect.left = (x_pixels - width) / 2;
 								rect.top = (y_pixels - height) / 2;
 
 								rect.right = rect.left + width;
@@ -121,6 +128,8 @@ namespace
 
 								ShowWindow(this->window_, SW_SHOW);
 								UpdateWindow(this->window_);
+
+								SetForegroundWindow(this->window_);
 							}
 						}
 					}
