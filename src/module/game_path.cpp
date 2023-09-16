@@ -3,7 +3,6 @@
 #include "utils/io.hpp"
 #include "utils/com.hpp"
 #include "properties.hpp"
-#include "steam_proxy.hpp"
 
 namespace
 {
@@ -16,9 +15,30 @@ namespace
 			SetCurrentDirectoryW(wide_path.data());
 		}
 
+		std::filesystem::path get_steam_install_directory()
+		{
+			std::filesystem::path install_path{};
+
+			HKEY reg_key;
+			if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software\\WOW6432Node\\Valve\\Steam", 0, KEY_QUERY_VALUE,
+			                  &reg_key) ==
+				ERROR_SUCCESS)
+			{
+				wchar_t path[MAX_PATH] = {0};
+				DWORD length = sizeof(path);
+				RegQueryValueExW(reg_key, L"InstallPath", nullptr, nullptr, reinterpret_cast<BYTE*>(path),
+				                 &length);
+				RegCloseKey(reg_key);
+
+				install_path = std::wstring(path, length / 2);
+			}
+
+			return install_path;
+		}
+
 		std::string get_default_witcher_path()
 		{
-			const auto steam_path = steam_proxy::get_steam_install_directory();
+			const auto steam_path = get_steam_install_directory();
 			if (steam_path.empty()) return {};
 
 			const auto witcher_path = steam_path / "steamapps/common/The Witcher 3";

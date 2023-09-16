@@ -54,7 +54,6 @@
 #include <filesystem>
 #include <functional>
 
-#include <udis86.h>
 #include <MinHook.h>
 
 #include <rapidjson/document.h>
