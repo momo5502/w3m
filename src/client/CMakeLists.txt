@@ -15,3 +15,11 @@ target_link_libraries(client PRIVATE
 )
 
 set_target_properties(client PROPERTIES OUTPUT_NAME "w3m")
+
+add_custom_command(
+  TARGET client
+  POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" -E create_symlink "${PROJECT_SOURCE_DIR}/data/" "$<TARGET_FILE_DIR:client>/data"
+)
+
+set_property(GLOBAL PROPERTY VS_STARTUP_PROJECT client)

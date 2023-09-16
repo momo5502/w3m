@@ -143,7 +143,7 @@ namespace filesystem
 		{
 			reinterpret_cast<void(*)(void*, string_array*)>(0x1402A3ED0_g)(a1, scripts);
 
-			const auto custom_scripts = collect_custom_scripts(loader::get_main_module().get_folder() / "mods");
+			const auto custom_scripts = collect_custom_scripts(loader::get_main_module().get_folder() / "data");
 			if (custom_scripts.empty())
 			{
 				return;
