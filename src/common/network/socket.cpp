@@ -12,6 +12,7 @@ using namespace std::literals;
 namespace network
 {
 	socket::socket(const int af)
+		: address_family_(af)
 	{
 		initialize_wsa();
 		this->socket_ = ::socket(af, SOCK_DGRAM, IPPROTO_UDP);
@@ -19,7 +20,8 @@ namespace network
 		if (af == AF_INET6)
 		{
 			int i = 1;
-			setsockopt(this->socket_, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<char*>(&i), static_cast<int>(sizeof(i)));
+			setsockopt(this->socket_, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<char*>(&i),
+			           static_cast<int>(sizeof(i)));
 		}
 	}
 
@@ -63,11 +65,17 @@ namespace network
 		return result;
 	}
 
+	bool socket::send(const address& target, const void* data, const size_t size) const
+	{
+		const int res = sendto(this->socket_, static_cast<const char*>(data), static_cast<int>(size), 0,
+		                       &target.get_addr(),
+		                       target.get_size());
+		return res == static_cast<int>(size);
+	}
+
 	bool socket::send(const address& target, const std::string& data) const
 	{
-		const int res = sendto(this->socket_, data.data(), static_cast<int>(data.size()), 0, &target.get_addr(),
-		                       target.get_size());
-		return res == static_cast<int>(data.size());
+		return this->send(target, data.data(), data.size());
 	}
 
 	bool socket::receive(address& source, std::string& data) const
@@ -75,7 +83,8 @@ namespace network
 		char buffer[0x2000];
 		socklen_t len = source.get_max_size();
 
-		const auto result = recvfrom(this->socket_, buffer, static_cast<int>(sizeof(buffer)), 0, &source.get_addr(), &len);
+		const auto result = recvfrom(this->socket_, buffer, static_cast<int>(sizeof(buffer)), 0, &source.get_addr(),
+		                             &len);
 		if (result == SOCKET_ERROR)
 		{
 			return false;
@@ -146,6 +155,11 @@ namespace network
 		return this->port_;
 	}
 
+	int socket::get_address_family() const
+	{
+		return this->address_family_;
+	}
+
 	bool socket::sleep_sockets(const std::vector<const socket*>& sockets, const std::chrono::milliseconds timeout)
 	{
 		static const auto poll_func = poll;
@@ -163,7 +177,8 @@ namespace network
 			pfd.revents = 0;
 		}
 
-		const auto retval = poll_func(pfds.data(), static_cast<uint32_t>(pfds.size()), static_cast<int>(timeout.count()));
+		const auto retval = poll_func(pfds.data(), static_cast<uint32_t>(pfds.size()),
+		                              static_cast<int>(timeout.count()));
 
 		if (retval == SOCKET_ERROR)
 		{

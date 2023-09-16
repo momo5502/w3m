@@ -19,7 +19,9 @@ namespace network
 	class socket
 	{
 	public:
-		socket(int af = AF_INET);
+		socket() = default;
+
+		socket(int af);
 		~socket();
 
 		socket(const socket& obj) = delete;
@@ -30,6 +32,7 @@ namespace network
 
 		bool bind_port(const address& target);
 
+		[[maybe_unused]] bool send(const address& target, const void* data, size_t size) const;
 		[[maybe_unused]] bool send(const address& target, const std::string& data) const;
 		bool receive(address& source, std::string& data) const;
 
@@ -42,11 +45,14 @@ namespace network
 		SOCKET get_socket() const;
 		uint16_t get_port() const;
 
+		int get_address_family() const;
+
 		static bool sleep_sockets(const std::vector<const socket*>& sockets, std::chrono::milliseconds timeout);
 		static bool sleep_sockets_until(const std::vector<const socket*>& sockets,
 		                                std::chrono::high_resolution_clock::time_point time_point);
 
 	private:
+		int address_family_{AF_UNSPEC};
 		uint16_t port_ = 0;
 		SOCKET socket_ = INVALID_SOCKET;
 	};
