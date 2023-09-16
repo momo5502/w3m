@@ -1,14 +1,18 @@
 #pragma once
 
+#if _WIN32
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_NO_POSIX_ERROR_CODES
+#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <WinSock2.h>
 #include <WS2tcpip.h>
+#endif
 
 #include <string>
 #include <vector>
+#include <optional>
 
 namespace network
 {

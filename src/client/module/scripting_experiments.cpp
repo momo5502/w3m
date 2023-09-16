@@ -3,7 +3,7 @@
 #include "../loader/component_loader.hpp"
 #include "../loader/loader.hpp"
 
-#include "../network/socket.hpp"
+#include <network/socket.hpp>
 
 #include <utils/string.hpp>
 
