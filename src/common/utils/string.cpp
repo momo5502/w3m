@@ -1,24 +1,60 @@
 #include "string.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <cstdarg>
 #include <sstream>
+#include <array>
 
 #include "nt.hpp"
+#include "finally.hpp"
+
+#undef max
 
 namespace utils::string
 {
-	const char* va(const char* fmt, ...)
+	const char* va(const char* format, ...)
 	{
-		static thread_local va_provider<8, 256> provider;
+		constexpr auto buffer_count = 4;
+		thread_local std::array<std::vector<char>, buffer_count> buffers{};
+		thread_local size_t current_index{0};
 
-		va_list ap;
-		va_start(ap, fmt);
+		const auto index = current_index++;
+		current_index %= buffers.size();
 
-		const char* result = provider.get(fmt, ap);
+		auto& buffer = buffers.at(index);
 
-		va_end(ap);
-		return result;
+		if (buffer.size() < 10)
+		{
+			buffer.resize(10);
+		}
+
+		while (true)
+		{
+			va_list ap{};
+			va_start(ap, format);
+
+#ifdef _WIN32
+			const int res = vsnprintf_s(buffer.data(), buffer.size(), _TRUNCATE, format, ap);
+#else
+			const int res = vsnprintf(buffer.data(), buffer.size(), format, ap);
+#endif
+
+			va_end(ap);
+
+			if (res > 0 && static_cast<size_t>(res) < buffer.size())
+			{
+				break;
+			}
+			if (res == 0)
+			{
+				return nullptr;
+			}
+
+			buffer.resize(std::max(buffer.size() * 2, static_cast<size_t>(1)));
+		}
+
+		return buffer.data();
 	}
 
 	std::vector<std::string> split(const std::string& s, const char delim)
@@ -126,72 +162,43 @@ namespace utils::string
 
 	std::string get_clipboard_data()
 	{
-		if (OpenClipboard(nullptr))
+		bool clipboard_is_open = false;
+		const auto _1 = finally([&]
 		{
-			std::string data;
-
-			auto* const clipboard_data = GetClipboardData(1u);
-			if (clipboard_data)
+			if (clipboard_is_open)
 			{
-				auto* const cliptext = static_cast<char*>(GlobalLock(clipboard_data));
-				if (cliptext)
-				{
-					data.append(cliptext);
-					GlobalUnlock(clipboard_data);
-				}
+				CloseClipboard();
 			}
-			CloseClipboard();
+		});
 
-			return data;
-		}
-		return {};
-	}
+		clipboard_is_open = OpenClipboard(nullptr);
 
-	void strip(const char* in, char* out, size_t max)
-	{
-		assert(max);
-		if (!in || !out) return;
-
-		max--;
-		size_t current = 0;
-		while (*in != '\0' && current < max)
+		if (!clipboard_is_open)
 		{
-			const auto color_index = (*(in + 1) - 48) >= 0xC ? 7 : (*(in + 1) - 48);
-
-			if (*in == '^' && (color_index != 7 || *(in + 1) == '7'))
-			{
-				++in;
-			}
-			else
-			{
-				*out = *in;
-				++out;
-				++current;
-			}
-
-			++in;
+			return {};
 		}
 
-		*out = '\0';
-	}
-
-	void strip_material(const char* in, char* out, size_t max)
-	{
-		assert(max);
-		if (!in || !out) return;
-
-		size_t i = 0;
-		while (*in != '\0' && i < max - 1)
+		auto* const clipboard_data = GetClipboardData(CF_TEXT);
+		if (!clipboard_data)
 		{
-			if (*in != '$' && *in != '{' && *in != '}')
-			{
-				*out++ = *in;
-				++i;
-			}
-			++in;
+			return {};
 		}
 
-		*out = '\0';
+		const auto* const cliptext = static_cast<char*>(GlobalLock(clipboard_data));
+		const auto _2 = finally([&]
+		{
+			if (cliptext)
+			{
+				GlobalUnlock(clipboard_data);
+			}
+		});
+
+		if (!cliptext)
+		{
+			return {};
+		}
+
+		return std::string(cliptext);
 	}
 
 	std::string convert(const std::wstring& wstr)

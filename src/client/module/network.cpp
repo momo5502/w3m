@@ -134,6 +134,16 @@ namespace network
 				}
 			}
 		}
+
+		socket create_and_bind_socket(const int family, const uint16_t port)
+		{
+			socket s{family};
+			s.set_blocking(false);
+
+			bind_socket(s, port);
+
+			return s;
+		}
 	}
 
 	void on(const std::string& command, callback callback)
@@ -179,14 +189,8 @@ namespace network
 	public:
 		void post_load() override
 		{
-			g_socket_v4 = socket{AF_INET};
-			g_socket_v6 = socket{AF_INET6};
-
-			g_socket_v4.set_blocking(false);
-			g_socket_v6.set_blocking(false);
-
-			bind_socket(g_socket_v4, 28960);
-			bind_socket(g_socket_v6, 28960);
+			g_socket_v4 = create_and_bind_socket(AF_INET, 28960);
+			g_socket_v6 = create_and_bind_socket(AF_INET6, 28960);
 
 			g_thread = utils::thread::create_named_jthread("Network Dispatcher", packet_receiver);
 		}

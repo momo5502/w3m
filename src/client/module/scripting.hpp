@@ -129,7 +129,6 @@ namespace scripting
 		template <typename T>
 		auto adapt_return_value(T val)
 		{
-			//static_assert(std::is_arithmetic_v<T>);
 			return val;
 		}
 
