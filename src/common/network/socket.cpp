@@ -164,24 +164,22 @@ namespace network
 		return this->address_family_;
 	}
 
-	bool socket::sleep_sockets(const std::vector<const socket*>& sockets, const std::chrono::milliseconds timeout)
+	bool socket::sleep_sockets(const std::span<const socket*>& sockets, const std::chrono::milliseconds timeout)
 	{
-		static const auto poll_func = poll;
-
 		std::vector<pollfd> pfds{};
 		pfds.resize(sockets.size());
 
 		for (size_t i = 0; i < sockets.size(); ++i)
 		{
 			auto& pfd = pfds.at(i);
-			const auto& socket = sockets.at(i);
+			const auto& socket = sockets[i];
 
 			pfd.fd = socket->get_socket();
 			pfd.events = POLLIN;
 			pfd.revents = 0;
 		}
 
-		const auto retval = poll_func(pfds.data(), static_cast<uint32_t>(pfds.size()),
+		const auto retval = poll(pfds.data(), static_cast<uint32_t>(pfds.size()),
 		                              static_cast<int>(timeout.count()));
 
 		if (retval == SOCKET_ERROR)
@@ -198,7 +196,7 @@ namespace network
 		return !socket_is_ready;
 	}
 
-	bool socket::sleep_sockets_until(const std::vector<const socket*>& sockets,
+	bool socket::sleep_sockets_until(const std::span<const socket*>& sockets,
 	                                 const std::chrono::high_resolution_clock::time_point time_point)
 	{
 		const auto duration = time_point - std::chrono::high_resolution_clock::now();

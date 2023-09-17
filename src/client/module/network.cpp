@@ -130,7 +130,9 @@ namespace network
 
 				if (!v4_handled && !v6_handled)
 				{
-					socket::sleep_sockets({&g_socket_v4, &g_socket_v6}, 1s);
+					std::vector<const socket*> sockets{&g_socket_v4, &g_socket_v6};
+
+					socket::sleep_sockets(sockets, 1s);
 				}
 			}
 		}
