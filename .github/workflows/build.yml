@@ -65,6 +65,9 @@ jobs:
         with:
           submodules: true
 
+      - name: Install ninja
+        uses: seanmiddleditch/gha-setup-ninja@v3
+
       - name: CMake Build
         run: cmake --workflow --preset=${{matrix.preset}}
 
