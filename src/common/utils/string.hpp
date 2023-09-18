@@ -23,7 +23,9 @@ namespace utils::string
 
 	std::string dump_hex(const std::string& data, const std::string& separator = " ");
 
+#ifdef _WIN32
 	std::string get_clipboard_data();
+#endif
 
 	std::string convert(const std::wstring& wstr);
 	std::wstring convert(const std::string& str);

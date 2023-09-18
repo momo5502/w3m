@@ -160,6 +160,7 @@ namespace utils::string
 		return result;
 	}
 
+#ifdef _WIN32
 	std::string get_clipboard_data()
 	{
 		bool clipboard_is_open = false;
@@ -200,6 +201,7 @@ namespace utils::string
 
 		return std::string(cliptext);
 	}
+#endif
 
 	std::string convert(const std::wstring& wstr)
 	{
