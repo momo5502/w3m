@@ -9,10 +9,11 @@ on:
       - "*"
     types: [opened, synchronize, reopened]
 jobs:
-  build:
-    name: Build binaries
+  build-windows:
+    name: Build Windows
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         configuration:
           - Debug
@@ -41,3 +42,35 @@ jobs:
           path: |
             build/${{matrix.preset}}/artifacts/w3m.exe
             build/${{matrix.preset}}/artifacts/w3m.pdb
+            build/${{matrix.preset}}/artifacts/server.exe
+            build/${{matrix.preset}}/artifacts/server.pdb
+    
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration:
+          - Debug
+          - Release
+        include:
+          - configuration: Debug
+            preset: debug
+          - configuration: Release
+            preset: release
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: CMake Build
+        run: cmake --workflow --preset=${{matrix.preset}}
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{matrix.configuration}} Artifacts
+          path: |
+            build/${{matrix.preset}}/artifacts/server
