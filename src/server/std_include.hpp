@@ -1,7 +1,5 @@
 #pragma once
 
-#define TLS_PAYLOAD_SIZE 0x2000
-
 #pragma warning(push)
 #pragma warning(disable: 4127)
 #pragma warning(disable: 4244)
@@ -24,6 +22,8 @@
 #pragma warning(disable: 26812)
 #pragma warning(disable: 28020)
 
+#ifdef _WIN32
+
 #define WIN32_LEAN_AND_MEAN
 
 #include <Windows.h>
@@ -39,6 +39,8 @@
 
 #ifdef min
 #undef min
+#endif
+
 #endif
 
 #include <map>

@@ -24,8 +24,6 @@
 #pragma warning(disable: 26812)
 #pragma warning(disable: 28020)
 
-#if defined(_WIN32) && defined(_MSC_VER)
-
 #define WIN32_LEAN_AND_MEAN
 
 #include <Windows.h>
@@ -41,8 +39,6 @@
 
 #ifdef min
 #undef min
-#endif
-
 #endif
 
 #include <map>
