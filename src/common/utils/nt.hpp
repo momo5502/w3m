@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef _WIN32
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
@@ -255,3 +257,5 @@ namespace utils::nt
 
 	std::string get_user_name();
 }
+
+#endif

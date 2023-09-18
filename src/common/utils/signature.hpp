@@ -1,6 +1,8 @@
 #pragma once
 #include "nt.hpp"
 
+#ifdef _WIN32
+
 namespace utils::hook
 {
 	class signature final
@@ -71,3 +73,5 @@ namespace utils::hook
 }
 
 utils::hook::signature::signature_result operator"" _sig(const char* str, size_t len);
+
+#endif

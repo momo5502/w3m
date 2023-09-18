@@ -1,19 +1,13 @@
 #include "hook.hpp"
 
+#ifdef _WIN32
+
 #include <map>
 #include <MinHook.h>
 
 #include "concurrency.hpp"
 #include "string.hpp"
 #include "nt.hpp"
-
-#ifdef max
-#undef max
-#endif
-
-#ifdef min
-#undef min
-#endif
 
 namespace utils::hook
 {
@@ -606,3 +600,5 @@ namespace utils::hook
 		return extract<void*>(data + 1);
 	}
 }
+
+#endif

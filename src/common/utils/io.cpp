@@ -6,17 +6,18 @@ namespace utils::io
 {
 	bool remove_file(const std::filesystem::path& file)
 	{
-		if (DeleteFileW(file.wstring().data()) != FALSE)
-		{
-			return true;
-		}
-
-		return GetLastError() == ERROR_FILE_NOT_FOUND;
+		std::error_code ec{};
+		return std::filesystem::remove(file, ec) && !ec;
 	}
 
 	bool move_file(const std::filesystem::path& src, const std::filesystem::path& target)
 	{
+#ifdef _WIN32
 		return MoveFileW(src.wstring().data(), target.wstring().data()) == TRUE;
+#else
+		copy_folder(src, target);
+		return remove_file(src);
+#endif
 	}
 
 	bool file_exists(const std::string& file)
@@ -112,8 +113,8 @@ namespace utils::io
 	void copy_folder(const std::filesystem::path& src, const std::filesystem::path& target)
 	{
 		std::filesystem::copy(src, target,
-			std::filesystem::copy_options::overwrite_existing |
-			std::filesystem::copy_options::recursive);
+		                      std::filesystem::copy_options::overwrite_existing |
+		                      std::filesystem::copy_options::recursive);
 	}
 
 

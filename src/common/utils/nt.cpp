@@ -1,5 +1,7 @@
 #include "nt.hpp"
 
+#ifdef _WIN32
+
 #include <lmcons.h>
 
 #include "string.hpp"
@@ -25,7 +27,7 @@ namespace utils::nt
 	{
 		HMODULE handle = nullptr;
 		GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-			static_cast<LPCSTR>(address), &handle);
+		                   static_cast<LPCSTR>(address), &handle);
 		return library(handle);
 	}
 
@@ -108,7 +110,7 @@ namespace utils::nt
 
 		DWORD protection;
 		VirtualProtect(this->get_ptr(), this->get_optional_header()->SizeOfImage, PAGE_EXECUTE_READWRITE,
-			&protection);
+		               &protection);
 	}
 
 	size_t library::get_relative_entry_point() const
@@ -143,10 +145,10 @@ namespace utils::nt
 	{
 		if (!this->is_valid()) return {};
 
-		wchar_t name[MAX_PATH] = { 0 };
+		wchar_t name[MAX_PATH] = {0};
 		GetModuleFileNameW(this->module_, name, MAX_PATH);
 
-		return { name };
+		return {name};
 	}
 
 	std::filesystem::path library::get_folder() const
@@ -237,14 +239,14 @@ namespace utils::nt
 		{
 			registry_key new_key{};
 			if (RegOpenKeyExA(current_key, part.data(), 0,
-				KEY_ALL_ACCESS, &new_key) == ERROR_SUCCESS)
+			                  KEY_ALL_ACCESS, &new_key) == ERROR_SUCCESS)
 			{
 				current_key = std::move(new_key);
 				continue;
 			}
 
 			if (RegCreateKeyExA(current_key, part.data(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS,
-				nullptr, &new_key, nullptr) != ERROR_SUCCESS)
+			                    nullptr, &new_key, nullptr) != ERROR_SUCCESS)
 			{
 				return {};
 			}
@@ -314,8 +316,8 @@ namespace utils::nt
 		auto* const command_line = GetCommandLineA();
 
 		CreateProcessA(self.get_path().generic_string().data(), command_line, nullptr, nullptr, false, NULL, nullptr,
-			current_dir,
-			&startup_info, &process_info);
+		               current_dir,
+		               &startup_info, &process_info);
 
 		if (process_info.hThread && process_info.hThread != INVALID_HANDLE_VALUE) CloseHandle(process_info.hThread);
 		if (process_info.hProcess && process_info.hProcess != INVALID_HANDLE_VALUE) CloseHandle(process_info.hProcess);
@@ -339,3 +341,5 @@ namespace utils::nt
 		return std::string(username, username_len - 1);
 	}
 }
+
+#endif

@@ -2,6 +2,8 @@ momo_silence_deprecation_warnings()
 
 ##########################################
 
+if (MSVC)
+
 set(ASMJIT_STATIC ON)
 set(ASMJIT_NO_AARCH64 ON)
 set(ASMJIT_NO_FOREIGN ON)
@@ -11,6 +13,8 @@ add_subdirectory(asmjit)
 ##########################################
 
 add_subdirectory(minhook)
+
+endif()
 
 ##########################################
 

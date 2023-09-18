@@ -7,8 +7,13 @@ add_library(common ${SRC_FILES})
 
 target_link_libraries(common PUBLIC
   RapidJSON
-  minhook
-  asmjit
 )
+
+if (MSVC)
+  target_link_libraries(common PUBLIC
+    minhook
+    asmjit
+  )
+endif()
 
 target_include_directories(common INTERFACE "${CMAKE_CURRENT_LIST_DIR}")

@@ -14,7 +14,7 @@ namespace utils
 	{
 		std::lock_guard _(this->mutex_);
 
-		for (auto& data : this->pool_)
+		for (const auto& data : this->pool_)
 		{
 			memory::free(data);
 		}
@@ -26,7 +26,7 @@ namespace utils
 	{
 		std::lock_guard _(this->mutex_);
 
-		const auto j = std::find(this->pool_.begin(), this->pool_.end(), data);
+		const auto j = std::ranges::find(this->pool_, data);
 		if (j != this->pool_.end())
 		{
 			memory::free(data);
@@ -70,7 +70,7 @@ namespace utils
 	char* memory::duplicate_string(const std::string& string)
 	{
 		const auto new_string = allocate_array<char>(string.size() + 1);
-		std::memcpy(new_string, string.data(), string.size());
+		std::memmove(new_string, string.data(), string.size());
 		return new_string;
 	}
 
@@ -104,10 +104,11 @@ namespace utils
 
 	bool memory::is_bad_read_ptr(const void* ptr)
 	{
+#ifdef _WIN32
 		MEMORY_BASIC_INFORMATION mbi = {};
 		if (VirtualQuery(ptr, &mbi, sizeof(mbi)))
 		{
-			const DWORD mask = (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ |
+			constexpr DWORD mask = (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ |
 				PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY);
 			auto b = !(mbi.Protect & mask);
 			// check the page is not a guard page
@@ -115,21 +116,26 @@ namespace utils
 
 			return b;
 		}
+#endif
+		(void)ptr;
 		return true;
 	}
 
 	bool memory::is_bad_code_ptr(const void* ptr)
 	{
+#ifdef _WIN32
 		MEMORY_BASIC_INFORMATION mbi = {};
 		if (VirtualQuery(ptr, &mbi, sizeof(mbi)))
 		{
-			const DWORD mask = (PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY);
+			constexpr DWORD mask = (PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY);
 			auto b = !(mbi.Protect & mask);
 			// check the page is not a guard page
 			if (mbi.Protect & (PAGE_GUARD | PAGE_NOACCESS)) b = true;
 
 			return b;
 		}
+#endif
+		(void)ptr;
 		return true;
 	}
 

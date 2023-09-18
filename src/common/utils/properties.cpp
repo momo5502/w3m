@@ -37,7 +37,7 @@ namespace utils
 	{
 		if (!this->document_.HasMember(name.data()))
 		{
-			rapidjson::Value key(name.data(), rapidjson::SizeType(name.size()));
+			rapidjson::Value key(name.data(), static_cast<rapidjson::SizeType>(name.size()));
 			rapidjson::Value value(rapidjson::kNullType);
 			this->document_.AddMember(key, value, this->document_.GetAllocator());
 		}
@@ -59,7 +59,7 @@ namespace utils
 			return false;
 		}
 
-		auto& val = this->document_[name.data()];
+		const auto& val = this->document_[name.data()];
 		if (!val.IsString())
 		{
 			return false;
@@ -77,7 +77,7 @@ namespace utils
 			return false;
 		}
 
-		auto& val = this->document_[name.data()];
+		const auto& val = this->document_[name.data()];
 		if (!val.IsInt64())
 		{
 			return false;
@@ -95,7 +95,7 @@ namespace utils
 			return false;
 		}
 
-		auto& val = this->document_[name.data()];
+		const auto& val = this->document_[name.data()];
 		if (!val.IsDouble())
 		{
 			return false;
@@ -111,7 +111,7 @@ namespace utils
 		this->create_member(name);
 
 		auto& val = this->document_[name.data()];
-		val.SetString(value.data(), rapidjson::SizeType(value.size()));
+		val.SetString(value.data(), static_cast<rapidjson::SizeType>(value.size()));
 
 		this->save();
 	}

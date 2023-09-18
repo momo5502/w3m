@@ -1,12 +1,13 @@
 #include "com.hpp"
-#include "nt.hpp"
+
+#ifdef _WIN32
+
 #include "string.hpp"
 #include "finally.hpp"
 
 #include <stdexcept>
 
 #include <ShlObj.h>
-
 
 namespace utils::com
 {
@@ -108,9 +109,9 @@ namespace utils::com
 		}
 
 		const auto _ = finally([raw_path]()
-			{
-				CoTaskMemFree(raw_path);
-			});
+		{
+			CoTaskMemFree(raw_path);
+		});
 
 		const std::wstring result_path = raw_path;
 		out_folder = string::convert(result_path);
@@ -132,3 +133,5 @@ namespace utils::com
 		return progress_dialog;
 	}
 }
+
+#endif

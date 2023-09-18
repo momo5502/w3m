@@ -246,7 +246,7 @@ namespace utils::string
 
 	std::string& ltrim(std::string& str)
 	{
-		str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](const unsigned char input)
+		str.erase(str.begin(), std::ranges::find_if(str, [](const unsigned char input)
 		{
 			return !std::isspace(input);
 		}));
