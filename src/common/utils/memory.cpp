@@ -1,6 +1,9 @@
 #include "memory.hpp"
 #include "nt.hpp"
 
+#include <cstring>
+#include <algorithm>
+
 namespace utils
 {
 	memory::allocator memory::mem_allocator_;
@@ -70,7 +73,7 @@ namespace utils
 	char* memory::duplicate_string(const std::string& string)
 	{
 		const auto new_string = allocate_array<char>(string.size() + 1);
-		std::memmove(new_string, string.data(), string.size());
+		std::memmove(new_string, string.data(), string.size() + 1);
 		return new_string;
 	}
 
