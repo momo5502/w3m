@@ -1,4 +1,6 @@
 #include "thread.hpp"
+
+#ifdef _WIN32
 #include "string.hpp"
 #include "finally.hpp"
 
@@ -120,3 +122,5 @@ namespace utils::thread
 		});
 	}
 }
+
+#endif
