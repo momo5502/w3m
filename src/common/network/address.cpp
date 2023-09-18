@@ -44,7 +44,7 @@ namespace network
 		this->address_.sa_family = AF_UNSPEC;
 	}
 
-	address::address(const std::string& addr, const std::optional<ADDRESS_FAMILY>& family)
+	address::address(const std::string& addr, const std::optional<int>& family)
 		: address()
 	{
 		this->parse(addr, family);
@@ -295,7 +295,7 @@ namespace network
 		return is_ipv4() || is_ipv6();
 	}
 
-	void address::parse(std::string addr, const std::optional<ADDRESS_FAMILY>& family)
+	void address::parse(std::string addr, const std::optional<int>& family)
 	{
 		std::optional<uint16_t> port_value{};
 
@@ -315,7 +315,7 @@ namespace network
 		}
 	}
 
-	void address::resolve(const std::string& hostname, const std::optional<ADDRESS_FAMILY>& family)
+	void address::resolve(const std::string& hostname, const std::optional<int>& family)
 	{
 		const auto port = this->get_port();
 		auto port_reset_action = utils::finally([this, port]()

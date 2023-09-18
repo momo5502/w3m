@@ -19,6 +19,8 @@
 #include <fcntl.h>
 #include <poll.h>
 
+#include <cstring>
+
 #define ZeroMemory(x, y) memset(x, 0, y)
 
 #endif
@@ -35,7 +37,7 @@ namespace network
 	{
 	public:
 		address();
-		address(const std::string& addr, const std::optional<ADDRESS_FAMILY>& family = {});
+		address(const std::string& addr, const std::optional<int>& family = {});
 		address(const sockaddr_in& addr);
 		address(const sockaddr_in6& addr);
 		address(const sockaddr* addr, int length);
@@ -84,8 +86,8 @@ namespace network
 			sockaddr_storage storage_;
 		};
 
-		void parse(std::string addr, const std::optional<ADDRESS_FAMILY>& family = {});
-		void resolve(const std::string& hostname, const std::optional<ADDRESS_FAMILY>& family = {});
+		void parse(std::string addr, const std::optional<int>& family = {});
+		void resolve(const std::string& hostname, const std::optional<int>& family = {});
 	};
 }
 
