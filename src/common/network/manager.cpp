@@ -17,7 +17,7 @@ namespace network
 
 			if (family == AF_INET)
 			{
-				a.set_ipv4(in4addr_any);
+				a.set_ipv4(INADDR_ANY);
 			}
 			else if (family == AF_INET6)
 			{

@@ -1,5 +1,7 @@
 #include "socket.hpp"
 
+#include <thread>
+
 #ifdef _WIN32
 #define poll WSAPoll
 #define SOCK_WOULDBLOCK WSAEWOULDBLOCK
