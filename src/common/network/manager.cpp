@@ -191,4 +191,14 @@ namespace network
 	{
 		this->thread_ = {};
 	}
+
+	const socket& manager::get_ipv4_socket() const
+	{
+		return this->socket_v4_;
+	}
+
+	const socket& manager::get_ipv6_socket() const
+	{
+		return this->socket_v6_;
+	}
 }

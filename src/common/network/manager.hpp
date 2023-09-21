@@ -27,6 +27,9 @@ namespace network
 
 		void stop();
 
+		const socket& get_ipv4_socket() const;
+		const socket& get_ipv6_socket() const;
+
 	private:
 		socket socket_v4_{};
 		socket socket_v6_{};
