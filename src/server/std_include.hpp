@@ -56,6 +56,8 @@
 #include <stdexcept>
 
 #include <cassert>
+#include <csignal>
+#include <cstdarg>
 
 #pragma warning(pop)
 

@@ -25,5 +25,7 @@ int main(int argc, const char* argv[])
 		std::this_thread::sleep_for(10ms);
 	}
 
+	console::log("Terminating server...");
+
 	return 0;
 }

@@ -1,7 +1,7 @@
 #include "std_include.hpp"
 #include "console.hpp"
 
-#include <csignal>
+#include <utils/finally.hpp>
 
 #ifdef _WIN32
 #define COLOR_LOG_INFO 11//15
@@ -19,8 +19,13 @@ namespace console
 {
 	namespace
 	{
-		std::mutex signal_mutex;
-		std::function<void()> signal_callback;
+		constinit std::atomic_bool signal_installed{false};
+
+		std::function<void()>& get_signal_callback()
+		{
+			static std::function<void()> signal_callback{};
+			return signal_callback;
+		}
 
 #ifdef _WIN32
 #define COLOR(win, posix) win
@@ -45,6 +50,8 @@ namespace console
 #ifdef _WIN32
 		BOOL WINAPI handler(const DWORD signal)
 		{
+			const auto& signal_callback = get_signal_callback();
+
 			if (signal == CTRL_C_EVENT && signal_callback)
 			{
 				signal_callback();
@@ -56,6 +63,8 @@ namespace console
 #else
 	void handler(int signal)
 	{
+		const auto& signal_callback = get_signal_callback();
+
 		if (signal == SIGINT && signal_callback)
 		{
 			signal_callback();
@@ -65,7 +74,7 @@ namespace console
 
 		std::string format(va_list* ap, const char* message)
 		{
-			static thread_local char buffer[0x1000];
+			thread_local char buffer[0x1000];
 
 #ifdef _WIN32
 			const int count = _vsnprintf_s(buffer, sizeof(buffer), sizeof(buffer), message, *ap);
@@ -160,62 +169,59 @@ namespace console
 	void reset_color()
 	{
 		lock _{};
+
 #ifdef _WIN32
 		SetConsoleTextAttribute(get_console_handle(), 7);
 #else
 		printf("\033[0m");
 #endif
 
-		fflush(stdout);
+		(void)fflush(stdout);
 	}
 
 	void info(const char* message, ...)
 	{
 		va_list ap;
 		va_start(ap, message);
+		const auto _ = utils::finally([&ap] { va_end(ap); });
 
 		const auto data = format(&ap, message);
 		print_colored("[+] " + data + "\n", COLOR_LOG_INFO);
-
-		va_end(ap);
 	}
 
 	void warn(const char* message, ...)
 	{
 		va_list ap;
 		va_start(ap, message);
+		const auto _ = utils::finally([&ap] { va_end(ap); });
 
 		const auto data = format(&ap, message);
 		print_colored("[!] " + data + "\n", COLOR_LOG_WARN);
-
-		va_end(ap);
 	}
 
 	void error(const char* message, ...)
 	{
 		va_list ap;
 		va_start(ap, message);
+		const auto _ = utils::finally([&ap] { va_end(ap); });
 
 		const auto data = format(&ap, message);
 		print_colored("[-] " + data + "\n", COLOR_LOG_ERROR);
-
-		va_end(ap);
 	}
 
 	void log(const char* message, ...)
 	{
 		va_list ap;
 		va_start(ap, message);
+		const auto _ = utils::finally([&ap] { va_end(ap); });
 
 		const auto data = format(&ap, message);
 		print_colored("[*] " + data + "\n", COLOR_LOG_DEBUG);
-
-		va_end(ap);
 	}
 
 	void set_title(const std::string& title)
 	{
-		lock _{};
+		const lock _{};
 
 #ifdef _WIN32
 		SetConsoleTitleA(title.data());
@@ -226,9 +232,14 @@ namespace console
 	}
 
 	signal_handler::signal_handler(std::function<void()> callback)
-		: std::lock_guard<std::mutex>(signal_mutex)
 	{
-		signal_callback = std::move(callback);
+		bool value{false};
+		if (!signal_installed.compare_exchange_strong(value, true))
+		{
+			throw std::runtime_error("Global signal handler already installed");
+		}
+
+		get_signal_callback() = std::move(callback);
 
 #ifdef _WIN32
 		SetConsoleCtrlHandler(handler, TRUE);
@@ -245,6 +256,7 @@ namespace console
 		signal(SIGINT, SIG_DFL);
 #endif
 
-		signal_callback = {};
+		get_signal_callback() = {};
+		signal_installed = false;
 	}
 }

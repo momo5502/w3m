@@ -23,7 +23,7 @@ namespace console
 
 	void set_title(const std::string& title);
 
-	class signal_handler : std::lock_guard<std::mutex>
+	class signal_handler
 	{
 	public:
 		signal_handler(std::function<void()> callback);
