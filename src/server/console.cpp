@@ -1,6 +1,8 @@
 #include "std_include.hpp"
 #include "console.hpp"
 
+#include <csignal>
+
 #ifdef _WIN32
 #define COLOR_LOG_INFO 11//15
 #define COLOR_LOG_WARN 14
