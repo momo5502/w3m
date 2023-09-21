@@ -14,10 +14,10 @@ if (MSVC)
     minhook
     asmjit
   )
-elseif (UNIX)
-  target_compile_options(common PUBLIC
-    "-pthread"
-  )
 endif()
 
 target_include_directories(common INTERFACE "${CMAKE_CURRENT_LIST_DIR}")
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(common PUBLIC Threads::Threads)
