@@ -1,6 +1,10 @@
 #pragma once
 
+#include <unordered_map>
+
 #include <network/manager.hpp>
+
+#include "client.hpp"
 
 class server
 {
@@ -14,6 +18,8 @@ public:
 	void stop();
 
 private:
+	using client_map = std::unordered_map<network::address, client>;
+
 	std::atomic_bool stop_{false};
 	network::manager manager_;
 
