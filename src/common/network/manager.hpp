@@ -15,6 +15,11 @@ namespace network
 	public:
 		manager(uint16_t port);
 
+		manager(manager&&) = delete;
+		manager(const manager&) = delete;
+		manager& operator=(manager&&) = delete;
+		manager& operator=(const manager&) = delete;
+
 		using callback = std::function<void(const address&, const std::string_view&)>;
 		using callback_map = std::unordered_map<std::string, callback>;
 
