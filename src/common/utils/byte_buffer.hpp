@@ -42,17 +42,12 @@ namespace utils
 			this->write_string(str, strlen(str));
 		}
 
+		void write(const byte_buffer& object);
+
 		template <typename T>
 		void write(const T& object)
 		{
 			this->write(&object, sizeof(object));
-		}
-
-		template <>
-		void write<byte_buffer>(const byte_buffer& object)
-		{
-			const auto& buffer = object.get_buffer();
-			this->write(buffer.data(), buffer.size());
 		}
 
 		template <typename T>

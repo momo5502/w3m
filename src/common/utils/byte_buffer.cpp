@@ -25,6 +25,12 @@ namespace utils
 		this->buffer_.append(static_cast<const char*>(buffer), length);
 	}
 
+	void byte_buffer::write(const byte_buffer& object)
+	{
+		const auto& buffer = object.get_buffer();
+		this->write(buffer.data(), buffer.size());
+	}
+
 	void byte_buffer::read(void* data, const size_t length)
 	{
 		if (this->writing_)
