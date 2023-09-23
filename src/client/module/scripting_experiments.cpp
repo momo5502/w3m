@@ -110,7 +110,7 @@ namespace scripting_experiments
 			network::send(network::get_master_server(), "state", buffer.get_buffer());
 		}
 
-		void receive_player_state(const network::address& address, const std::string_view& data)
+		void receive_player_states(const network::address& address, const std::string_view& data)
 		{
 			if (address != network::get_master_server())
 			{
@@ -135,7 +135,7 @@ namespace scripting_experiments
 					player_state.speed = state.speed;
 					player_state.valid = true;
 
-					players.emplace_back(std::move(player_state));
+					players.emplace_back(player_state);
 				}
 			});
 		}
@@ -150,7 +150,7 @@ namespace scripting_experiments
 			scripting::register_function<get_player_count>(L"GetPlayerCount");
 			scripting::register_function<get_player_state>(L"GetPlayerState");
 
-			network::on("state", &receive_player_state);
+			network::on("states", &receive_player_states);
 		}
 	};
 }

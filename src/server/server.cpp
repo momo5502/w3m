@@ -12,7 +12,42 @@ namespace
 
 		auto& client = clients[source];
 		client.last_packet = std::chrono::high_resolution_clock::now();
-		client.current_state_ = player_state;
+		client.current_state = player_state;
+	}
+
+	void send_state(const network::manager& manager, const server::client_map& clients)
+	{
+		std::vector<game::player_state> states{};
+		states.reserve(clients.size());
+
+		size_t index = 0;
+		for (const auto& client : clients)
+		{
+			if (index != 0)
+			{
+				states.emplace_back(client.second.current_state);
+			}
+
+			++index;
+		}
+
+		index = 0;
+		game::player_state last_state{};
+		for (const auto& client : clients)
+		{
+			if (index != 0)
+			{
+				states[index - 1] = last_state;
+			}
+
+			utils::buffer_serializer buffer{};
+			buffer.write_vector(states);
+
+			(void)manager.send(client.first, "states", buffer.get_buffer());
+
+			last_state = client.second.current_state;
+			++index;
+		}
 	}
 }
 
@@ -50,7 +85,7 @@ void server::stop()
 
 void server::run_frame()
 {
-	this->clients_.access([](client_map& clients)
+	this->clients_.access([this](client_map& clients)
 	{
 		const auto now = std::chrono::high_resolution_clock::now();
 
@@ -67,6 +102,8 @@ void server::run_frame()
 				++i;
 			}
 		}
+
+		send_state(this->manager_, clients);
 	});
 }
 
