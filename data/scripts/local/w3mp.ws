@@ -91,7 +91,6 @@ function TransmitPlayerState(actor : CActor)
     playerState.velocity = movingAgent.GetVelocity();
     playerState.speed = movingAgent.GetSpeed();
     playerState.moveType = ConvertPlayerMoveType(thePlayer.playerMoveType);
-    playerState.valid = true;
 
     StorePlayerState(playerState);
 }
