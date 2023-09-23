@@ -12,21 +12,11 @@ namespace scripting_filesystem
 {
 	namespace
 	{
-		struct array_thing
-		{
-			void** elements;
-			uint32_t count;
-		};
+		using unknown_array = scripting::array<void*>;
 
-		struct string_array
+		void* load_mod_scripts_stub(unknown_array* a1, unknown_array* a2)
 		{
-			scripting::detail::managed_script_string* strings;
-			uint32_t count;
-		};
-
-		void* load_mod_scripts_stub(array_thing* a1, array_thing* a2)
-		{
-			const auto res = reinterpret_cast<void* (*)(array_thing*, array_thing*)>(0x1402A9D50_g)(a1, a2);
+			const auto res = reinterpret_cast<void* (*)(unknown_array*, unknown_array*)>(0x1402A9D50_g)(a1, a2);
 
 			// Always say we have mods
 			(*reinterpret_cast<uint8_t**>(0x144DE5FF8_g))[208] |= 1;
@@ -76,7 +66,7 @@ namespace scripting_filesystem
 			return scripts;
 		}
 
-		void remove_overriden_base_scripts(std::vector<scripting::detail::managed_script_string>& base_scripts,
+		void remove_overriden_base_scripts(std::vector<scripting::string>& base_scripts,
 		                                   const std::vector<std::wstring>& custom_scripts)
 		{
 			const std::wstring separator = L"\\scripts\\";
@@ -105,43 +95,9 @@ namespace scripting_filesystem
 			}
 		}
 
-		std::vector<scripting::detail::managed_script_string> drain_script_array(string_array& scripts)
+		void collect_script(void* a1, scripting::array<scripting::string>* scripts)
 		{
-			std::vector<scripting::detail::managed_script_string> script_vector{};
-			script_vector.reserve(scripts.count);
-
-			for (uint32_t i = 0; i < scripts.count; ++i)
-			{
-				script_vector.emplace_back(std::move(scripts.strings[i]));
-			}
-
-
-			scripting::detail::destroy_object(scripts.strings);
-
-			scripts.strings = nullptr;
-			scripts.count = 0;
-
-			return script_vector;
-		}
-
-		void transfer_to_script_array(string_array& scripts,
-		                              std::vector<scripting::detail::managed_script_string>&& script_vector)
-		{
-			scripts.count = static_cast<uint32_t>(script_vector.size());
-			scripts.strings = scripting::detail::allocate<scripting::detail::managed_script_string>(
-				script_vector.size());
-
-			for (size_t i = 0; i < script_vector.size(); ++i)
-			{
-				scripts.strings[i] = std::move(script_vector[i]);
-			}
-
-			script_vector.clear();
-		}
-
-		void collect_script(void* a1, string_array* scripts)
-		{
-			reinterpret_cast<void(*)(void*, string_array*)>(0x1402A3ED0_g)(a1, scripts);
+			reinterpret_cast<void(*)(void*, scripting::array<scripting::string>*)>(0x1402A3ED0_g)(a1, scripts);
 
 			const auto custom_scripts = collect_custom_scripts(loader::get_main_module().get_folder() / "data");
 			if (custom_scripts.empty())
@@ -149,7 +105,7 @@ namespace scripting_filesystem
 				return;
 			}
 
-			auto base_scripts = drain_script_array(*scripts);
+			auto base_scripts = scripts->move_to_vector();
 			remove_overriden_base_scripts(base_scripts, custom_scripts);
 
 			for (const auto& script : custom_scripts)
@@ -157,7 +113,7 @@ namespace scripting_filesystem
 				base_scripts.emplace_back(script);
 			}
 
-			transfer_to_script_array(*scripts, std::move(base_scripts));
+			*scripts = std::move(base_scripts);
 		}
 
 		class component final : public component_interface

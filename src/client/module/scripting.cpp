@@ -83,106 +83,6 @@ namespace scripting
 
 	namespace detail
 	{
-		void* allocate_object(const size_t size)
-		{
-			return reinterpret_cast<void* (*)(uint64_t, size_t, uint64_t, uint64_t)>(0x1402597F0_g)(0, size, 2, 14);
-		}
-
-		void destroy_object(void* game)
-		{
-			if (game)
-			{
-				reinterpret_cast<void(*)(void*)>(0x140259710_g)(game);
-			}
-		}
-
-		managed_script_string::managed_script_string(const std::string& str)
-			: managed_script_string(utils::string::convert(str))
-		{
-		}
-
-		managed_script_string& managed_script_string::operator=(const std::string& str)
-		{
-			*this = managed_script_string(str);
-			return *this;
-		}
-
-		managed_script_string::managed_script_string(const std::wstring_view& str)
-		{
-			this->str_.length = static_cast<uint32_t>(str.size() + 1);
-			this->str_.string = allocate<wchar_t>(this->str_.length);
-
-			memcpy(this->str_.string, str.data(), static_cast<size_t>(this->str_.length) * 2);
-		}
-
-		managed_script_string& managed_script_string::operator=(const std::wstring_view& str)
-		{
-			*this = managed_script_string(str);
-			return *this;
-		}
-
-		managed_script_string::~managed_script_string()
-		{
-			destroy_object(this->str_.string);
-		}
-
-		managed_script_string::managed_script_string(const managed_script_string& obj)
-		{
-			this->operator=(obj);
-		}
-
-		managed_script_string& managed_script_string::operator=(const managed_script_string& obj)
-		{
-			if (this != &obj)
-			{
-				*this = obj.to_view();
-			}
-
-			return *this;
-		};
-
-		managed_script_string::managed_script_string(managed_script_string&& obj) noexcept
-		{
-			this->operator=(std::move(obj));
-		}
-
-		managed_script_string& managed_script_string::operator=(managed_script_string&& obj) noexcept
-		{
-			if (this != &obj)
-			{
-				this->~managed_script_string();
-				this->str_ = obj.str_;
-				obj.str_ = {};
-			}
-
-			return *this;
-		}
-
-		std::wstring_view managed_script_string::to_view() const
-		{
-			if (this->str_.length == 0)
-			{
-				return {};
-			}
-
-			return {this->str_.string, this->str_.length - 1};
-		}
-
-		std::wstring managed_script_string::to_wstring() const
-		{
-			return std::wstring{this->to_view()};
-		}
-
-		std::string managed_script_string::to_string() const
-		{
-			return utils::string::convert(this->to_wstring());
-		}
-
-		bool managed_script_string::operator==(const managed_script_string& obj) const
-		{
-			return this->to_view() == obj.to_view();
-		}
-
 		void read_script_argument(game::script_execution_context& ctx, void* value)
 		{
 			using function_type = void(uint64_t, game::script_execution_context*, void*);
@@ -196,6 +96,105 @@ namespace scripting
 		{
 			get_registration_vector().emplace_back(name, function);
 		}
+	}
+
+	void* allocate_memory(const size_t size)
+	{
+		return reinterpret_cast<void* (*)(uint64_t, size_t, uint64_t, uint64_t)>(0x1402597F0_g)(0, size, 2, 14);
+	}
+
+	void free_memory(void* memory)
+	{
+		if (memory)
+		{
+			reinterpret_cast<void(*)(void*)>(0x140259710_g)(memory);
+		}
+	}
+
+	string::string(const std::string_view& str)
+		: string()
+	{
+		this->resize(str.size());
+
+		for (size_t i = 0; i < str.size(); ++i)
+		{
+			this->data()[i] = str[i];
+		}
+	}
+
+	string& string::operator=(const std::string_view& str)
+	{
+		*this = string(str);
+		return *this;
+	}
+
+	string::string(const std::wstring_view& str)
+		: string()
+	{
+		this->resize(str.size());
+
+		for (size_t i = 0; i < str.size(); ++i)
+		{
+			this->data()[i] = str[i];
+		}
+	}
+
+	string& string::operator=(const std::wstring_view& str)
+	{
+		*this = string(str);
+		return *this;
+	}
+
+	string::string(const wchar_t* str)
+		: string(std::wstring_view(str))
+	{
+	}
+
+	string& string::operator=(const wchar_t* str)
+	{
+		*this = string(str);
+		return *this;
+	}
+
+	string::string(const char* str)
+		: string(std::string_view(str))
+	{
+	}
+
+	string& string::operator=(const char* str)
+	{
+		*this = string(str);
+		return *this;
+	}
+
+	std::wstring_view string::to_view() const
+	{
+		if (this->empty())
+		{
+			return {};
+		}
+
+		return {this->data(), this->size() - 1};
+	}
+
+	std::wstring string::to_wstring() const
+	{
+		return std::wstring{this->to_view()};
+	}
+
+	std::string string::to_string() const
+	{
+		return utils::string::convert(this->to_wstring());
+	}
+
+	bool string::operator==(const string& obj) const
+	{
+		if (this->size() != obj.size())
+		{
+			return false;
+		}
+
+		return memcmp(this->data(), obj.data(), this->size()) == 0;
 	}
 
 	class component final : public component_interface

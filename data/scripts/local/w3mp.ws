@@ -5,12 +5,11 @@ struct W3mPlayerState
     var velocity : Vector;
     var speed : float;
     var moveType : int;
-    var valid : bool;
 }
 
 import function StorePlayerState(playerState : W3mPlayerState);
 import function GetPlayerCount() : int;
-import function GetPlayerState(playerId : int) : W3mPlayerState;
+import function GetPlayerStates() : array<W3mPlayerState>;
 
 function ConvertPlayerMoveType(playerMoveType : EPlayerMoveType) : int
 {
@@ -170,7 +169,7 @@ state ExampleState in StateMachineExample {
 
     latent function moveLoop()
     {
-        var playerStateId : int;
+        /*var playerStateId : int;
         var i : int;
         i = 0;
 
@@ -191,7 +190,7 @@ state ExampleState in StateMachineExample {
             }
 
             Sleep(0.03);
-        }
+        }*/
     }
     
     latent function moveThePlayer(appid:int) {
@@ -210,7 +209,7 @@ state ExampleState in StateMachineExample {
             return;
         }
 
-        ApplyPlayerState(act, GetPlayerState(0), appid);
+       // ApplyPlayerState(act, GetPlayerState(0), appid);
     }
 }
 

@@ -20,7 +20,6 @@ namespace scripting_experiments
 			scripting::game::Vector velocity{};
 			float speed;
 			int move_type{};
-			bool valid{};
 		};
 
 		using players = std::vector<W3mPlayerState>;
@@ -70,19 +69,11 @@ namespace scripting_experiments
 
 		// ----------------------------------------------
 
-		W3mPlayerState get_player_state(int player_id)
+		scripting::array<W3mPlayerState> get_player_states()
 		{
-			return g_players.access<W3mPlayerState>([player_id](const players& players)
+			return g_players.access<scripting::array<W3mPlayerState>>([](const players& players)
 			{
-				const auto id = static_cast<size_t>(player_id);
-				if (id < players.size())
-				{
-					return players[id];
-				}
-
-				W3mPlayerState state{};
-				state.valid = false;
-				return state;
+				return players;
 			});
 		}
 
@@ -133,7 +124,6 @@ namespace scripting_experiments
 					player_state.velocity = convert(state.velocity);
 					player_state.move_type = state.move_type;
 					player_state.speed = state.speed;
-					player_state.valid = true;
 
 					players.emplace_back(player_state);
 				}
@@ -148,7 +138,7 @@ namespace scripting_experiments
 		{
 			scripting::register_function<store_player_state>(L"StorePlayerState");
 			scripting::register_function<get_player_count>(L"GetPlayerCount");
-			scripting::register_function<get_player_state>(L"GetPlayerState");
+			scripting::register_function<get_player_states>(L"GetPlayerStates");
 
 			network::on("states", &receive_player_states);
 		}

@@ -39,9 +39,10 @@ namespace scripting
 
 #pragma pack(push)
 #pragma pack(1)
-		struct script_string
+		template <typename T>
+		struct raw_array
 		{
-			wchar_t* string{};
+			T* values{};
 			uint32_t length{};
 		};
 #pragma pack(pop)
@@ -49,57 +50,290 @@ namespace scripting
 		using script_function = void(void* a1, script_execution_context* ctx, void* return_value);
 	}
 
-	namespace detail
-	{
-		void* allocate_object(size_t size);
-		void destroy_object(void* game);
+	void* allocate_memory(size_t size);
+	void free_memory(void* memory);
 
-		template <typename T>
-		T* allocate(const size_t count = 1)
+
+	template <typename T>
+	class array
+	{
+	public:
+		array() = default;
+
+		array(const size_t count, T element = T())
+			: array()
 		{
-			auto* array = static_cast<T*>(allocate_object(sizeof(T) * count));
+			this->resize(count, std::move(element));
+		}
+
+		array(const T* data, const size_t count)
+		{
+			this->array_ = this->allocate_uninitialized(count);
 
 			for (size_t i = 0; i < count; ++i)
 			{
-				new(array + i) T();
+				new(&this->array_.values[i]) T(data[i]);
 			}
-
-			return array;
 		}
 
-		class managed_script_string
+		array(const std::vector<T>& data)
+			: array(data.data(), data.size())
 		{
-		public:
-			managed_script_string() = default;
+		}
 
-			managed_script_string(const std::string& str);
-			managed_script_string& operator=(const std::string& str);
+		array(std::vector<T>&& data)
+		{
+			this->array_ = this->allocate_uninitialized(data.size());
 
-			managed_script_string(const std::wstring_view& str);
-			managed_script_string& operator=(const std::wstring_view& str);
-
-			~managed_script_string();
-
-			managed_script_string(const managed_script_string& obj);
-			managed_script_string& operator=(const managed_script_string& obj);
-
-			managed_script_string(managed_script_string&& obj) noexcept;
-			managed_script_string& operator=(managed_script_string&& obj) noexcept;
-
-			bool operator==(const managed_script_string& obj) const;
-
-			bool operator!=(const managed_script_string& obj) const
+			for (size_t i = 0; i < data.size(); ++i)
 			{
-				return !this->operator==(obj);
+				new(&this->array_.values[i]) T(std::move(data[i]));
+			}
+		}
+
+		array(const array& obj)
+			: array()
+		{
+			this->operator=(obj);
+		}
+
+		array(array&& obj) noexcept
+			: array()
+		{
+			this->operator=(std::move(obj));
+		}
+
+		array& operator=(const array& obj)
+		{
+			if (this != &obj)
+			{
+				*this = array(obj.array_.values, obj.array_.length);
 			}
 
-			std::wstring to_wstring() const;
-			std::string to_string() const;
-			std::wstring_view to_view() const;
+			return *this;
+		}
 
-			game::script_string str_{};
-		};
+		array& operator=(array&& obj) noexcept
+		{
+			if (this != &obj)
+			{
+				this->clear();
 
+				this->array_ = obj.array_;
+
+				obj.array_.length = 0;
+				obj.array_.values = nullptr;
+			}
+
+			return *this;
+		}
+
+		array& operator=(std::vector<T> vector)
+		{
+			*this = array(std::move(vector));
+			return *this;
+		}
+
+		~array()
+		{
+			this->clear();
+		}
+
+		T* data()
+		{
+			return this->array_.values;
+		}
+
+		const T* data() const
+		{
+			return this->array_.values;
+		}
+
+		size_t size() const
+		{
+			return this->array_.length;
+		}
+
+		bool empty() const
+		{
+			return this->size() == 0;
+		}
+
+		T& operator[](size_t index)
+		{
+			if (this->size() <= index)
+			{
+				throw std::runtime_error("Invalid array index");
+			}
+
+			return this->data()[index];
+		}
+
+		const T& operator[](size_t index) const
+		{
+			if (this->size() <= index)
+			{
+				throw std::runtime_error("Invalid array index");
+			}
+
+			return this->data()[index];
+		}
+
+		void push_back(T obj)
+		{
+			this->resize(this->size() + 1, std::move(obj));
+		}
+
+		T pop_back()
+		{
+			if (this->empty())
+			{
+				throw std::runtime_error("Array is empty");
+			}
+
+			auto& last = (*this)[this->size() - 1];
+			auto element = std::move(last);
+			last.~T();
+
+			this->array_.length -= 1;
+
+			return element;
+		}
+
+		T* begin()
+		{
+			return this->data();
+		}
+
+		const T* begin() const
+		{
+			return this->data();
+		}
+
+		T* end()
+		{
+			return this->begin() + this->size();
+		}
+
+		const T* end() const
+		{
+			return this->begin() + this->size();
+		}
+
+		std::vector<T> to_vector() const
+		{
+			return {this->begin(), this->end()};
+		}
+
+		std::vector<T> move_to_vector()
+		{
+			std::vector<T> v{};
+			v.reserve(this->size());
+
+			for (auto& element : *this)
+			{
+				v.emplace_back(std::move(element));
+			}
+
+			this->clear();
+
+			return v;
+		}
+
+		void clear()
+		{
+			while (!this->empty())
+			{
+				(void)this->pop_back();
+			}
+
+			free_memory(this->array_.values);
+
+			this->array_.length = 0;
+			this->array_.values = nullptr;
+		}
+
+		void resize(const size_t count, T element = T())
+		{
+			while (count < this->size())
+			{
+				(void)this->pop_back();
+			}
+
+			if (count <= this->size())
+			{
+				return;
+			}
+
+			const auto old_size = this->size();
+			auto new_array = this->allocate_uninitialized(count);
+
+			for (size_t i = 0; i < old_size; ++i)
+			{
+				new(&new_array.values[i]) T(std::move(this->data()[i]));
+			}
+
+			for (auto i = old_size + 1; i < count; ++i)
+			{
+				new(&new_array.values[i]) T(element);
+			}
+
+			new(&new_array.values[old_size]) T(std::move(element));
+
+			this->clear();
+
+			this->array_ = new_array;
+		}
+
+	private:
+		game::raw_array<T> allocate_uninitialized(const size_t count) const
+		{
+			game::raw_array<T> new_array{};
+			new_array.length = static_cast<uint32_t>(count);
+			if (new_array.length != count)
+			{
+				throw std::runtime_error("Too many items");
+			}
+
+			new_array.values = static_cast<T*>(allocate_memory(sizeof(T) * count));
+
+			return new_array;
+		}
+
+		game::raw_array<T> array_{nullptr, 0};
+	};
+
+	class string : public array<wchar_t>
+	{
+	public:
+		using array::array;
+
+		string(const std::string_view& str);
+		string& operator=(const std::string_view& str);
+
+		string(const std::wstring_view& str);
+		string& operator=(const std::wstring_view& str);
+
+		string(const wchar_t* str);
+		string& operator=(const wchar_t* str);
+
+		string(const char* str);
+		string& operator=(const char* str);
+
+		bool operator==(const string& obj) const;
+
+		bool operator!=(const string& obj) const
+		{
+			return !this->operator==(obj);
+		}
+
+		std::wstring to_wstring() const;
+		std::string to_string() const;
+		std::wstring_view to_view() const;
+	};
+
+	namespace detail
+	{
 		void read_script_argument(game::script_execution_context& ctx, void* value);
 		void register_script_function(const wchar_t* name, game::script_function* function);
 
@@ -115,14 +349,14 @@ namespace scripting
 		template <>
 		inline std::wstring read_script_argument<std::wstring>(game::script_execution_context& ctx)
 		{
-			const auto managed_string = read_script_argument<managed_script_string>(ctx);
+			const auto managed_string = read_script_argument<string>(ctx);
 			return managed_string.to_wstring();
 		}
 
 		template <>
 		inline std::string read_script_argument<std::string>(game::script_execution_context& ctx)
 		{
-			const auto managed_string = read_script_argument<managed_script_string>(ctx);
+			const auto managed_string = read_script_argument<string>(ctx);
 			return managed_string.to_string();
 		}
 
@@ -141,7 +375,7 @@ namespace scripting
 		template <>
 		inline auto adapt_return_value(std::string val)
 		{
-			return managed_script_string(val);
+			return string(val);
 		}
 
 
