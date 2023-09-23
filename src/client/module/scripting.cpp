@@ -114,7 +114,7 @@ namespace scripting
 	string::string(const std::string_view& str)
 		: string()
 	{
-		this->resize(str.size());
+		this->resize(str.size() + 1, 0);
 
 		for (size_t i = 0; i < str.size(); ++i)
 		{
@@ -131,7 +131,7 @@ namespace scripting
 	string::string(const std::wstring_view& str)
 		: string()
 	{
-		this->resize(str.size());
+		this->resize(str.size() + 1, 0);
 
 		for (size_t i = 0; i < str.size(); ++i)
 		{
