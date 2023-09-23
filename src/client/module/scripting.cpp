@@ -216,7 +216,7 @@ namespace scripting
 
 		for (size_t i = 0; i < obj.size(); ++i)
 		{
-			if (this->at(i) != obj[i])
+			if (this->at(i) != static_cast<wchar_t>(obj[i]))
 			{
 				return false;
 			}

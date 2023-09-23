@@ -385,17 +385,10 @@ namespace scripting
 		}
 
 		template <>
-		inline auto adapt_return_value(game::Vector val)
-		{
-			return val;
-		}
-
-		template <>
 		inline auto adapt_return_value(std::string val)
 		{
 			return string(val);
 		}
-
 
 		template <auto Function, typename Return, typename... Args>
 		void dispatcher_function(void* /*a1*/, game::script_execution_context* ctx, void* return_value)
