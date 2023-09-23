@@ -222,8 +222,9 @@ state MultiplayerState in W3MStateMachine
 
         while (parent.players.Size() > player_states.Size())
         {
-            current_player = parent.players[parent.players.Size()];
-            parent.players.PopBack();
+            current_player = parent.players[parent.players.Size() - 1];
+            parent.players.Remove(current_player);
+
             current_player.Destroy();
         }
 
