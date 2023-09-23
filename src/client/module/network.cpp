@@ -12,7 +12,7 @@ namespace network
 	{
 		manager& get_network_manager()
 		{
-			static manager m{28960};
+			static manager m{};
 			return m;
 		}
 	}

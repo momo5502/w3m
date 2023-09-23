@@ -111,18 +111,21 @@ namespace network
 			return true;
 		}
 
-		socket create_and_bind_socket(const int family, const uint16_t port)
+		socket create_and_bind_socket(const int family, const std::optional<uint16_t>& port)
 		{
 			socket s{family};
 			s.set_blocking(false);
 
-			bind_socket(s, port);
+			if (port)
+			{
+				bind_socket(s, *port);
+			}
 
 			return s;
 		}
 	}
 
-	manager::manager(const uint16_t port)
+	manager::manager(const std::optional<uint16_t>& port)
 		: socket_v4_(create_and_bind_socket(AF_INET, port)),
 		  socket_v6_(create_and_bind_socket(AF_INET6, port))
 	{

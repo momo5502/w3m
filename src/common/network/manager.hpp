@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>
+#include <optional>
 #include <functional>
 
 #include "address.hpp"
@@ -13,7 +14,7 @@ namespace network
 	class manager
 	{
 	public:
-		manager(uint16_t port);
+		manager(const std::optional<uint16_t>& port = {});
 
 		manager(manager&&) = delete;
 		manager(const manager&) = delete;

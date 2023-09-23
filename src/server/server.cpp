@@ -3,6 +3,8 @@
 
 #include <utils/byte_buffer.hpp>
 
+#include "console.hpp"
+
 namespace
 {
 	void handle_player_state(server::client_map& clients, const network::address& source, const std::string_view& data)
@@ -10,9 +12,16 @@ namespace
 		utils::buffer_deserializer buffer(data);
 		const auto player_state = buffer.read<game::player_state>();
 
+		const auto size = clients.size();
+
 		auto& client = clients[source];
 		client.last_packet = std::chrono::high_resolution_clock::now();
 		client.current_state = player_state;
+
+		if(clients.size() != size)
+		{
+			console::log("Player connected: %s", source.to_string().data());
+		}
 	}
 
 	void send_state(const network::manager& manager, const server::client_map& clients)
@@ -74,7 +83,7 @@ void server::run()
 	while (!this->stop_)
 	{
 		this->run_frame();
-		std::this_thread::sleep_for(1s);
+		std::this_thread::sleep_for(30ms);
 	}
 }
 
@@ -93,8 +102,9 @@ void server::run_frame()
 		{
 			const auto last_packet_diff = now - i->second.last_packet;
 
-			if (last_packet_diff > 1min)
+			if (last_packet_diff > 20s)
 			{
+				console::log("Removing player: %s", i->first.to_string().data());
 				i = clients.erase(i);
 			}
 			else

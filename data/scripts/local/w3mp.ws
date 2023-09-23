@@ -63,22 +63,6 @@ function ConvertToMoveType(moveType : int) : EMoveType
     }
 }
 
-function logSpeed()
-{
-     GetWitcherPlayer().DisplayHudMessage(
-   
-    FloatToString(thePlayer.GetBehaviorVariable( 'test_moveSpeed'))
-    + " | " + 
-    FloatToString(thePlayer.GetMovingAgentComponent().GetSpeed())
-    + " | " + 
-    FloatToString(thePlayer.GetMovingAgentComponent().GetCurrentMoveSpeedAbs())
-    + " | " + 
-    FloatToString(thePlayer.GetMovingAgentComponent().GetRelativeMoveSpeed())
-    + " | " + 
-    FloatToString(thePlayer.GetMovingAgentComponent().GetMoveTypeRelativeMoveSpeed(MT_Walk))
-     );
-}
-
 function TransmitPlayerState(actor : CActor)
 {
     var playerState : W3mPlayerState;
@@ -100,7 +84,7 @@ function TransmitCurrentPlayerState()
     TransmitPlayerState((CActor)thePlayer);
 }
 
-function ApplyPlayerState(actor : CActor, playerState : W3mPlayerState, application_id: int)
+function ApplyPlayerState(actor : CActor, playerState : W3mPlayerState)
 {
     var inter : int;
     var movingAgent : CMovingPhysicalAgentComponent;
@@ -139,80 +123,7 @@ function ApplyPlayerState(actor : CActor, playerState : W3mPlayerState, applicat
     movingAgent.SetGameplayRelativeMoveSpeed(playerState.speed);
 }
 
-function MomoTestFunc(pos : Vector) : Vector
-{
-    return pos;
-}
-
-statemachine class StateMachineExample extends CEntity {
-    public function start() {
-       // GetWitcherPlayer().DisplayHudMessage("Starting");
-        this.GotoState('ExampleState');
-    }
-}
-
-state ExampleState in StateMachineExample {
-    var last_id : int;
-    var application_id : int;
-
-    default last_id = 0;
-    default application_id = 0;
-
-    event OnEnterState(previous_state_name: name) {
-        this.entryFunctionExample();
-    }
-
-    entry function entryFunctionExample() {
-        this.moveLoop();
-    }
-
-    latent function moveLoop()
-    {
-        /*var playerStateId : int;
-        var i : int;
-        i = 0;
-
-        while(true)
-        {
-            TransmitCurrentPlayerState();
-
-            playerStateId = GetPlayerStateId();
-            if(this.last_id != playerStateId) {
-                this.last_id = playerStateId;
-                moveThePlayer(this.application_id);
-                this.application_id = this.application_id + 1;
-            }
-
-            i = i + 1;
-            if((( i / 150 )* 150 )== i) {
-                //logSpeed();
-            }
-
-            Sleep(0.03);
-        }*/
-    }
-    
-    latent function moveThePlayer(appid:int) {
-        var ent : CEntity;
-        var act : CActor;
-
-        ent = theGame.GetTheOtherPlayer();
-        if (!ent)
-        {
-            return;
-        }
-
-        act = (CActor)ent;
-        if(!act)
-        {
-            return;
-        }
-
-       // ApplyPlayerState(act, GetPlayerState(0), appid);
-    }
-}
-
-exec function blub()
+function CreateNewPlayerEntity() : CEntity
 {
     var pos : Vector;
     var rot : EulerAngles;
@@ -220,8 +131,8 @@ exec function blub()
     var npc : CNewNPC;
     var template : CEntityTemplate;
     var followerMovingagent : CMovingAgentComponent;
-	var followOnFootAI : CAIFollowSideBySideAction;
-    var tags : array< name >;
+    var followOnFootAI : CAIFollowSideBySideAction;
+    var tags : array<name>;
 
     tags.PushBack('w3m_Player');
 
@@ -235,23 +146,96 @@ exec function blub()
 
     npc.AddAbility('_canBeFollower', true); 
 
-		
-		followerMovingagent = npc.GetMovingAgentComponent();
-		followerMovingagent.SetGameplayRelativeMoveSpeed(0.0f);
-		followerMovingagent.SetDirectionChangeRate(0.16);
-		followerMovingagent.SetMaxMoveRotationPerSec(60);
-		
-		followOnFootAI = new CAIFollowSideBySideAction in npc;
-		followOnFootAI.OnCreated();
-	
-		followOnFootAI.params.targetTag = 'PLAYER';
-		followOnFootAI.params.moveSpeed = 6;
-		followOnFootAI.params.teleportToCatchup = true;
-		
+    followerMovingagent = npc.GetMovingAgentComponent();
+    followerMovingagent.SetGameplayRelativeMoveSpeed(0.0f);
+    followerMovingagent.SetDirectionChangeRate(0.16);
+    followerMovingagent.SetMaxMoveRotationPerSec(60);
+    
+    followOnFootAI = new CAIFollowSideBySideAction in npc;
+    followOnFootAI.OnCreated();
 
-        npc.GotoState('NewIdle', false);
+    followOnFootAI.params.targetTag = 'PLAYER';
+    followOnFootAI.params.moveSpeed = 6;
+    followOnFootAI.params.teleportToCatchup = true;
+        
+    npc.GotoState('NewIdle', false);
 
-        //npc.ForceAIBehavior(followOnFootAI, BTAP_Emergency);
+    //npc.ForceAIBehavior(followOnFootAI, BTAP_Emergency);
 
-        theGame.SetTheOtherPlayer(ent);
+    return ent;
+}
+
+statemachine class W3MStateMachine extends CEntity
+{
+    editable var players : array<CEntity>;
+
+    public function start()
+    {
+        this.GotoState('MultiplayerState');
+    }
+}
+
+state MultiplayerState in W3MStateMachine
+{
+    event OnEnterState(previous_state_name: name)
+    {
+        this.EntryFunction();
+    }
+
+    entry function EntryFunction()
+    {
+        this.RunMultiplayer();
+    }
+
+    latent function RunMultiplayer()
+    {
+        while(true)
+        {
+            RunMultiplayerFrame();
+            Sleep(0.03);
+        }
+    }
+
+    latent function RunMultiplayerFrame()
+    {
+        TransmitCurrentPlayerState();
+        UpdateOtherPlayers();
+    }
+
+    latent function UpdateOtherPlayers()
+    {
+        var index : int;
+        var player_states : array<W3mPlayerState>;
+
+        player_states = GetPlayerStates();
+        AdjustPlayers(player_states);
+
+        for (index = 0; index < player_states.Size(); index += 1)
+        {
+            ApplyPlayerState((CActor)parent.players[index], player_states[index]);
+        }
+    }
+
+    latent function AdjustPlayers(player_states : array<W3mPlayerState>)
+    {
+        var current_player : CEntity;
+
+        while (parent.players.Size() > player_states.Size())
+        {
+            current_player = parent.players[parent.players.Size()];
+            parent.players.PopBack();
+            current_player.Destroy();
+        }
+
+        while (parent.players.Size() < player_states.Size())
+        {
+            current_player = CreateNewPlayerEntity();
+            parent.players.PushBack(current_player);
+        }
+    }
+}
+
+exec function connect()
+{
+    theGame.StartMultiplayer();
 }

@@ -56,8 +56,7 @@ import class CR4Game extends CCommonGame
 	public var deathSaveLockId : int;
 	private var currentPresence : name;
 	private var restoreUsableItemL : bool;
-	public var myMachine : StateMachineExample;
-	public var theOtherPlayer : CEntity;
+	public var w3mStateMachine : W3MStateMachine;
 	
 	private saved var savedEnchanterFunds 			: int;
 	private saved var gameplayFactsForRemoval 		: array<SGameplayFactRemoval>;
@@ -74,19 +73,13 @@ import class CR4Game extends CCommonGame
 		uberMovement = flag;
 	}
 
-	public function SetTheOtherPlayer(otherPlayer : CEntity)
+	public function StartMultiplayer()
 	{
-		theOtherPlayer = otherPlayer;
-
-		if(!myMachine) {
-			myMachine = new StateMachineExample in this;
-			myMachine.start();
+		if (!w3mStateMachine)
+		{
+			w3mStateMachine = new W3MStateMachine in this;
+			w3mStateMachine.start();
 		}
-	}
-
-	public function GetTheOtherPlayer() : CEntity
-	{
-		return theOtherPlayer;
 	}
 	
 	public function IsUberMovementEnabled() : bool
