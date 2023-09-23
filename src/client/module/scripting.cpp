@@ -118,7 +118,7 @@ namespace scripting
 
 		for (size_t i = 0; i < str.size(); ++i)
 		{
-			this->data()[i] = str[i];
+			this->at(i) = str[i];
 		}
 	}
 
@@ -135,7 +135,7 @@ namespace scripting
 
 		for (size_t i = 0; i < str.size(); ++i)
 		{
-			this->data()[i] = str[i];
+			this->at(i) = str[i];
 		}
 	}
 
@@ -195,6 +195,79 @@ namespace scripting
 		}
 
 		return memcmp(this->data(), obj.data(), this->size()) == 0;
+	}
+
+	bool string::operator!=(const string& obj) const
+	{
+		return !this->operator==(obj);
+	}
+
+	bool string::operator==(const std::string_view& obj) const
+	{
+		if (this->empty() && obj.empty())
+		{
+			return true;
+		}
+
+		if ((obj.size() + 1) != this->size())
+		{
+			return false;
+		}
+
+		for (size_t i = 0; i < obj.size(); ++i)
+		{
+			if (this->at(i) != obj[i])
+			{
+				return false;
+			}
+		}
+
+		return this->at(obj.size()) == 0;
+	}
+
+	bool string::operator!=(const std::string_view& obj) const
+	{
+		return !this->operator==(obj);
+	}
+
+	bool string::operator==(const std::wstring_view& obj) const
+	{
+		if (this->empty() && obj.empty())
+		{
+			return true;
+		}
+
+		if ((obj.size() + 1) != this->size())
+		{
+			return false;
+		}
+
+		return this->to_view() == obj && this->at(obj.size()) == 0;
+	}
+
+	bool string::operator!=(const std::wstring_view& obj) const
+	{
+		return !this->operator==(obj);
+	}
+
+	bool string::operator==(const char* obj) const
+	{
+		return this->operator==(std::string_view(obj));
+	}
+
+	bool string::operator!=(const char* obj) const
+	{
+		return !this->operator==(obj);
+	}
+
+	bool string::operator==(const wchar_t* obj) const
+	{
+		return this->operator==(std::wstring_view(obj));
+	}
+
+	bool string::operator!=(const wchar_t* obj) const
+	{
+		return !this->operator==(obj);
 	}
 
 	class component final : public component_interface

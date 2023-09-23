@@ -159,7 +159,7 @@ namespace scripting
 			return this->size() == 0;
 		}
 
-		T& operator[](size_t index)
+		T& at(const size_t index)
 		{
 			if (this->size() <= index)
 			{
@@ -169,7 +169,7 @@ namespace scripting
 			return this->data()[index];
 		}
 
-		const T& operator[](size_t index) const
+		const T& at(const size_t index) const
 		{
 			if (this->size() <= index)
 			{
@@ -177,6 +177,16 @@ namespace scripting
 			}
 
 			return this->data()[index];
+		}
+
+		T& operator[](const size_t index)
+		{
+			return this->at(index);
+		}
+
+		const T& operator[](const size_t index) const
+		{
+			return this->at(index);
 		}
 
 		void push_back(T obj)
@@ -191,7 +201,7 @@ namespace scripting
 				throw std::runtime_error("Array is empty");
 			}
 
-			auto& last = (*this)[this->size() - 1];
+			auto& last = this->at(this->size() - 1);
 			auto element = std::move(last);
 			last.~T();
 
@@ -270,7 +280,7 @@ namespace scripting
 
 			for (size_t i = 0; i < old_size; ++i)
 			{
-				new(&new_array.values[i]) T(std::move(this->data()[i]));
+				new(&new_array.values[i]) T(std::move(this->at(i)));
 			}
 
 			for (auto i = old_size + 1; i < count; ++i)
@@ -321,11 +331,19 @@ namespace scripting
 		string& operator=(const char* str);
 
 		bool operator==(const string& obj) const;
+		bool operator!=(const string& obj) const;
 
-		bool operator!=(const string& obj) const
-		{
-			return !this->operator==(obj);
-		}
+		bool operator==(const std::string_view& obj) const;
+		bool operator!=(const std::string_view& obj) const;
+
+		bool operator==(const std::wstring_view& obj) const;
+		bool operator!=(const std::wstring_view& obj) const;
+
+		bool operator==(const char* obj) const;
+		bool operator!=(const char* obj) const;
+
+		bool operator==(const wchar_t* obj) const;
+		bool operator!=(const wchar_t* obj) const;
 
 		std::wstring to_wstring() const;
 		std::string to_string() const;
