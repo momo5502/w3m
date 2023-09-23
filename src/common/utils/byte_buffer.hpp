@@ -7,77 +7,54 @@
 
 namespace utils
 {
-	class byte_buffer
+	class buffer_deserializer
 	{
 	public:
-		byte_buffer();
-		byte_buffer(std::string buffer);
-
 		template <typename T>
-		byte_buffer(const std::basic_string_view<T>& buffer)
-			: byte_buffer(std::string(reinterpret_cast<const char*>(buffer.data()), buffer.size() * sizeof(T)))
+		buffer_deserializer(const std::basic_string_view<T>& buffer)
+			: buffer_(reinterpret_cast<const std::byte*>(buffer.data()), buffer.size() * sizeof(T))
 		{
-		}
-
-		void write(const void* buffer, size_t length);
-
-		void write(const char* text)
-		{
-			this->write(text, strlen(text));
-		}
-
-		void write_string(const char* str, const size_t length)
-		{
-			this->write<uint32_t>(static_cast<uint32_t>(length));
-			this->write(str, length);
-		}
-
-		void write_string(const std::string& str)
-		{
-			this->write_string(str.data(), str.size());
-		}
-
-		void write_string(const char* str)
-		{
-			this->write_string(str, strlen(str));
-		}
-
-		void write(const byte_buffer& object);
-
-		template <typename T>
-		void write(const T& object)
-		{
-			this->write(&object, sizeof(object));
+			static_assert(std::is_trivially_copyable_v<T>, "Type must be trivially copyable");
 		}
 
 		template <typename T>
-		void write(const std::vector<T>& vec)
+		buffer_deserializer(const std::basic_string<T>& buffer)
+			: buffer_deserializer(std::basic_string_view<T>(buffer.data(), buffer.size()))
 		{
-			this->write(vec.data(), vec.size() * sizeof(T));
 		}
 
 		template <typename T>
-		void write_vector(const std::vector<T>& vec)
+		buffer_deserializer(const std::vector<T>& buffer)
+			: buffer_deserializer(std::basic_string_view<T>(buffer.data(), buffer.size()))
 		{
-			this->write(static_cast<uint32_t>(vec.size()));
-			this->write(vec);
 		}
 
-		const std::string& get_buffer() const
+		void read(void* data, const size_t length)
 		{
-			return this->buffer_;
+			if (this->offset_ + length > this->buffer_.size())
+			{
+				throw std::runtime_error("Out of bounds read from byte buffer");
+			}
+
+			memcpy(data, this->buffer_.data() + this->offset_, length);
+			this->offset_ += length;
 		}
 
-		std::string move_buffer()
+		std::string read_data(const size_t length)
 		{
-			return std::move(this->buffer_);
-		}
+			std::string result{};
+			result.resize(length);
 
-		void read(void* data, size_t length);
+			this->read(result.data(), result.size());
+
+			return result;
+		}
 
 		template <typename T>
 		T read()
 		{
+			static_assert(std::is_trivially_copyable_v<T>, "Type must be trivially copyable");
+
 			T object{};
 			this->read(&object, sizeof(object));
 			return object;
@@ -86,6 +63,8 @@ namespace utils
 		template <typename T>
 		std::vector<T> read_vector()
 		{
+			static_assert(std::is_trivially_copyable_v<T>, "Type must be trivially copyable");
+
 			std::vector<T> result{};
 			const auto size = this->read<uint32_t>();
 			const auto totalSize = size * sizeof(T);
@@ -132,11 +111,81 @@ namespace utils
 			return this->offset_;
 		}
 
-		std::string read_data(size_t length);
+	private:
+		size_t offset_{0};
+		std::basic_string_view<std::byte> buffer_{};
+	};
+
+	class buffer_serializer
+	{
+	public:
+		buffer_serializer() = default;
+
+		void write(const void* buffer, const size_t length)
+		{
+			this->buffer_.append(static_cast<const char*>(buffer), length);
+		}
+
+		void write(const char* text)
+		{
+			this->write(text, strlen(text));
+		}
+
+		void write_string(const char* str, const size_t length)
+		{
+			this->write<uint32_t>(static_cast<uint32_t>(length));
+			this->write(str, length);
+		}
+
+		void write_string(const std::string& str)
+		{
+			this->write_string(str.data(), str.size());
+		}
+
+		void write_string(const char* str)
+		{
+			this->write_string(str, strlen(str));
+		}
+
+		void write(const buffer_serializer& object)
+		{
+			const auto& buffer = object.get_buffer();
+			this->write(buffer.data(), buffer.size());
+		}
+
+		template <typename T>
+		void write(const T& object)
+		{
+			static_assert(std::is_trivially_copyable_v<T>, "Type must be trivially copyable");
+			this->write(&object, sizeof(object));
+		}
+
+		template <typename T>
+		void write(const std::vector<T>& vec)
+		{
+			static_assert(std::is_trivially_copyable_v<T>, "Type must be trivially copyable");
+			this->write(vec.data(), vec.size() * sizeof(T));
+		}
+
+		template <typename T>
+		void write_vector(const std::vector<T>& vec)
+		{
+			static_assert(std::is_trivially_copyable_v<T>, "Type must be trivially copyable");
+			this->write(static_cast<uint32_t>(vec.size()));
+			this->write(vec);
+		}
+
+		const std::string& get_buffer() const
+		{
+			return this->buffer_;
+		}
+
+		std::string move_buffer()
+		{
+			return std::move(this->buffer_);
+		}
 
 	private:
-		bool writing_{false};
-		size_t offset_{0};
 		std::string buffer_{};
 	};
 }

@@ -12,4 +12,6 @@ namespace network
 
 	bool send_data(const address& address, const void* data, size_t length);
 	bool send_data(const address& address, const std::string& data);
+
+	const address& get_master_server();
 }

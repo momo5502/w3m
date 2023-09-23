@@ -37,6 +37,12 @@ namespace network
 		return send_data(address, data.data(), data.size());
 	}
 
+	const address& get_master_server()
+	{
+		static const address master{"server.momo5502.com:28960"};
+		return master;
+	}
+
 	class component final : public component_interface
 	{
 	public:

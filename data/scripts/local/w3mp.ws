@@ -1,9 +1,3 @@
-struct W3mPlayerInfo
-{
-    var username : string;
-    var guid : Uint64;
-}
-
 struct W3mPlayerState
 {
     var angles : EulerAngles;
@@ -11,13 +5,12 @@ struct W3mPlayerState
     var velocity : Vector;
     var speed : float;
     var moveType : int;
+    var valid : bool;
 }
 
 import function StorePlayerState(playerState : W3mPlayerState);
 import function GetPlayerCount() : int;
-import function GetPlayerInfo(playerId : int) : W3mPlayerInfo;
 import function GetPlayerState(playerId : int) : W3mPlayerState;
-import function GetPlayerStateId() : int;
 
 function ConvertPlayerMoveType(playerMoveType : EPlayerMoveType) : int
 {
@@ -99,6 +92,7 @@ function TransmitPlayerState(actor : CActor)
     playerState.velocity = movingAgent.GetVelocity();
     playerState.speed = movingAgent.GetSpeed();
     playerState.moveType = ConvertPlayerMoveType(thePlayer.playerMoveType);
+    playerState.valid = true;
 
     StorePlayerState(playerState);
 }
