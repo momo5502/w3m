@@ -38,7 +38,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{matrix.configuration}} Artifacts
+          name: Windows ${{matrix.configuration}} Artifacts
           path: |
             build/${{matrix.preset}}/artifacts/w3m.exe
             build/${{matrix.preset}}/artifacts/w3m.pdb
@@ -89,6 +89,6 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{matrix.configuration}} Artifacts
+          name: Linux ${{matrix.configuration}} Artifacts
           path: |
             build/${{matrix.preset}}/artifacts/server
