@@ -11,9 +11,9 @@ namespace properties::detail
 	{
 		std::string get_path()
 		{
-			const auto out_folder = std::filesystem::path(loader::get_main_module().get_folder());
-			const auto out_path = out_folder / "w3x.json";
-			return out_path.generic_string();
+			auto path = loader::get_main_module().get_path();
+			path.replace_extension(".json");
+			return path.generic_string();
 		}
 	}
 

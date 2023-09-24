@@ -18,7 +18,7 @@ namespace
 		client.last_packet = std::chrono::high_resolution_clock::now();
 		client.current_state = player_state;
 
-		if(clients.size() != size)
+		if (clients.size() != size)
 		{
 			console::log("Player connected: %s", source.to_string().data());
 		}
