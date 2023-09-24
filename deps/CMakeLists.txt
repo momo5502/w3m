@@ -7,6 +7,7 @@ if (MSVC)
 set(ASMJIT_STATIC ON)
 set(ASMJIT_NO_AARCH64 ON)
 set(ASMJIT_NO_FOREIGN ON)
+set(ASMJIT_NO_CUSTOM_FLAGS ON)
 
 add_subdirectory(asmjit)
 
