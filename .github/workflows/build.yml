@@ -66,10 +66,10 @@ jobs:
           submodules: true
 
 
-      - name: Install GCC 11
+      - name: Install Dependencies
         run: |
           sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
-          sudo apt install -y g++-11
+          sudo apt install -y g++-11 ninja-build
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 30
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 30
           sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 30
@@ -78,10 +78,6 @@ jobs:
           sudo update-alternatives --set c++ /usr/bin/g++
           sudo update-alternatives --config gcc
           sudo update-alternatives --config g++
-      
-
-      - name: Install ninja
-        uses: seanmiddleditch/gha-setup-ninja@v3
 
       - name: CMake Build
         run: cmake --workflow --preset=${{matrix.preset}}
