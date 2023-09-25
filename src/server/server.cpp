@@ -10,6 +10,12 @@ namespace
 	void handle_player_state(server::client_map& clients, const network::address& source, const std::string_view& data)
 	{
 		utils::buffer_deserializer buffer(data);
+		const auto protocol = buffer.read<uint32_t>();
+		if (protocol != game::PROTOCOL)
+		{
+			return;
+		}
+
 		const auto player_state = buffer.read<game::player_state>();
 
 		const auto size = clients.size();
@@ -30,11 +36,11 @@ namespace
 		states.reserve(clients.size());
 
 		size_t index = 0;
-		for (const auto& client : clients)
+		for (const auto& val : clients | std::views::values)
 		{
 			if (index != 0)
 			{
-				states.emplace_back(client.second.current_state);
+				states.emplace_back(val.current_state);
 			}
 
 			++index;
@@ -50,6 +56,7 @@ namespace
 			}
 
 			utils::buffer_serializer buffer{};
+			buffer.write(game::PROTOCOL);
 			buffer.write_vector(states);
 
 			(void)manager.send(client.first, "states", buffer.get_buffer());

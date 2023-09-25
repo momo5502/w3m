@@ -5,6 +5,8 @@
 
 namespace game
 {
+	constexpr uint32_t PROTOCOL = 1;
+
 	using vec3_t = std::array<float, 3>;
 	using vec4_t = std::array<float, 4>;
 

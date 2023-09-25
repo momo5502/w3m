@@ -96,6 +96,7 @@ namespace scripting_experiments
 			player_state.move_type = state.move_type;
 
 			utils::buffer_serializer buffer{};
+			buffer.write(game::PROTOCOL);
 			buffer.write(player_state);
 
 			network::send(network::get_master_server(), "state", buffer.get_buffer());
@@ -109,6 +110,12 @@ namespace scripting_experiments
 			}
 
 			utils::buffer_deserializer buffer(data);
+			const auto protocol = buffer.read<uint32_t>();
+			if (protocol != game::PROTOCOL)
+			{
+				return;
+			}
+
 			const auto player_states = buffer.read_vector<game::player_state>();
 
 			g_players.access([&player_states](players& players)
