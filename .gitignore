@@ -146,5 +146,4 @@ UpgradeLog*.htm
 # User scripts
 user*.bat
 
-# Premake binary
-#premake5.exe
+.vscode/
