@@ -29,7 +29,7 @@ namespace scripting_experiments
 		};
 
 		template <typename T>
-		struct GameObject
+		struct game_object
 		{
 			uint64_t some_type;
 			T* object;
@@ -82,7 +82,7 @@ namespace scripting_experiments
 
 		// ----------------------------------------------
 
-		void set_display_name(const GameObject<CNewNPC>* npc, const scripting::string& name)
+		void set_display_name(const game_object<CNewNPC>* npc, const scripting::string& name)
 		{
 			if (npc && npc->object)
 			{
