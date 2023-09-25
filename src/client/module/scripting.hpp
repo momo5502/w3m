@@ -395,13 +395,14 @@ namespace scripting
 		{
 			try
 			{
+				std::tuple<Args...> args{read_script_argument<Args>(*ctx)...};
 				if constexpr (std::is_same_v<Return, void>)
 				{
-					Function(read_script_argument<Args>(*ctx)...);
+					std::apply(Function, std::move(args));
 				}
 				else
 				{
-					auto value = adapt_return_value(Function(read_script_argument<Args>(*ctx)...));
+					auto value = adapt_return_value(std::apply(Function, std::move(args)));
 
 					if (return_value)
 					{
