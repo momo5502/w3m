@@ -22,6 +22,19 @@ namespace scripting_experiments
 			int move_type{};
 		};
 
+		struct CNewNPC
+		{
+			char pad[704];
+			scripting::string display_name;
+		};
+
+		template <typename T>
+		struct GameObject
+		{
+			uint64_t some_type;
+			T* object;
+		};
+
 		using players = std::vector<W3mPlayerState>;
 		utils::concurrency::container<players> g_players;
 
@@ -68,6 +81,14 @@ namespace scripting_experiments
 		}
 
 		// ----------------------------------------------
+
+		void set_display_name(const GameObject<CNewNPC>* npc, const scripting::string& name)
+		{
+			if (npc && npc->object)
+			{
+				npc->object->display_name = name;
+			}
+		}
 
 		scripting::array<W3mPlayerState> get_player_states()
 		{
@@ -146,6 +167,7 @@ namespace scripting_experiments
 			scripting::register_function<store_player_state>(L"StorePlayerState");
 			scripting::register_function<get_player_count>(L"GetPlayerCount");
 			scripting::register_function<get_player_states>(L"GetPlayerStates");
+			scripting::register_function<set_display_name>(L"SetNpcDisplayName");
 
 			network::on("states", &receive_player_states);
 		}

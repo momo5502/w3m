@@ -7,6 +7,7 @@ struct W3mPlayerState
     var moveType : int;
 }
 
+import function SetNpcDisplayName(npc : CNewNPC, npcName : string);
 import function StorePlayerState(playerState : W3mPlayerState);
 import function GetPlayerCount() : int;
 import function GetPlayerStates() : array<W3mPlayerState>;
@@ -161,6 +162,8 @@ function CreateNewPlayerEntity() : CEntity
     npc.GotoState('NewIdle', false);
 
     //npc.ForceAIBehavior(followOnFootAI, BTAP_Emergency);
+
+    SetNpcDisplayName(npc, "W3M Player");
 
     return ent;
 }
