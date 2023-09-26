@@ -98,14 +98,6 @@ namespace scripting_experiments
 			});
 		}
 
-		int get_player_count()
-		{
-			return g_players.access<int>([](const players& players)
-			{
-				return static_cast<int>(players.size());
-			});
-		}
-
 		void store_player_state(const W3mPlayerState& state)
 		{
 			game::player_state player_state{};
@@ -164,10 +156,9 @@ namespace scripting_experiments
 	public:
 		void post_load() override
 		{
-			scripting::register_function<store_player_state>(L"StorePlayerState");
-			scripting::register_function<get_player_count>(L"GetPlayerCount");
-			scripting::register_function<get_player_states>(L"GetPlayerStates");
-			scripting::register_function<set_display_name>(L"SetNpcDisplayName");
+			scripting::register_function<store_player_state>(L"W3mStorePlayerState");
+			scripting::register_function<get_player_states>(L"W3mGetPlayerStates");
+			scripting::register_function<set_display_name>(L"W3mSetNpcDisplayName");
 
 			network::on("states", &receive_player_states);
 		}

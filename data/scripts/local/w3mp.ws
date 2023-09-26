@@ -7,10 +7,9 @@ struct W3mPlayerState
     var moveType : int;
 }
 
-import function SetNpcDisplayName(npc : CNewNPC, npcName : string);
-import function StorePlayerState(playerState : W3mPlayerState);
-import function GetPlayerCount() : int;
-import function GetPlayerStates() : array<W3mPlayerState>;
+import function W3mSetNpcDisplayName(npc : CNewNPC, npcName : string);
+import function W3mStorePlayerState(playerState : W3mPlayerState);
+import function W3mGetPlayerStates() : array<W3mPlayerState>;
 
 function ConvertPlayerMoveType(playerMoveType : EPlayerMoveType) : int
 {
@@ -77,7 +76,7 @@ function TransmitPlayerState(actor : CActor)
     playerState.speed = movingAgent.GetSpeed();
     playerState.moveType = ConvertPlayerMoveType(thePlayer.playerMoveType);
 
-    StorePlayerState(playerState);
+    W3mStorePlayerState(playerState);
 }
 
 function TransmitCurrentPlayerState()
@@ -152,23 +151,14 @@ function CreateNewPlayerEntity() : CEntity
     followerMovingagent.SetDirectionChangeRate(0.16);
     followerMovingagent.SetMaxMoveRotationPerSec(60);
     
-    followOnFootAI = new CAIFollowSideBySideAction in npc;
-    followOnFootAI.OnCreated();
-
-    followOnFootAI.params.targetTag = 'PLAYER';
-    followOnFootAI.params.moveSpeed = 6;
-    followOnFootAI.params.teleportToCatchup = true;
-        
     npc.GotoState('NewIdle', false);
 
-    //npc.ForceAIBehavior(followOnFootAI, BTAP_Emergency);
-
-    SetNpcDisplayName(npc, "W3M Player");
+    W3mSetNpcDisplayName(npc, "W3M Player");
 
     return ent;
 }
 
-statemachine class W3MStateMachine extends CEntity
+statemachine class W3mStateMachine extends CEntity
 {
     editable var players : array<CEntity>;
 
@@ -178,7 +168,7 @@ statemachine class W3MStateMachine extends CEntity
     }
 }
 
-state MultiplayerState in W3MStateMachine
+state MultiplayerState in W3mStateMachine
 {
     event OnEnterState(previous_state_name: name)
     {
@@ -210,7 +200,7 @@ state MultiplayerState in W3MStateMachine
         var index : int;
         var player_states : array<W3mPlayerState>;
 
-        player_states = GetPlayerStates();
+        player_states = W3mGetPlayerStates();
         AdjustPlayers(player_states);
 
         for (index = 0; index < player_states.Size(); index += 1)

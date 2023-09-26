@@ -56,7 +56,7 @@ import class CR4Game extends CCommonGame
 	public var deathSaveLockId : int;
 	private var currentPresence : name;
 	private var restoreUsableItemL : bool;
-	public var w3mStateMachine : W3MStateMachine;
+	public var w3mStateMachine : W3mStateMachine;
 	
 	private saved var savedEnchanterFunds 			: int;
 	private saved var gameplayFactsForRemoval 		: array<SGameplayFactRemoval>;
@@ -77,7 +77,7 @@ import class CR4Game extends CCommonGame
 	{
 		if (!w3mStateMachine)
 		{
-			w3mStateMachine = new W3MStateMachine in this;
+			w3mStateMachine = new W3mStateMachine in this;
 			w3mStateMachine.start();
 		}
 	}
