@@ -23,6 +23,7 @@ namespace window
 				if (class_name == "W2ViewportClass"s)
 				{
 					*reinterpret_cast<HWND*>(param) = window;
+					return FALSE;
 				}
 			}
 
@@ -52,7 +53,7 @@ namespace window
 		static HWND window = nullptr;
 		if (!window || !IsWindow(window))
 		{
-			EnumWindows(enum_windows_proc, LPARAM(&window));
+			EnumWindows(enum_windows_proc, reinterpret_cast<LPARAM>(&window));
 		}
 
 		return window;
