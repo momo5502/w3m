@@ -5,7 +5,7 @@ namespace scripting
 {
 	namespace game
 	{
-		__declspec(align(16)) struct Vector
+		struct Vector
 		{
 			float X{0.0};
 			float Y{0.0};
