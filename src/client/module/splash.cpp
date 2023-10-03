@@ -55,10 +55,10 @@ namespace
 				MSG msg{};
 				while (window && IsWindow(window))
 				{
-					if (PeekMessageA(&msg, window, NULL, NULL, PM_REMOVE))
+					if (PeekMessageW(&msg, nullptr, NULL, NULL, PM_REMOVE))
 					{
 						TranslateMessage(&msg);
-						DispatchMessage(&msg);
+						DispatchMessageW(&msg);
 					}
 					else
 					{
@@ -131,10 +131,17 @@ namespace
 				const auto window = this->window_;
 				this->window_ = nullptr;
 
-				if (window && IsWindow(window))
+				if (!window || !IsWindow(window))
 				{
-					ShowWindow(window, SW_HIDE);
-					DestroyWindow(window);
+					return nullptr;
+				}
+
+				ShowWindow(window, SW_HIDE);
+				DestroyWindow(window);
+
+				if (GetWindowThreadProcessId(window, nullptr) != GetCurrentThreadId())
+				{
+					return nullptr;
 				}
 
 				return window;
