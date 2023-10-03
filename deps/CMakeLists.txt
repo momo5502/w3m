@@ -14,6 +14,7 @@ add_subdirectory(asmjit)
 ##########################################
 
 add_subdirectory(minhook)
+add_subdirectory(html-ui)
 
 endif()
 

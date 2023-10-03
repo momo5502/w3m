@@ -7,3 +7,6 @@
 [submodule "deps/minhook"]
 	path = deps/minhook
 	url = https://github.com/TsudaKageyu/minhook.git
+[submodule "deps/html-ui"]
+	path = deps/html-ui
+	url = ../html-ui.git
