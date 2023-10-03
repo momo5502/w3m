@@ -270,9 +270,8 @@ namespace scripting
 		return !this->operator==(obj);
 	}
 
-	class component final : public component_interface
+	struct component final : component_interface
 	{
-	public:
 		void post_load() override
 		{
 			utils::hook::call(0x1410058B7_g, register_script_functions_stub);

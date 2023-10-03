@@ -43,9 +43,8 @@ namespace network
 		return master;
 	}
 
-	class component final : public component_interface
+	struct component final : component_interface
 	{
-	public:
 		void post_load() override
 		{
 			get_network_manager();

@@ -137,9 +137,19 @@ namespace
 			}
 		}
 	}
+
+	void* import_resolver(const std::string& module, const std::string& function)
+	{
+		if (function == "ExitProcess")
+		{
+			return &exit_hook;
+		}
+
+		return component_loader::load_import(module, function);
+	}
 }
 
-int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
+int WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 {
 	if (handle_process_runner())
 	{
@@ -168,17 +178,7 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 
 			assert(utils::nt::library{} == loader::get_main_module());
 
-			run_launcher();
-
-			const auto lib = loader::load("witcher3.exe",
-			                              [](const std::string& module, const std::string& function) -> void* {
-				                              if (function == "ExitProcess")
-				                              {
-					                              return &exit_hook;
-				                              }
-
-				                              return component_loader::load_import(module, function);
-			                              });
+			const auto lib = loader::load("witcher3.exe", import_resolver);
 			loader::apply_main_module(lib);
 
 			assert(utils::nt::library{} == loader::get_game_module());

@@ -5,10 +5,7 @@
 enum class component_priority
 {
 	min = 0,
-	// must run after the steam_proxy
-	name,
-	// must run after the updater
-	steam_proxy,
+	splash,
 	launcher,
 	updater,
 };

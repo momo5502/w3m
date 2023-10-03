@@ -116,9 +116,8 @@ namespace scripting_filesystem
 			*scripts = std::move(base_scripts);
 		}
 
-		class component final : public component_interface
+		struct component final : component_interface
 		{
-		public:
 			void post_load() override
 			{
 				utils::hook::call(0x1402AB75D_g, load_mod_scripts_stub);

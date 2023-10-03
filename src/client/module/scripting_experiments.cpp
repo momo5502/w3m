@@ -151,9 +151,8 @@ namespace scripting_experiments
 		}
 	}
 
-	class component final : public component_interface
+	struct component final : component_interface
 	{
-	public:
 		void post_load() override
 		{
 			scripting::register_function<store_player_state>(L"W3mStorePlayerState");

@@ -40,9 +40,8 @@ namespace console
 		}
 	}
 
-	class component final : public component_interface
+	struct component final : component_interface
 	{
-	public:
 		void post_load() override
 		{
 			if (!utils::nt::is_wine())

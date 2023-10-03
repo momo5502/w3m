@@ -7,9 +7,8 @@
 
 namespace patches
 {
-	class component final : public component_interface
+	struct component final : component_interface
 	{
-	public:
 		void post_load() override
 		{
 			// Prevent pausing the game when focus is lost
