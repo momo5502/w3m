@@ -23,8 +23,6 @@ namespace utils::nt
 	class library final
 	{
 	public:
-		static library load(const char* name);
-		static library load(const std::string& name);
 		static library load(const std::filesystem::path& path);
 		static library get_by_address(const void* address);
 
@@ -76,25 +74,25 @@ namespace utils::nt
 		}
 
 		template <typename T, typename... Args>
-		T invoke(const std::string& process, Args ... args) const
+		T invoke(const std::string& process, Args... args) const
 		{
-			auto method = this->get<T(__cdecl)(Args ...)>(process);
+			auto method = this->get<T(__cdecl)(Args...)>(process);
 			if (method) return method(args...);
 			return T();
 		}
 
 		template <typename T, typename... Args>
-		T invoke_pascal(const std::string& process, Args ... args) const
+		T invoke_pascal(const std::string& process, Args... args) const
 		{
-			auto method = this->get<T(__stdcall)(Args ...)>(process);
+			auto method = this->get<T(__stdcall)(Args...)>(process);
 			if (method) return method(args...);
 			return T();
 		}
 
 		template <typename T, typename... Args>
-		T invoke_this(const std::string& process, void* this_ptr, Args ... args) const
+		T invoke_this(const std::string& process, void* this_ptr, Args... args) const
 		{
-			auto method = this->get<T(__thiscall)(void*, Args ...)>(this_ptr, process);
+			auto method = this->get<T(__thiscall)(void*, Args...)>(this_ptr, process);
 			if (method) return method(args...);
 			return T();
 		}
@@ -105,7 +103,7 @@ namespace utils::nt
 		[[nodiscard]] PIMAGE_DOS_HEADER get_dos_header() const;
 		[[nodiscard]] PIMAGE_OPTIONAL_HEADER get_optional_header() const;
 
-		[[nodiscard]] void** get_iat_entry(const std::string& module_name, std::string proc_name) const;
+		[[nodiscard]] void** get_iat_entry(const std::string& module_name, const std::string& proc_name) const;
 		[[nodiscard]] void** get_iat_entry(const std::string& module_name, const char* proc_name) const;
 
 	private:
@@ -172,7 +170,7 @@ namespace utils::nt
 		}
 
 	private:
-		HANDLE handle_{ InvalidHandle };
+		HANDLE handle_{InvalidHandle};
 	};
 
 

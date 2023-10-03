@@ -8,19 +8,9 @@
 
 namespace utils::nt
 {
-	library library::load(const char* name)
-	{
-		return library(LoadLibraryA(name));
-	}
-
-	library library::load(const std::string& name)
-	{
-		return library::load(name.data());
-	}
-
 	library library::load(const std::filesystem::path& path)
 	{
-		return library::load(path.generic_string());
+		return library(LoadLibraryW(path.generic_wstring().data()));
 	}
 
 	library library::get_by_address(const void* address)
@@ -78,7 +68,7 @@ namespace utils::nt
 		return &this->get_nt_headers()->OptionalHeader;
 	}
 
-	void** library::get_iat_entry(const std::string& module_name, std::string proc_name) const
+	void** library::get_iat_entry(const std::string& module_name, const std::string& proc_name) const
 	{
 		return this->get_iat_entry(module_name, proc_name.data());
 	}
@@ -183,17 +173,18 @@ namespace utils::nt
 		auto* const target_function = other_module.get_proc<void*>(proc_name);
 		if (!target_function) return nullptr;
 
-		auto* header = this->get_optional_header();
+		const auto* header = this->get_optional_header();
 		if (!header) return nullptr;
 
-		auto* import_descriptor = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(this->get_ptr() + header->DataDirectory
+		const auto* import_descriptor = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(this->get_ptr() + header->
+			DataDirectory
 			[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
 
 		while (import_descriptor->Name)
 		{
 			if (!_stricmp(reinterpret_cast<char*>(this->get_ptr() + import_descriptor->Name), module_name.data()))
 			{
-				auto* original_thunk_data = reinterpret_cast<PIMAGE_THUNK_DATA>(import_descriptor->
+				const auto* original_thunk_data = reinterpret_cast<PIMAGE_THUNK_DATA>(import_descriptor->
 					OriginalFirstThunk + this->get_ptr());
 				auto* thunk_data = reinterpret_cast<PIMAGE_THUNK_DATA>(import_descriptor->FirstThunk + this->
 					get_ptr());
@@ -297,7 +288,7 @@ namespace utils::nt
 		auto* const handle = LoadResource(lib, res);
 		if (!handle) return {};
 
-		return std::string(LPSTR(LockResource(handle)), SizeofResource(lib, res));
+		return {static_cast<LPSTR>(LockResource(handle)), SizeofResource(lib, res)};
 	}
 
 	void relaunch_self()
@@ -326,7 +317,7 @@ namespace utils::nt
 	void terminate(const uint32_t code)
 	{
 		TerminateProcess(GetCurrentProcess(), code);
-		_Exit(code);
+		_Exit(static_cast<int>(code));
 	}
 
 	std::string get_user_name()
@@ -338,7 +329,7 @@ namespace utils::nt
 			return {};
 		}
 
-		return std::string(username, username_len - 1);
+		return {username, username_len - 1};
 	}
 }
 

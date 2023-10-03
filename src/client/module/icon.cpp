@@ -9,7 +9,7 @@ namespace
 	{
 		HICON __stdcall load_icon_w(const HINSTANCE instance, const wchar_t* name)
 		{
-			if (size_t(name) <= 300 && instance == loader::get_game_module())
+			if (reinterpret_cast<size_t>(name) <= 300 && instance == loader::get_game_module())
 			{
 				return LoadIconA(loader::get_main_module(), MAKEINTRESOURCE(102));
 			}

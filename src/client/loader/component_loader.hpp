@@ -7,7 +7,6 @@
 
 namespace component_loader
 {
-	std::vector<std::unique_ptr<component_interface>>& get_components();
 	void register_component(std::unique_ptr<component_interface>&& component);
 
 	class premature_shutdown_trigger final : public std::exception
@@ -29,20 +28,6 @@ namespace component_loader
 			register_component(std::make_unique<T>());
 		}
 	};
-
-	template <typename T>
-	T* get()
-	{
-		for (const auto& component : get_components())
-		{
-			if (typeid(*component) == typeid(T))
-			{
-				return reinterpret_cast<T*>(component.get());
-			}
-		}
-
-		return nullptr;
-	}
 
 	bool post_start();
 	bool post_load();

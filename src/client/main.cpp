@@ -23,7 +23,7 @@ namespace
 		const auto self_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(self.get_ptr()
 			+ self.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
 
-		const auto ref = DWORD64(&tls_data);
+		const auto ref = reinterpret_cast<DWORD64>(&tls_data);
 		const auto tls_index = *reinterpret_cast<PDWORD>(self_tls->AddressOfIndex);
 		const auto tls_vector = *reinterpret_cast<PDWORD64>(__readgsqword(0x58) + 8ull * tls_index);
 		const auto offset = ref - tls_vector;
@@ -56,7 +56,7 @@ namespace
 			return;
 		}
 
-		auto* callback = get_tls_callbacks();
+		const auto* callback = get_tls_callbacks();
 		while (callback && *callback)
 		{
 			(*callback)(GetModuleHandleA(nullptr), reason, nullptr);
@@ -87,7 +87,7 @@ namespace
 			return false;
 		}
 
-		const auto pid = DWORD(atoi(parent_proc + strlen(command)));
+		const auto pid = static_cast<DWORD>(atoi(parent_proc + strlen(command)));
 		const utils::nt::handle<> process_handle = OpenProcess(SYNCHRONIZE, FALSE, pid);
 		if (process_handle)
 		{
@@ -99,13 +99,13 @@ namespace
 
 	void enable_dpi_awareness()
 	{
-		const utils::nt::library user32{ "user32.dll" };
+		const utils::nt::library user32{"user32.dll"};
 
 		{
 			const auto set_dpi = user32
-				? user32.get_proc<BOOL(WINAPI*)(DPI_AWARENESS_CONTEXT)>(
-					"SetProcessDpiAwarenessContext")
-				: nullptr;
+				                     ? user32.get_proc<BOOL(WINAPI*)(DPI_AWARENESS_CONTEXT)>(
+					                     "SetProcessDpiAwarenessContext")
+				                     : nullptr;
 			if (set_dpi)
 			{
 				set_dpi(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
@@ -114,11 +114,11 @@ namespace
 		}
 
 		{
-			const utils::nt::library shcore{ "shcore.dll" };
+			const utils::nt::library shcore{"shcore.dll"};
 			const auto set_dpi = shcore
-				? shcore.get_proc<HRESULT(WINAPI*)(PROCESS_DPI_AWARENESS)>(
-					"SetProcessDpiAwareness")
-				: nullptr;
+				                     ? shcore.get_proc<HRESULT(WINAPI*)(PROCESS_DPI_AWARENESS)>(
+					                     "SetProcessDpiAwareness")
+				                     : nullptr;
 			if (set_dpi)
 			{
 				set_dpi(PROCESS_PER_MONITOR_DPI_AWARE);
@@ -128,40 +128,14 @@ namespace
 
 		{
 			const auto set_dpi = user32
-				? user32.get_proc<BOOL(WINAPI*)()>(
-					"SetProcessDPIAware")
-				: nullptr;
+				                     ? user32.get_proc<BOOL(WINAPI*)()>(
+					                     "SetProcessDPIAware")
+				                     : nullptr;
 			if (set_dpi)
 			{
 				set_dpi();
 			}
 		}
-	}
-
-	void trigger_high_performance_gpu_switch()
-	{
-		// Make sure to link D3D11, as this might trigger high performance GPU
-		static volatile auto _ = &D3D11CreateDevice;
-
-		const auto key = utils::nt::open_or_create_registry_key(
-			HKEY_CURRENT_USER, R"(Software\Microsoft\DirectX\UserGpuPreferences)");
-		if (!key)
-		{
-			return;
-		}
-
-		const auto self = utils::nt::library::get_by_address(&trigger_high_performance_gpu_switch);
-		const auto path = self.get_path().make_preferred().wstring();
-
-		if (RegQueryValueExW(key, path.data(), nullptr, nullptr, nullptr, nullptr) != ERROR_FILE_NOT_FOUND)
-		{
-			return;
-		}
-
-		const std::wstring data = L"GpuPreference=2;";
-		RegSetValueExW(key, self.get_path().make_preferred().wstring().data(), 0, REG_SZ,
-			reinterpret_cast<const BYTE*>(data.data()),
-			static_cast<DWORD>((data.size() + 1u) * 2));
 	}
 }
 
@@ -173,19 +147,19 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 	}
 
 	FARPROC entry_point{};
-	srand(uint32_t(time(nullptr)) ^ ~(GetTickCount() * GetCurrentProcessId()));
+	srand(static_cast<uint32_t>(time(nullptr)) ^ ~(GetTickCount() * GetCurrentProcessId()));
 
 	enable_dpi_awareness();
 
 	{
 		auto premature_shutdown = true;
 		const auto _ = utils::finally([&premature_shutdown]()
+		{
+			if (premature_shutdown)
 			{
-				if (premature_shutdown)
-				{
-					component_loader::pre_destroy();
-				}
-			});
+				component_loader::pre_destroy();
+			}
+		});
 
 		try
 		{
@@ -194,15 +168,17 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 
 			assert(utils::nt::library{} == loader::get_main_module());
 
-			const auto lib = loader::load("witcher3.exe", [](const std::string& module, const std::string& function) -> void*
-				{
-					if (function == "ExitProcess")
-					{
-						return &exit_hook;
-					}
+			run_launcher();
 
-					return component_loader::load_import(module, function);
-				});
+			const auto lib = loader::load("witcher3.exe",
+			                              [](const std::string& module, const std::string& function) -> void* {
+				                              if (function == "ExitProcess")
+				                              {
+					                              return &exit_hook;
+				                              }
+
+				                              return component_loader::load_import(module, function);
+			                              });
 			loader::apply_main_module(lib);
 
 			assert(utils::nt::library{} == loader::get_game_module());
@@ -210,7 +186,7 @@ int __stdcall WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 			g_call_tls_callbacks = true;
 			run_tls_callbacks(DLL_PROCESS_ATTACH);
 
-			entry_point = FARPROC(lib.get_entry_point());
+			entry_point = static_cast<FARPROC>(lib.get_entry_point());
 
 			if (!component_loader::post_load()) return 0;
 			premature_shutdown = false;

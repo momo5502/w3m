@@ -22,11 +22,12 @@ namespace loader
 			const auto* const import_directory = &target.get_optional_header()->DataDirectory[
 				IMAGE_DIRECTORY_ENTRY_IMPORT];
 
-			const auto* descriptor = PIMAGE_IMPORT_DESCRIPTOR(target.get_ptr() + import_directory->VirtualAddress);
+			const auto* descriptor = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(target.get_ptr()
+				+ import_directory->VirtualAddress);
 
 			while (descriptor->Name)
 			{
-				std::string name = LPSTR(target.get_ptr() + descriptor->Name);
+				std::string name = reinterpret_cast<LPSTR>(target.get_ptr() + descriptor->Name);
 
 				const auto* name_table_entry = reinterpret_cast<uintptr_t*>(target.get_ptr() + descriptor->
 					OriginalFirstThunk);
@@ -50,7 +51,8 @@ namespace loader
 					}
 					else
 					{
-						const auto* import = PIMAGE_IMPORT_BY_NAME(target.get_ptr() + *name_table_entry);
+						const auto* import = reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(target.get_ptr()
+							+ *name_table_entry);
 						function_name = import->Name;
 						function_procname = function_name.data();
 					}
@@ -64,7 +66,7 @@ namespace loader
 					auto* resolved_function = import_resolver(name, function_name);
 					if (resolved_function)
 					{
-						function = FARPROC(resolved_function);
+						function = static_cast<FARPROC>(resolved_function);
 					}
 
 					if (!function)
@@ -108,7 +110,7 @@ namespace loader
 
 				auto* rel_info = offset_pointer<uint16_t*>(relocation, sizeof(IMAGE_BASE_RELOCATION));
 				const auto* rel_info_end = offset_pointer<uint16_t*>(
-					rel_info, relocation->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION));
+					rel_info, static_cast<ptrdiff_t>(relocation->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)));
 
 				for (; rel_info < rel_info_end; ++rel_info)
 				{
@@ -154,8 +156,8 @@ namespace loader
 					get_optional_header()
 					->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
 
-				auto* target_tls_start = PVOID(target_tls->StartAddressOfRawData);
-				const auto* tls_start = PVOID(source_tls->StartAddressOfRawData);
+				auto* target_tls_start = reinterpret_cast<PVOID>(target_tls->StartAddressOfRawData);
+				const auto* tls_start = reinterpret_cast<PVOID>(source_tls->StartAddressOfRawData);
 				const auto tls_size = source_tls->EndAddressOfRawData - source_tls->StartAddressOfRawData;
 				const auto tls_index = *reinterpret_cast<DWORD*>(target_tls->AddressOfIndex);
 
@@ -176,12 +178,12 @@ namespace loader
 		}
 	}
 
-	utils::nt::library load(const std::string& filename, const resolver& import_resolver)
+	utils::nt::library load(const std::filesystem::path& file, const resolver& import_resolver)
 	{
-		const auto target = utils::nt::library::load(filename);
+		const auto target = utils::nt::library::load(file);
 		if (!target)
 		{
-			throw std::runtime_error{"Failed to map: " + filename};
+			throw std::runtime_error{"Failed to map: " + file.string()};
 		}
 
 		load_relocations(target);
@@ -212,20 +214,20 @@ namespace loader
 
 	size_t reverse_g(const size_t val)
 	{
-		static auto base = size_t(loader::get_game_module().get_ptr());
-		assert(base != size_t(loader::get_main_module().get_ptr()));
+		static auto base = reinterpret_cast<size_t>(get_game_module().get_ptr());
+		assert(base != reinterpret_cast<size_t>(get_main_module().get_ptr()));
 		return 0x140000000 + (val - base);
 	}
 
 	size_t reverse_g(const void* val)
 	{
-		return reverse_g(size_t(val));
+		return reverse_g(reinterpret_cast<size_t>(val));
 	}
 }
 
 size_t operator"" _g(const size_t val)
 {
-	static auto base = size_t(loader::get_game_module().get_ptr());
-	assert(base != size_t(loader::get_main_module().get_ptr()));
+	static auto base = reinterpret_cast<size_t>(loader::get_game_module().get_ptr());
+	assert(base != reinterpret_cast<size_t>(loader::get_main_module().get_ptr()));
 	return base + (val - 0x140000000);
 }
