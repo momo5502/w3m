@@ -1,5 +1,8 @@
 #pragma once
+
 #include "memory.hpp"
+
+#include <array>
 
 template <class Type, size_t n>
 constexpr auto ARRAY_COUNT(Type (&)[n]) { return n; }
@@ -40,5 +43,11 @@ namespace utils::string
 	void copy(char (&dest)[Size], const char* src)
 	{
 		copy(dest, Size, src);
+	}
+
+	template <size_t Size>
+	void copy(std::array<char, Size>& dest, const char* src)
+	{
+		copy(dest.data(), dest.size(), src);
 	}
 }

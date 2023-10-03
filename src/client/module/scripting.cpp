@@ -156,6 +156,11 @@ namespace scripting
 		return *this;
 	}
 
+	string::string(const char* str, const size_t length)
+		: string(std::string_view(str, length))
+	{
+	}
+
 	string::string(const char* str)
 		: string(std::string_view(str))
 	{

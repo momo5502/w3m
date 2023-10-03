@@ -7,9 +7,16 @@ struct W3mPlayerState
     var moveType : int;
 }
 
+struct W3mPlayer
+{
+    var guid : Uint64;
+    var playerName : string;
+    var playerState : W3mPlayerState;
+}
+
 import function W3mSetNpcDisplayName(npc : CNewNPC, npcName : string);
 import function W3mStorePlayerState(playerState : W3mPlayerState);
-import function W3mGetPlayerStates() : array<W3mPlayerState>;
+import function W3mGetPlayerStates() : array<W3mPlayer>;
 
 function ConvertPlayerMoveType(playerMoveType : EPlayerMoveType) : int
 {
@@ -39,7 +46,7 @@ function ConvertPlayerMoveType(playerMoveType : EPlayerMoveType) : int
 
 function ConvertToMoveType(moveType : int) : EMoveType
 {
-    switch( moveType)
+    switch(moveType)
     {
         case 0:
             return MT_Walk;
@@ -84,14 +91,19 @@ function TransmitCurrentPlayerState()
     TransmitPlayerState((CActor)thePlayer);
 }
 
-function ApplyPlayerState(actor : CActor, playerState : W3mPlayerState)
+function ApplyPlayerState(actor : CActor, player : W3mPlayer)
 {
     var inter : int;
     var movingAgent : CMovingPhysicalAgentComponent;
     var actorPos : Vector;
     var targetPos : Vector;
+    var playerState : W3mPlayerState;
+
+    playerState = player.playerState;
 
     inter = 5;
+
+    W3mSetNpcDisplayName((CNewNPC)actor, player.playerName);
 
     actorPos = actor.GetWorldPosition();
     targetPos = playerState.position;
@@ -198,7 +210,7 @@ state MultiplayerState in W3mStateMachine
     latent function UpdateOtherPlayers()
     {
         var index : int;
-        var player_states : array<W3mPlayerState>;
+        var player_states : array<W3mPlayer>;
 
         player_states = W3mGetPlayerStates();
         AdjustPlayers(player_states);
@@ -209,7 +221,7 @@ state MultiplayerState in W3mStateMachine
         }
     }
 
-    latent function AdjustPlayers(player_states : array<W3mPlayerState>)
+    latent function AdjustPlayers(player_states : array<W3mPlayer>)
     {
         var current_player : CEntity;
 

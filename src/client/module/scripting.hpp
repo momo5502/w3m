@@ -327,6 +327,8 @@ namespace scripting
 		string(const wchar_t* str);
 		string& operator=(const wchar_t* str);
 
+		string(const char* str, size_t length);
+
 		string(const char* str);
 		string& operator=(const char* str);
 

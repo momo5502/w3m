@@ -1,6 +1,7 @@
 #include "std_include.hpp"
 #include "server.hpp"
 
+#include <utils/string.hpp>
 #include <utils/byte_buffer.hpp>
 
 #include "console.hpp"
@@ -16,13 +17,15 @@ namespace
 			return;
 		}
 
-		const auto player_state = buffer.read<game::player_state>();
+		const auto player_state = buffer.read<game::player>();
 
 		const auto size = clients.size();
 
 		auto& client = clients[source];
 		client.last_packet = std::chrono::high_resolution_clock::now();
-		client.current_state = player_state;
+		client.guid = player_state.guid;
+		client.name.assign(player_state.name.data(), strnlen_s(player_state.name.data(), player_state.name.size()));
+		client.current_state = std::move(player_state.state);
 
 		if (clients.size() != size)
 		{
@@ -32,7 +35,7 @@ namespace
 
 	void send_state(const network::manager& manager, const server::client_map& clients)
 	{
-		std::vector<game::player_state> states{};
+		std::vector<game::player> states{};
 		states.reserve(clients.size());
 
 		size_t index = 0;
@@ -40,14 +43,20 @@ namespace
 		{
 			if (index != 0)
 			{
-				states.emplace_back(val.current_state);
+				game::player player{};
+				player.guid = val.guid;
+				player.state = val.current_state;
+				utils::string::copy(player.name, val.name.data());
+
+				states.emplace_back(std::move(player));
 			}
 
 			++index;
 		}
 
 		index = 0;
-		game::player_state last_state{};
+		game::player last_state{};
+
 		for (const auto& client : clients)
 		{
 			if (index != 0)
@@ -61,7 +70,10 @@ namespace
 
 			(void)manager.send(client.first, "states", buffer.get_buffer());
 
-			last_state = client.second.current_state;
+			last_state.guid = client.second.guid;
+			last_state.state = client.second.current_state;
+			utils::string::copy(last_state.name, client.second.name.data());
+
 			++index;
 		}
 	}

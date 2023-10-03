@@ -3,11 +3,13 @@
 #include "../loader/component_loader.hpp"
 
 #include <game/structs.hpp>
+#include <utils/string.hpp>
 #include <utils/byte_buffer.hpp>
 #include <utils/concurrency.hpp>
 
 #include "network.hpp"
 #include "scripting.hpp"
+#include "utils/nt.hpp"
 
 namespace scripting_experiments
 {
@@ -22,6 +24,13 @@ namespace scripting_experiments
 			int move_type{};
 		};
 
+		struct W3mPlayer
+		{
+			uint64_t guid{};
+			scripting::string name{};
+			W3mPlayerState state{};
+		};
+
 		struct CNewNPC
 		{
 			char pad[704];
@@ -31,11 +40,11 @@ namespace scripting_experiments
 		template <typename T>
 		struct game_object
 		{
-			uint64_t some_type;
-			T* object;
+			uint64_t some_type{};
+			T* object{};
 		};
 
-		using players = std::vector<W3mPlayerState>;
+		using players = std::vector<W3mPlayer>;
 		utils::concurrency::container<players> g_players;
 
 		game::vec3_t convert(const scripting::game::EulerAngles& euler_angles)
@@ -80,6 +89,13 @@ namespace scripting_experiments
 			return game_vector;
 		}
 
+		template <size_t Size>
+		scripting::string convert(const std::array<char, Size>& str)
+		{
+			const auto length = strnlen_s(str.data(), Size);
+			return {str.data(), length};
+		}
+
 		// ----------------------------------------------
 
 		void set_display_name(const game_object<CNewNPC>* npc, const scripting::string& name)
@@ -90,9 +106,9 @@ namespace scripting_experiments
 			}
 		}
 
-		scripting::array<W3mPlayerState> get_player_states()
+		scripting::array<W3mPlayer> get_player_states()
 		{
-			return g_players.access<scripting::array<W3mPlayerState>>([](const players& players)
+			return g_players.access<scripting::array<W3mPlayer>>([](const players& players)
 			{
 				return players;
 			});
@@ -108,9 +124,17 @@ namespace scripting_experiments
 			player_state.speed = state.speed;
 			player_state.move_type = state.move_type;
 
+			static const auto guid = rand();
+			static const auto username = utils::nt::get_user_name();
+
+			game::player player{};
+			player.guid = guid;
+			player.state = std::move(player_state);
+			utils::string::copy(player.name, username.data());
+
 			utils::buffer_serializer buffer{};
 			buffer.write(game::PROTOCOL);
-			buffer.write(player_state);
+			buffer.write(player);
 
 			network::send(network::get_master_server(), "state", buffer.get_buffer());
 		}
@@ -129,23 +153,28 @@ namespace scripting_experiments
 				return;
 			}
 
-			const auto player_states = buffer.read_vector<game::player_state>();
+			const auto player_data = buffer.read_vector<game::player>();
 
-			g_players.access([&player_states](players& players)
+			g_players.access([&player_data](players& players)
 			{
 				players.resize(0);
-				players.reserve(player_states.size());
+				players.reserve(player_data.size());
 
-				for (const auto& state : player_states)
+				for (const auto& player : player_data)
 				{
 					W3mPlayerState player_state{};
-					player_state.angles = convert(state.angles);
-					player_state.position = convert(state.position);
-					player_state.velocity = convert(state.velocity);
-					player_state.move_type = state.move_type;
-					player_state.speed = state.speed;
+					player_state.angles = convert(player.state.angles);
+					player_state.position = convert(player.state.position);
+					player_state.velocity = convert(player.state.velocity);
+					player_state.move_type = player.state.move_type;
+					player_state.speed = player.state.speed;
 
-					players.emplace_back(player_state);
+					W3mPlayer w3m_player{};
+					w3m_player.guid = player.guid;
+					w3m_player.name = convert(player.name);
+					w3m_player.state = std::move(player_state);
+
+					players.emplace_back(std::move(w3m_player));
 				}
 			});
 		}
