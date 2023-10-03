@@ -101,7 +101,7 @@ namespace
 		{
 			void post_start() override
 			{
-				if (!run_launcher())
+				if (!utils::nt::is_wine() && !run_launcher())
 				{
 					component_loader::trigger_premature_shutdown();
 				}
