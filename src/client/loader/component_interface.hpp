@@ -6,6 +6,7 @@ enum class component_priority
 {
 	min = 0,
 	splash,
+	console,
 	launcher,
 	updater,
 };

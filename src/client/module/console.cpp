@@ -21,9 +21,13 @@ namespace console
 
 		void create_console()
 		{
+			if (GetStdHandle(STD_OUTPUT_HANDLE))
+			{
+				return;
+			}
+
 			AllocConsole();
 			AttachConsole(GetCurrentProcessId());
-			ShowWindow(GetConsoleWindow(), SW_SHOWNOACTIVATE);
 
 			FILE* fp{};
 			(void)freopen_s(&fp, "CONIN$", "r", stdin);
@@ -42,11 +46,18 @@ namespace console
 
 	struct component final : component_interface
 	{
-		void post_load() override
+		void post_start() override
 		{
 			if (!utils::nt::is_wine())
 			{
 				create_console();
+			}
+		}
+
+		void post_load() override
+		{
+			if (!utils::nt::is_wine())
+			{
 				utils::hook::jump(0x14025D5B0_g, log_message_stub);
 			}
 
@@ -63,6 +74,11 @@ namespace console
 					break;
 				}
 			}
+		}
+
+		component_priority priority() const override
+		{
+			return component_priority::console;
 		}
 	};
 }
