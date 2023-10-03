@@ -92,7 +92,7 @@ namespace scripting_experiments
 		template <size_t Size>
 		scripting::string convert(const std::array<char, Size>& str)
 		{
-			const auto length = strnlen_s(str.data(), Size);
+			const auto length = strnlen(str.data(), Size);
 			return {str.data(), length};
 		}
 

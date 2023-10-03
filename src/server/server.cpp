@@ -24,7 +24,7 @@ namespace
 		auto& client = clients[source];
 		client.last_packet = std::chrono::high_resolution_clock::now();
 		client.guid = player_state.guid;
-		client.name.assign(player_state.name.data(), strnlen_s(player_state.name.data(), player_state.name.size()));
+		client.name.assign(player_state.name.data(), strnlen(player_state.name.data(), player_state.name.size()));
 		client.current_state = std::move(player_state.state);
 
 		if (clients.size() != size)
