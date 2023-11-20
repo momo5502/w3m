@@ -3,6 +3,8 @@
 #ifdef _WIN32
 
 #include <intrin.h>
+#include <mutex>
+#include <thread>
 
 namespace utils::hook
 {
