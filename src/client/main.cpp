@@ -5,6 +5,7 @@
 
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
+#include <utils/flags.hpp>
 #include <utils/finally.hpp>
 
 extern __declspec(thread) char tls_data[TLS_PAYLOAD_SIZE];
@@ -149,12 +150,14 @@ namespace
 	}
 }
 
-int WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR, int)
+int main(int argc, char** argv)
 {
 	if (handle_process_runner())
 	{
 		return 0;
 	}
+
+	utils::flags flags{argc, argv};
 
 	FARPROC entry_point{};
 	srand(static_cast<uint32_t>(time(nullptr)) ^ ~(GetTickCount() * GetCurrentProcessId()));
@@ -199,4 +202,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 	}
 
 	return static_cast<int>(entry_point());
+}
+
+int WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR, int)
+{
+	return main(__argc, __argv);
 }
