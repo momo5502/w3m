@@ -1,47 +1,26 @@
 #pragma once
-#include <thread>
-#include "nt.hpp"
 
-namespace utils::thread
+#include <chrono>
+
+namespace utils
 {
-	bool set_name(HANDLE t, const std::string& name);
-	bool set_name(DWORD id, const std::string& name);
-	bool set_name(std::thread& t, const std::string& name);
-	bool set_name(const std::string& name);
-
-	template <typename ...Args>
-	std::thread create_named_thread(const std::string& name, Args&&... args)
-	{
-		auto t = std::thread(std::forward<Args>(args)...);
-		set_name(t, name);
-		return t;
-	}
-
-	class handle
+	template <typename Clock = std::chrono::high_resolution_clock>
+	class timer
 	{
 	public:
-		handle(const DWORD thread_id, const DWORD access = THREAD_ALL_ACCESS)
-			: handle_(OpenThread(access, FALSE, thread_id))
+		void update()
 		{
+			this->point_ = Clock::now();
 		}
 
-		operator bool() const
+		bool has_elapsed(typename Clock::duration duration) const
 		{
-			return this->handle_;
-		}
-
-		operator HANDLE() const
-		{
-			return this->handle_;
+			const auto now = Clock::now();
+			const auto diff = now - this->point_;
+			return diff > duration;
 		}
 
 	private:
-		nt::handle<> handle_{};
+		typename Clock::time_point point_{ Clock::now() };
 	};
-
-	std::vector<DWORD> get_thread_ids();
-	void for_each_thread(const std::function<void(HANDLE)>& callback, DWORD access = THREAD_ALL_ACCESS);
-
-	void suspend_other_threads();
-	void resume_other_threads();
 }
