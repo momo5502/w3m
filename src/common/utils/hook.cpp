@@ -175,6 +175,8 @@ namespace utils::hook
 
 	void assembler::pushad64()
 	{
+		this->pushfq();
+
 		this->push(rax);
 		this->push(rcx);
 		this->push(rdx);
@@ -192,10 +194,14 @@ namespace utils::hook
 		this->push(r13);
 		this->push(r14);
 		this->push(r15);
+
+		this->sub(rsp, 8);
 	}
 
 	void assembler::popad64()
 	{
+		this->add(rsp, 8);
+
 		this->pop(r15);
 		this->pop(r14);
 		this->pop(r13);
@@ -213,6 +219,8 @@ namespace utils::hook
 		this->pop(rdx);
 		this->pop(rcx);
 		this->pop(rax);
+
+		this->popfq();
 	}
 
 	void assembler::prepare_stack_for_call()
