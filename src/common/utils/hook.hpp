@@ -67,8 +67,8 @@ namespace utils::hook
 		using Assembler::call;
 		using Assembler::jmp;
 
-		void pushad64();
-		void popad64();
+		void pushaq();
+		void popaq();
 
 		void prepare_stack_for_call();
 		void restore_stack_after_call();

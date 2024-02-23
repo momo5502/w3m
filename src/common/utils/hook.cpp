@@ -173,7 +173,7 @@ namespace utils::hook
 		}
 	}
 
-	void assembler::pushad64()
+	void assembler::pushaq()
 	{
 		this->pushfq();
 
@@ -198,7 +198,7 @@ namespace utils::hook
 		this->sub(rsp, 8);
 	}
 
-	void assembler::popad64()
+	void assembler::popaq()
 	{
 		this->add(rsp, 8);
 
