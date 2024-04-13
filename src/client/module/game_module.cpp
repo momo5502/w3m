@@ -36,8 +36,8 @@ namespace
 		public:
 			void post_start() override
 			{
-				file_name_a_hook = utils::hook::detour(&GetModuleFileNameA, &get_module_file_name_a);
-				file_name_w_hook = utils::hook::detour(&GetModuleFileNameW, &get_module_file_name_w);
+				file_name_a_hook.create(&GetModuleFileNameA, &get_module_file_name_a);
+				file_name_w_hook.create(&GetModuleFileNameW, &get_module_file_name_w);
 			}
 		};
 	}
