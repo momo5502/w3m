@@ -1,4 +1,4 @@
-# Witcher 3: Online
+# Witcher 3: Mod
 
 An attempt at modding Witcher 3 and adding multiplayer support.  
 
