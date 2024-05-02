@@ -82,7 +82,7 @@ namespace
 					return;
 				}
 
-				this->window_ = CreateWindowExA(WS_EX_APPWINDOW, "Witcher Splash Screen", "Witcher 3: Online",
+				this->window_ = CreateWindowExA(WS_EX_APPWINDOW, "Witcher Splash Screen", W3M_MODNAME,
 				                                WS_POPUP | WS_SYSMENU, (x_pixels - initial_width) / 2,
 				                                (y_pixels - initial_height) / 2, initial_width, initial_height,
 				                                nullptr, nullptr, this->main_, nullptr);

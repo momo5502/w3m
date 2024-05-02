@@ -38,7 +38,7 @@ namespace window
 				{
 					if (const auto game_window = get_game_window())
 					{
-						SetWindowTextA(game_window, "Witcher 3: Online");
+						SetWindowTextA(game_window, W3M_MODNAME);
 						return scheduler::cond_end;
 					}
 

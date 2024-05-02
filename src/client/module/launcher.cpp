@@ -14,7 +14,7 @@ namespace
 		{
 			uint32_t directx_version{};
 
-			momo::html_ui window("Witcher 3: Mod", 500, 300);
+			momo::html_ui window(W3M_MODNAME, 500, 300);
 
 			window.register_handler("launch", [&](const uint32_t version)
 			{
