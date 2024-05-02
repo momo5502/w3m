@@ -10,7 +10,7 @@ namespace
 	{
 		utils::hook::detour file_name_a_hook;
 		utils::hook::detour file_name_w_hook;
-		
+
 		DWORD __stdcall get_module_file_name_a(HMODULE module, const LPSTR filename, const DWORD size)
 		{
 			if (!module)

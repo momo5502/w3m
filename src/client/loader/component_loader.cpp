@@ -7,12 +7,13 @@ namespace component_loader
 {
 	namespace
 	{
-		std::vector<std::unique_ptr<component_interface>>& get_components()
-		{
-			using component_vector = std::vector<std::unique_ptr<component_interface>>;
-			using component_vector_container = std::unique_ptr<component_vector, std::function<void(component_vector*)>>
-				;
+		using component_entry = std::unique_ptr<component_interface>;
+		using component_vector = std::vector<component_entry>;
+		using component_vector_destructor = std::function<void(component_vector*)>;
+		using component_vector_container = std::unique_ptr<component_vector, component_vector_destructor>;
 
+		component_vector& get_components()
+		{
 			static component_vector_container components(new component_vector,
 			                                             [](const component_vector* component_vector)
 			                                             {
@@ -29,8 +30,8 @@ namespace component_loader
 		auto& components = get_components();
 		components.emplace_back(std::move(component));
 
-		std::ranges::stable_sort(components, [](const std::unique_ptr<component_interface>& a,
-		                                        const std::unique_ptr<component_interface>& b)
+		std::ranges::stable_sort(components, [](const component_entry& a,
+		                                        const component_entry& b)
 		{
 			return a->priority() > b->priority();
 		});
