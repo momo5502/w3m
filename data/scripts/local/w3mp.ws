@@ -240,8 +240,3 @@ state MultiplayerState in W3mStateMachine
         }
     }
 }
-
-exec function connect()
-{
-    theGame.StartMultiplayer();
-}

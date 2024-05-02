@@ -203,6 +203,7 @@ import class CR4Game extends CCommonGame
 	event  OnGameLoadInitFinishedSuccess()
 	{
 		GetGuiManager().GetRootMenu().CloseMenu();
+		this.StartMultiplayer();
 	}
 	
 	public function IsFocusModeActive() : bool
