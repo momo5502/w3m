@@ -26,7 +26,7 @@ namespace updater
 		}
 	}
 
-	struct component final : component_interface
+	class component final : component_interface
 	{
 		component()
 		{
