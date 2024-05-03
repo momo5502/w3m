@@ -40,15 +40,22 @@ jobs:
       - name: CMake Build
         run: cmake --workflow --preset=${{matrix.preset}}
 
-      - name: Upload Artifacts
+      - name: Upload Binary
         uses: actions/upload-artifact@v4
         with:
-          name: Windows ${{matrix.configuration}} Artifacts
+          name: Windows ${{matrix.configuration}} Binaries
           path: |
             build/${{matrix.preset}}/artifacts/w3m.exe
             build/${{matrix.preset}}/artifacts/w3m.pdb
             build/${{matrix.preset}}/artifacts/server.exe
             build/${{matrix.preset}}/artifacts/server.pdb
+
+      - name: Upload Data Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows ${{matrix.configuration}} Data Artifacts
+          path: |
+            data/*
     
   build-linux:
     name: Build Linux
@@ -105,6 +112,17 @@ jobs:
         with:
           name: Linux Release Artifacts
 
+      - name: Download release data artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Windows Release Data Artifacts
+          path: data
+
+      - name: Download release binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: Windows Release Binaries
+
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2.7.0
         with:
@@ -116,6 +134,15 @@ jobs:
 
       - name: Upload Server Binary
         run: rsync -avz server ${{ secrets.MOMO_SERVER_USER }}@${{ secrets.MOMO_SERVER_HOSTNAME }}:~/
+
+      - name: Remove old data
+        run: ssh ${{ secrets.MOMO_SERVER_USER }}@${{ secrets.MOMO_SERVER_HOSTNAME }} "rm -rf ${{ secrets.MOMO_SERVER_DATA_PATH }}/data/*"
+
+      - name: Upload Game Binary
+        run: rsync -avz w3m.exe ${{ secrets.MOMO_SERVER_USER }}@${{ secrets.MOMO_SERVER_HOSTNAME }}:${{ secrets.MOMO_SERVER_DATA_PATH }}/
+
+      - name: Upload Data Files
+        run: rsync -avz ./data/ ${{ secrets.MOMO_SERVER_USER }}@${{ secrets.MOMO_SERVER_HOSTNAME }}:${{ secrets.MOMO_SERVER_DATA_PATH }}/data/
 
       - name: Publish changes
         run: ssh ${{ secrets.MOMO_SERVER_USER }}@${{ secrets.MOMO_SERVER_HOSTNAME }} "${{ secrets.MOMO_SERVER_UPDATE_COMMAND }}"
