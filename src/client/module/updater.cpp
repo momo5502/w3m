@@ -26,8 +26,9 @@ namespace updater
 		}
 	}
 
-	class component final : component_interface
+	class component final : public component_interface
 	{
+	public:
 		component()
 		{
 			this->update_thread_ = std::thread([this]
