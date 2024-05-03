@@ -10,3 +10,19 @@
 [submodule "deps/html-ui"]
 	path = deps/html-ui
 	url = ../html-ui.git
+[submodule "deps/libtomcrypt"]
+	path = deps/libtomcrypt
+	url = https://github.com/libtom/libtomcrypt.git
+	branch = develop
+[submodule "deps/libtommath"]
+	path = deps/libtommath
+	url = https://github.com/libtom/libtommath.git
+	branch = develop
+[submodule "deps/curl"]
+	path = deps/curl
+	url = https://github.com/curl/curl.git
+[submodule "deps/zlib"]
+	path = deps/zlib
+	url = https://github.com/madler/zlib.git
+	branch = develop
+	ignore = dirty
