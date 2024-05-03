@@ -98,7 +98,7 @@ jobs:
     name: Deploy Server
     needs: [build-windows, build-linux]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main')
     steps:
       - name: Download master server binary
         uses: actions/download-artifact@v4
