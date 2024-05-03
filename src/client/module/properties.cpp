@@ -3,17 +3,21 @@
 #include "../loader/loader.hpp"
 
 #include "properties.hpp"
+#include "game_path.hpp"
 #include "utils/nt.hpp"
 
 namespace properties::detail
 {
 	namespace
 	{
+		std::filesystem::path get_filesystem_path()
+		{
+			return game_path::get_appdata_path() / "properties.json";
+		}
+
 		std::string get_path()
 		{
-			auto path = loader::get_main_module().get_path();
-			path.replace_extension(".json");
-			return path.generic_string();
+			return get_filesystem_path().generic_string();
 		}
 	}
 
