@@ -56,7 +56,13 @@ endif()
 
 ##########################################
 
+option(WITH_LTM "" OFF)
+
 add_subdirectory(libtomcrypt)
+
+target_compile_definitions(libtomcrypt PUBLIC LTM_DESC)
+target_compile_definitions(libtomcrypt PUBLIC USE_LTM)
+target_link_libraries(libtomcrypt PUBLIC libtommath)
 
 if (MSVC)
     target_compile_options(libtomcrypt PRIVATE "/wd4703")
