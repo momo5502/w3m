@@ -41,6 +41,11 @@ namespace updater
 			join();
 		}
 
+		void post_start() override
+		{
+			join();
+		}
+
 		void post_load() override
 		{
 			join();
