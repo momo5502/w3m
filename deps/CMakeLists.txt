@@ -13,6 +13,57 @@ add_subdirectory(asmjit)
 
 ##########################################
 
+option(HTTP_ONLY "" ON)
+option(BUILD_CURL_EXE "" OFF)
+option(BUILD_SHARED_LIBS "" OFF)
+option(BUILD_STATIC_LIBS "" ON)
+option(CURL_ENABLE_EXPORT_TARGET "" OFF)
+
+option(CURL_DISABLE_DICT "" ON)
+option(CURL_DISABLE_FILE "" ON)
+option(CURL_DISABLE_LDAP "" ON)
+option(CURL_DISABLE_LDAPS "" ON)
+option(CURL_DISABLE_FTP "" ON)
+option(CURL_DISABLE_GOPHER "" ON)
+option(CURL_DISABLE_IMAP "" ON)
+option(CURL_DISABLE_MQTT "" ON)
+option(CURL_DISABLE_POP3 "" ON)
+option(CURL_DISABLE_RTSP "" ON)
+option(CURL_DISABLE_SMTP "" ON)
+option(CURL_DISABLE_SMB "" ON)
+option(CURL_DISABLE_TELNET "" ON)
+option(CURL_DISABLE_TFTP "" ON)
+
+option(CURL_USE_LIBSSH2 "" OFF)
+
+set(CURL_USE_SCHANNEL ON)
+
+add_subdirectory(curl)
+
+##########################################
+
+add_subdirectory(zlib)
+target_compile_definitions(zlibstatic PUBLIC ZLIB_CONST=1)
+target_include_directories(zlibstatic PUBLIC ${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
+
+##########################################
+
+add_subdirectory(libtommath)
+
+if (MSVC)
+    target_compile_options(libtommath PRIVATE "/wd4146")
+endif()
+
+##########################################
+
+add_subdirectory(libtomcrypt)
+
+if (MSVC)
+    target_compile_options(libtomcrypt PRIVATE "/wd4703")
+endif()
+
+##########################################
+
 add_subdirectory(minhook)
 add_subdirectory(html-ui)
 

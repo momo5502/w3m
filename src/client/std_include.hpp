@@ -52,6 +52,7 @@
 #include <optional>
 #include <string_view>
 #include <stdexcept>
+#include <filesystem>
 
 #include <cassert>
 

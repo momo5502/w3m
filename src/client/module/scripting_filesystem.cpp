@@ -7,6 +7,7 @@
 #include <utils/string.hpp>
 
 #include "scripting.hpp"
+#include "game_path.hpp"
 
 namespace scripting_filesystem
 {
@@ -99,7 +100,8 @@ namespace scripting_filesystem
 		{
 			reinterpret_cast<void(*)(void*, scripting::array<scripting::string>*)>(0x1402A3ED0_g)(a1, scripts);
 
-			const auto custom_scripts = collect_custom_scripts(loader::get_main_module().get_folder() / "data");
+			//const auto custom_scripts = collect_custom_scripts(loader::get_main_module().get_folder() / "data");
+			const auto custom_scripts = collect_custom_scripts(game_path::get_appdata_path() / "data");
 			if (custom_scripts.empty())
 			{
 				return;

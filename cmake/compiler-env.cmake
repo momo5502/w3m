@@ -2,6 +2,19 @@ include_guard()
 
 ##########################################
 
+set(IS_CI OFF)
+if(DEFINED ENV{CI} AND ("$ENV{CI}" STREQUAL "true" OR "$ENV{CI}" STREQUAL "1"))
+    set(IS_CI ON)
+endif()
+
+##########################################
+
+if (IS_CI)
+  add_compile_definitions(CI=1)
+endif()
+
+##########################################
+
 cmake_policy(SET CMP0069 NEW) 
 set(CMAKE_POLICY_DEFAULT_CMP0069 NEW)
 

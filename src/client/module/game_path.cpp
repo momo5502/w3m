@@ -1,15 +1,17 @@
 #include "../std_include.hpp"
+#include "game_path.hpp"
 
 #include "../loader/component_loader.hpp"
 
 #include <utils/io.hpp>
 #include <utils/com.hpp>
+#include <utils/finally.hpp>
 
 #include "properties.hpp"
 
-namespace
+namespace game_path
 {
-	namespace game_path
+	namespace
 	{
 		void set_directory(const std::filesystem::path& path)
 		{
@@ -93,9 +95,8 @@ namespace
 			properties::set("game_path", path);
 		}
 
-		class component final : public component_interface
+		struct component final : component_interface
 		{
-		public:
 			void post_start() override
 			{
 				if (!utils::io::file_exists("witcher3.exe"))
@@ -104,6 +105,28 @@ namespace
 				}
 			}
 		};
+	}
+
+	std::filesystem::path get_appdata_path()
+	{
+		static const auto appdata_path = []
+		{
+			PWSTR path;
+			if (FAILED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &path)))
+			{
+				throw std::runtime_error("Failed to read APPDATA path!");
+			}
+
+			auto _ = utils::finally([&path]
+			{
+				CoTaskMemFree(path);
+			});
+
+			static auto appdata = std::filesystem::path(path) / "w3m";
+			return appdata;
+		}();
+
+		return appdata_path;
 	}
 }
 
