@@ -43,6 +43,11 @@ namespace game_path
 
 		std::string get_default_witcher_path()
 		{
+			if (utils::nt::is_wine())
+			{
+				return "Z:\\home\\deck\\.steam\\steamapps\\common\\The Witcher 3";
+			}
+
 			const auto steam_path = get_steam_install_directory();
 			if (steam_path.empty()) return {};
 
