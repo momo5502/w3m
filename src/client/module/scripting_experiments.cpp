@@ -8,6 +8,7 @@
 #include <utils/concurrency.hpp>
 
 #include "network.hpp"
+#include "renderer.hpp"
 #include "scripting.hpp"
 #include "utils/nt.hpp"
 
@@ -178,6 +179,14 @@ namespace scripting_experiments
 				}
 			});
 		}
+
+		size_t get_player_count()
+		{
+			return g_players.access<size_t>([](const players& players)
+			{
+				return players.size();
+			});
+		}
 	}
 
 	struct component final : component_interface
@@ -189,6 +198,12 @@ namespace scripting_experiments
 			scripting::register_function<set_display_name>(L"W3mSetNpcDisplayName");
 
 			network::on("states", &receive_player_states);
+
+			renderer::on_frame([]
+			{
+				renderer::draw_text("Players: " + std::to_string(get_player_count()), {10.0f, 30.0f},
+				                    {0xFF, 0xFF, 0xFF, 0xFF});
+			});
 		}
 	};
 }
