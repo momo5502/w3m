@@ -8,6 +8,7 @@ enum class component_priority
 	splash,
 	console,
 	launcher,
+	steam_proxy,
 	updater,
 };
 

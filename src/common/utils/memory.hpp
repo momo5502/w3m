@@ -66,6 +66,7 @@ namespace utils
 
 		static bool is_bad_read_ptr(const void* ptr);
 		static bool is_bad_code_ptr(const void* ptr);
+		static bool is_rdata_ptr(const void* ptr);
 
 		static allocator* get_allocator();
 

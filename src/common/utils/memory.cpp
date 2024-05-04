@@ -142,6 +142,33 @@ namespace utils
 		return true;
 	}
 
+	bool memory::is_rdata_ptr(const void* pointer)
+	{
+#ifdef _WIN32
+		const std::string rdata = ".rdata";
+		const auto pointer_lib = utils::nt::library::get_by_address(pointer);
+
+		for (const auto& section : pointer_lib.get_section_headers())
+		{
+			constexpr auto size = sizeof(section->Name);
+			char name[size + 1];
+			name[size] = 0;
+			std::memcpy(name, section->Name, size);
+
+			if (name == rdata)
+			{
+				const auto target = reinterpret_cast<size_t>(pointer);
+				const size_t source_start = reinterpret_cast<size_t>(pointer_lib.get_ptr()) + section->PointerToRawData;
+				const size_t source_end = source_start + section->SizeOfRawData;
+
+				return target >= source_start && target <= source_end;
+			}
+		}
+#endif
+
+		return false;
+	}
+
 	memory::allocator* memory::get_allocator()
 	{
 		return &memory::mem_allocator_;

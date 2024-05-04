@@ -18,6 +18,7 @@ target_link_libraries(client PRIVATE
   libtomcrypt
   libtommath
   zlibstatic
+  udis86
 )
 
 set_target_properties(client PROPERTIES OUTPUT_NAME "w3m")

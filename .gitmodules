@@ -26,3 +26,6 @@
 	url = https://github.com/madler/zlib.git
 	branch = develop
 	ignore = dirty
+[submodule "deps/udis86"]
+	path = deps/udis86
+	url = https://github.com/vmt/udis86.git

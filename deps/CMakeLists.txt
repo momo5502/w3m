@@ -82,4 +82,8 @@ target_include_directories(RapidJSON INTERFACE "${CMAKE_CURRENT_LIST_DIR}/rapidj
 
 ##########################################
 
+include(udis86.cmake)
+
+##########################################
+
 momo_restore_deprecation_warnings()
