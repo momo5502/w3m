@@ -3,6 +3,8 @@
 #include "../loader/component_loader.hpp"
 
 #include <game/structs.hpp>
+
+#include <utils/nt.hpp>
 #include <utils/string.hpp>
 #include <utils/byte_buffer.hpp>
 #include <utils/concurrency.hpp>
@@ -10,7 +12,7 @@
 #include "network.hpp"
 #include "renderer.hpp"
 #include "scripting.hpp"
-#include "utils/nt.hpp"
+#include "steam_proxy.hpp"
 
 namespace scripting_experiments
 {
@@ -115,6 +117,22 @@ namespace scripting_experiments
 			});
 		}
 
+		const std::string& get_player_name()
+		{
+			static const std::string name = []() -> std::string
+			{
+				const auto steam_name = steam_proxy::get_player_name();
+				if (steam_name)
+				{
+					return steam_name;
+				}
+
+				return utils::nt::get_user_name();
+			}();
+
+			return name;
+		}
+
 		void store_player_state(const W3mPlayerState& state)
 		{
 			game::player_state player_state{};
@@ -126,7 +144,7 @@ namespace scripting_experiments
 			player_state.move_type = state.move_type;
 
 			static const auto guid = rand();
-			static const auto username = utils::nt::get_user_name();
+			const auto& username = get_player_name();
 
 			game::player player{};
 			player.guid = guid;

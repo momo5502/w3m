@@ -229,7 +229,7 @@ namespace steam_proxy
 			return client_friends.invoke<const char*>("GetPersonaName");
 		}
 
-		return "";
+		return nullptr;
 	}
 }
 
