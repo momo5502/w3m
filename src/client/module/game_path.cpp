@@ -45,7 +45,7 @@ namespace game_path
 		{
 			if (utils::nt::is_wine())
 			{
-				return "Z:\\home\\deck\\.steam\\steamapps\\common\\The Witcher 3";
+				return "Z:\\home\\deck\\.local\\share\\Steam\\steamapps\\common";
 			}
 
 			const auto steam_path = get_steam_install_directory();

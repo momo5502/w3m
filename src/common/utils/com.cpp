@@ -86,14 +86,9 @@ namespace utils::com
 			}
 
 			IShellItem* shell_item = nullptr;
-			if (FAILED(SHCreateItemFromParsingName(wide_selected_folder.data(), NULL, IID_PPV_ARGS(&shell_item))))
+			if (SUCCEEDED(SHCreateItemFromParsingName(wide_selected_folder.data(), NULL, IID_PPV_ARGS(&shell_item))))
 			{
-				throw std::runtime_error("Failed to create item from parsing name");
-			}
-
-			if (FAILED(file_dialog->SetDefaultFolder(shell_item)))
-			{
-				throw std::runtime_error("Failed to set default folder");
+				file_dialog->SetDefaultFolder(shell_item);
 			}
 		}
 
