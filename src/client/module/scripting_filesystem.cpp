@@ -96,18 +96,15 @@ namespace scripting_filesystem
 			}
 		}
 
-		void collect_script(void* a1, scripting::array<scripting::string>* scripts)
+		void add_scripts_from_folder(scripting::array<scripting::string>& scripts, const std::filesystem::path& base)
 		{
-			reinterpret_cast<void(*)(void*, scripting::array<scripting::string>*)>(0x1402A3ED0_g)(a1, scripts);
-
-			//const auto custom_scripts = collect_custom_scripts(loader::get_main_module().get_folder() / "data");
-			const auto custom_scripts = collect_custom_scripts(game_path::get_appdata_path() / "data");
+			const auto custom_scripts = collect_custom_scripts(base);
 			if (custom_scripts.empty())
 			{
 				return;
 			}
 
-			auto base_scripts = scripts->move_to_vector();
+			auto base_scripts = scripts.move_to_vector();
 			remove_overriden_base_scripts(base_scripts, custom_scripts);
 
 			for (const auto& script : custom_scripts)
@@ -115,7 +112,15 @@ namespace scripting_filesystem
 				base_scripts.emplace_back(script);
 			}
 
-			*scripts = std::move(base_scripts);
+			scripts = std::move(base_scripts);
+		}
+
+		void collect_script(void* a1, scripting::array<scripting::string>* scripts)
+		{
+			reinterpret_cast<void(*)(void*, scripting::array<scripting::string>*)>(0x1402A3ED0_g)(a1, scripts);
+
+			add_scripts_from_folder(*scripts, game_path::get_appdata_path() / "data");
+			add_scripts_from_folder(*scripts, loader::get_main_module().get_folder() / "data");
 		}
 
 		struct component final : component_interface
