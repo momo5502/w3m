@@ -12,7 +12,7 @@ namespace properties::detail
 	{
 		std::filesystem::path get_filesystem_path()
 		{
-			return game_path::get_appdata_path() / "properties.json";
+			return game_path::get_appdata_path() / "user/properties.json";
 		}
 
 		std::string get_path()
