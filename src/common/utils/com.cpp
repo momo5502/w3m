@@ -61,7 +61,7 @@ namespace utils::com
 			throw std::runtime_error("Failed to get options");
 		}
 
-		if (FAILED(file_dialog->SetOptions(dw_options | FOS_PICKFOLDERS)))
+		if (FAILED(file_dialog->SetOptions(dw_options | FOS_PICKFOLDERS | FOS_FORCESHOWHIDDEN)))
 		{
 			throw std::runtime_error("Failed to set options");
 		}
