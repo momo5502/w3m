@@ -82,7 +82,11 @@ END
 // Binary Data
 //
 
+#if defined(_DEBUG) || !defined(CI)
+APP_ICON     ICON   "resources/icon.ico"
+#else
 APP_ICON     ICON   "resources/icon_dark.ico"
+#endif
 IMAGE_SPLASH BITMAP "resources/splash.bmp"
 MAIN_MENU    RCDATA "resources/main.html"
 
