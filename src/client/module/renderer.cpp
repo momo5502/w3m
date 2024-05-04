@@ -74,14 +74,14 @@ namespace renderer
 		{
 			void post_load() override
 			{
-				utils::hook::call(0x1404697CE_g, utils::hook::assemble([](utils::hook::assembler& a)
+				utils::hook::jump(0x1404697CE_g, utils::hook::assemble([](utils::hook::assembler& a)
 				{
-					a.call_aligned(0x14046FCF0);
+					a.call(0x14046FCF0_g);
 					a.pushaq();
 					a.mov(rcx, rbx);
-					a.call_aligned(renderer_stub);
+					a.call(renderer_stub);
 					a.popaq();
-					a.ret();
+					a.jmp(0x1404697D3_g);
 				}));
 			}
 		};
