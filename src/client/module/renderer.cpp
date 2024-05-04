@@ -79,7 +79,7 @@ namespace renderer
 					a.call(0x14046FCF0_g);
 					a.pushaq();
 					a.mov(rcx, rbx);
-					a.call(renderer_stub);
+					a.call_aligned(renderer_stub);
 					a.popaq();
 					a.jmp(0x1404697D3_g);
 				}));
