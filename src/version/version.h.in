@@ -1,0 +1,8 @@
+#pragma once
+
+// Do NOT modify the following entries manually - these will be overwritten!
+// Instead modify version.h.in!
+
+#define PROJECT_VERSION             "@PROJECT_VERSION@"
+#define PROJECT_COMMIT_HASH         "@PROJECT_COMMIT_HASH@"
+#define PROJECT_COMMIT_REF          "@PROJECT_COMMIT_REF@"

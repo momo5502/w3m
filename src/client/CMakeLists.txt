@@ -11,6 +11,7 @@ add_executable(client WIN32 ${SRC_FILES})
 target_precompile_headers(client PRIVATE std_include.hpp)
 
 target_link_libraries(client PRIVATE
+  version
   common
   html-ui
   libcurl_static

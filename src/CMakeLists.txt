@@ -1,3 +1,4 @@
+add_subdirectory(version)
 add_subdirectory(common)
 add_subdirectory(server)
 

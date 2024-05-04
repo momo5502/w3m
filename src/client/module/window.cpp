@@ -2,6 +2,7 @@
 
 #include "../loader/component_loader.hpp"
 #include "../loader/loader.hpp"
+#include "../game_version.hpp"
 
 #include "window.hpp"
 #include "scheduler.hpp"
