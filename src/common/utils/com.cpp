@@ -13,14 +13,12 @@ namespace utils::com
 {
 	namespace
 	{
-		struct ComInitializer
+		class ComInitializer
 		{
+		public:
 			ComInitializer()
+				: succeeded_(SUCCEEDED(CoInitializeEx(nullptr, COINIT_MULTITHREADED)))
 			{
-				if (FAILED(CoInitializeEx(nullptr, COINIT_MULTITHREADED)))
-				{
-					throw std::runtime_error("Failed to initialize the component object model");
-				}
 			}
 
 			ComInitializer(const ComInitializer&) = delete;
@@ -31,16 +29,22 @@ namespace utils::com
 
 			~ComInitializer()
 			{
-				CoUninitialize();
+				if (this->succeeded_)
+				{
+					CoUninitialize();
+				}
 			}
+
+		private:
+			bool succeeded_{false};
 		};
 
 		void initialize_com()
 		{
-			thread_local std::unique_ptr<ComInitializer> initializer{};
+			thread_local std::optional<ComInitializer> initializer{};
 			if (!initializer)
 			{
-				initializer = std::make_unique<ComInitializer>();
+				initializer.emplace();
 			}
 		}
 	}
