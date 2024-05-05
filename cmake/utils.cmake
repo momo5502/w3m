@@ -145,6 +145,10 @@ function(momo_target_disable_warnings target)
     return()
   endif()
 
+  if (NOT MSVC)
+    return()
+  endif()
+
   momo_target_remove_compile_options(${target} /W4 -W4 /W3 -W3)
 
   set(compile_options

@@ -1,6 +1,7 @@
 #include "compression.hpp"
 
 #include <zlib.h>
+#include <cstring>
 
 #include "io.hpp"
 

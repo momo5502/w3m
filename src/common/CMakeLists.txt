@@ -7,15 +7,15 @@ add_library(common ${SRC_FILES})
 
 target_link_libraries(common PUBLIC
   RapidJSON
+  libtomcrypt
+  libtommath
+  zlibstatic
 )
 
 if (MSVC)
   target_link_libraries(common PUBLIC
     minhook
     asmjit
-    libtomcrypt
-    libtommath
-    zlibstatic
   )
 endif()
 

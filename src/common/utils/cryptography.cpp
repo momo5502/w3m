@@ -1,10 +1,16 @@
 #include "cryptography.hpp"
 
 #include <random>
+#include <memory>
+#include <cstring>
 
 #include "nt.hpp"
 #include "string.hpp"
 #include "finally.hpp"
+
+#ifndef ZeroMemory
+#define ZeroMemory(obj, size) memset((obj), 0, (size))
+#endif
 
 #undef max
 using namespace std::string_literals;

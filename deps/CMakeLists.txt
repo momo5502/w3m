@@ -42,6 +42,22 @@ add_subdirectory(curl)
 
 ##########################################
 
+add_subdirectory(minhook)
+add_subdirectory(html-ui)
+
+##########################################
+
+include(udis86.cmake)
+
+endif()
+
+##########################################
+
+add_library(RapidJSON INTERFACE)
+target_include_directories(RapidJSON INTERFACE "${CMAKE_CURRENT_LIST_DIR}/rapidjson/include")
+
+##########################################
+
 add_subdirectory(zlib)
 target_compile_definitions(zlibstatic PUBLIC ZLIB_CONST=1)
 target_include_directories(zlibstatic PUBLIC ${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
@@ -67,22 +83,6 @@ target_link_libraries(libtomcrypt PUBLIC libtommath)
 if (MSVC)
     target_compile_options(libtomcrypt PRIVATE "/wd4703")
 endif()
-
-##########################################
-
-add_subdirectory(minhook)
-add_subdirectory(html-ui)
-
-endif()
-
-##########################################
-
-add_library(RapidJSON INTERFACE)
-target_include_directories(RapidJSON INTERFACE "${CMAKE_CURRENT_LIST_DIR}/rapidjson/include")
-
-##########################################
-
-include(udis86.cmake)
 
 ##########################################
 
