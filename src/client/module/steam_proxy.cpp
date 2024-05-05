@@ -166,7 +166,7 @@ namespace steam_proxy
 			game_id.raw.type = 1; // k_EGameIDTypeGameMod
 			game_id.raw.app_id = app_id & 0xFFFFFF;
 
-			const auto* mod_id = "bo3";
+			const auto* mod_id = "w3m";
 			game_id.raw.mod_id = *reinterpret_cast<const unsigned int*>(mod_id) | 0x80000000;
 
 			client_user.invoke<bool>("SpawnProcess", path.generic_string().data(), cmdline, our_directory,
@@ -193,7 +193,7 @@ namespace steam_proxy
 			load_client();
 			perform_cleanup_if_needed();
 
-			start_mod("\xF0\x9F\x94\xB1" " " W3M_NAME, get_app_id());
+			start_mod("\xF0\x9F\x90\xBA" " " W3M_NAME, get_app_id());
 			clean_up_on_error();
 		}
 
