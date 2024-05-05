@@ -167,6 +167,8 @@ function CreateNewPlayerEntity() : CEntity
 
     W3mSetNpcDisplayName(npc, "W3M Player");
 
+    npc.SetAttitude(thePlayer, AIA_Neutral);
+
     return ent;
 }
 
