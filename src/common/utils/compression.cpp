@@ -1,10 +1,8 @@
-#include <utils/memory.hpp>
 #include "compression.hpp"
 
 #include <zlib.h>
 
-#include <utils/io.hpp>
-#include <utils/finally.hpp>
+#include "io.hpp"
 
 namespace utils::compression
 {

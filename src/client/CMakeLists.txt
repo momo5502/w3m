@@ -15,9 +15,6 @@ target_link_libraries(client PRIVATE
   common
   html-ui
   libcurl_static
-  libtomcrypt
-  libtommath
-  zlibstatic
   udis86
 )
 

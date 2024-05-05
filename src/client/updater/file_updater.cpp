@@ -6,8 +6,9 @@
 
 #include <rapidjson/document.h>
 
-#include "../utils/cryptography.hpp"
 #include "../utils/http.hpp"
+
+#include <utils/cryptography.hpp>
 #include <utils/io.hpp>
 
 #define UPDATE_SERVER "https://data.momo5502.com/"

@@ -13,6 +13,9 @@ if (MSVC)
   target_link_libraries(common PUBLIC
     minhook
     asmjit
+    libtomcrypt
+    libtommath
+    zlibstatic
   )
 endif()
 
