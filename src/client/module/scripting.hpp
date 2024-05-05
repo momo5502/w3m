@@ -341,12 +341,6 @@ namespace scripting
 		bool operator==(const std::wstring_view& obj) const;
 		bool operator!=(const std::wstring_view& obj) const;
 
-		bool operator==(const char* obj) const;
-		bool operator!=(const char* obj) const;
-
-		bool operator==(const wchar_t* obj) const;
-		bool operator!=(const wchar_t* obj) const;
-
 		std::wstring to_wstring() const;
 		std::string to_string() const;
 		std::wstring_view to_view() const;

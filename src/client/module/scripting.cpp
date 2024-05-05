@@ -255,26 +255,6 @@ namespace scripting
 		return !this->operator==(obj);
 	}
 
-	bool string::operator==(const char* obj) const
-	{
-		return this->operator==(std::string_view(obj));
-	}
-
-	bool string::operator!=(const char* obj) const
-	{
-		return !this->operator==(obj);
-	}
-
-	bool string::operator==(const wchar_t* obj) const
-	{
-		return this->operator==(std::wstring_view(obj));
-	}
-
-	bool string::operator!=(const wchar_t* obj) const
-	{
-		return !this->operator==(obj);
-	}
-
 	struct component final : component_interface
 	{
 		void post_load() override
