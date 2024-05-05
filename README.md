@@ -3,7 +3,7 @@
 [![paypal](https://img.shields.io/badge/PayPal-support-blue.svg?logo=paypal)](https://paypal.me/momo5502)
 [![patreon](https://img.shields.io/badge/Patreon-support-red.svg?logo=patreon)](https://www.patreon.com/SnekLabs)
 
-# Witcher 3: Mod
+# Witcher 3: Multiplayer
 
 An attempt at modding Witcher 3 and adding multiplayer support.  
 
