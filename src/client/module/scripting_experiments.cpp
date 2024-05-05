@@ -9,6 +9,8 @@
 #include <utils/byte_buffer.hpp>
 #include <utils/concurrency.hpp>
 
+#include "../utils/identity.hpp"
+
 #include "network.hpp"
 #include "renderer.hpp"
 #include "scripting.hpp"
@@ -143,11 +145,10 @@ namespace scripting_experiments
 			player_state.speed = state.speed;
 			player_state.move_type = state.move_type;
 
-			static const auto guid = rand();
 			const auto& username = get_player_name();
 
 			game::player player{};
-			player.guid = guid;
+			player.guid = utils::identity::get_guid();
 			player.state = std::move(player_state);
 			utils::string::copy(player.name, username.data());
 
