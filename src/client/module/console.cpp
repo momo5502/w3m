@@ -61,6 +61,9 @@ namespace console
 				utils::hook::jump(0x14025D5B0_g, log_message_stub);
 			}
 
+			// Change console font
+			utils::hook::inject(0x14011668D_g, 0x142148C18_g);
+
 			// Enable ingame console
 			const auto config_vars = "48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8D 05 ? ? ? ? C6 05 ? ? ? ? ?"_sig;
 
