@@ -20,6 +20,9 @@ namespace renderer
 			color color{};
 		};
 
+		struct CDebugConsole;
+		struct CRenderFrame;
+
 		using command_queue = std::queue<text_command>;
 		utils::concurrency::container<command_queue> render_commands{};
 
@@ -27,17 +30,16 @@ namespace renderer
 		utils::concurrency::container<frame_callbacks> callbacks{};
 
 
-		void render_text(void* a2, float x, float y, const scripting::string& text, const color& color)
+		void render_text(CRenderFrame* frame, float x, float y, const scripting::string& text, const color& color)
 		{
-			auto* a1 = *reinterpret_cast<void**>(0x144E063E0_g);
-
-			reinterpret_cast<void(*)(void*, void*, float, float, const scripting::string&, uint32_t)>(
-				0x140471800_g)(a1, a2, x, y, text, *reinterpret_cast<const uint32_t*>(&color.r));
+			auto* console = *reinterpret_cast<CDebugConsole**>(0x144E063E0_g);
+			reinterpret_cast<void(*)(CDebugConsole*, CRenderFrame*, float, float, const scripting::string&, uint32_t)>(
+				0x140471800_g)(console, frame, x, y, text, *reinterpret_cast<const uint32_t*>(&color.r));
 		}
 
-		void renderer_stub(void* a2)
+		void renderer_stub(CRenderFrame* frame)
 		{
-			if (!a2)
+			if (!frame)
 			{
 				return;
 			}
@@ -64,7 +66,7 @@ namespace renderer
 			{
 				auto& command = queue.front();
 
-				render_text(a2, command.position.x, command.position.y, {command.text}, command.color);
+				render_text(frame, command.position.x, command.position.y, {command.text}, command.color);
 
 				queue.pop();
 			}
