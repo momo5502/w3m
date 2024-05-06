@@ -221,7 +221,7 @@ namespace scripting_experiments
 
 			scheduler::loop([]
 			{
-				renderer::draw_text("Players: " + std::to_string(get_player_count()), {10.0f, 30.0f},
+				renderer::draw_text("Players: " + std::to_string(get_player_count()), {60.0f, 30.0f},
 				                    {0xFF, 0xFF, 0xFF, 0xFF});
 			}, scheduler::renderer);
 		}
