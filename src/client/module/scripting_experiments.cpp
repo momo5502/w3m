@@ -13,6 +13,7 @@
 
 #include "network.hpp"
 #include "renderer.hpp"
+#include "scheduler.hpp"
 #include "scripting.hpp"
 #include "steam_proxy.hpp"
 
@@ -218,11 +219,11 @@ namespace scripting_experiments
 
 			network::on("states", &receive_player_states);
 
-			renderer::on_frame([]
+			scheduler::loop([]
 			{
 				renderer::draw_text("Players: " + std::to_string(get_player_count()), {10.0f, 30.0f},
 				                    {0xFF, 0xFF, 0xFF, 0xFF});
-			});
+			}, scheduler::renderer);
 		}
 	};
 }

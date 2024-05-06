@@ -6,7 +6,7 @@ namespace scheduler
 	{
 		// Asynchronuous pipeline, disconnected from the game
 		async = 0,
-
+		renderer,
 		count,
 	};
 

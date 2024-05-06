@@ -3,6 +3,7 @@
 #include "../loader/loader.hpp"
 
 #include "renderer.hpp"
+#include "scheduler.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
@@ -26,9 +27,6 @@ namespace renderer
 		using command_queue = std::queue<text_command>;
 		utils::concurrency::container<command_queue> render_commands{};
 
-		using frame_callbacks = std::list<frame_callback>;
-		utils::concurrency::container<frame_callbacks> callbacks{};
-
 
 		void render_text(CRenderFrame* frame, float x, float y, const scripting::string& text, const color& color)
 		{
@@ -44,13 +42,7 @@ namespace renderer
 				return;
 			}
 
-			callbacks.access([&](const frame_callbacks& callback_list)
-			{
-				for (const auto& cb : callback_list)
-				{
-					cb();
-				}
-			});
+			scheduler::execute(scheduler::renderer);
 
 			command_queue queue{};
 
@@ -87,14 +79,6 @@ namespace renderer
 				}));
 			}
 		};
-	}
-
-	void on_frame(frame_callback callback)
-	{
-		callbacks.access([&](frame_callbacks& callback_list)
-		{
-			callback_list.emplace_back(std::move(callback));
-		});
 	}
 
 	void draw_text(std::string text, const position position, const color color)

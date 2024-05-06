@@ -16,8 +16,5 @@ namespace renderer
 		uint8_t a = 0xFF;
 	};
 
-	using frame_callback = std::function<void()>;
-
-	void on_frame(frame_callback callback);
 	void draw_text(std::string text, position position, color color);
 }
