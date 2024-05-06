@@ -40,7 +40,7 @@ namespace utils::identity
 
 		std::string get_protected_data()
 		{
-			std::string input = "momo5502-boiii-auth";
+			std::string input = "momo5502-w3m-auth";
 
 			DATA_BLOB data_in{}, data_out{};
 			data_in.pbData = reinterpret_cast<uint8_t*>(input.data());
