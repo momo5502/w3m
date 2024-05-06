@@ -8,7 +8,57 @@
 
 namespace
 {
-	void handle_player_state(server::client_map& clients, const network::address& source, const std::string_view& data)
+	void send_authentication_request(const network::manager& manager, const network::address& source, client& client)
+	{
+		if (client.authentication_nonce.empty())
+		{
+			console::log("Authenticating player: %s", source.to_string().data());
+			client.authentication_nonce = utils::cryptography::random::get_challenge();
+		}
+
+		utils::buffer_serializer buffer{};
+		buffer.write(game::PROTOCOL);
+		buffer.write_string(client.authentication_nonce);
+
+		(void)manager.send(source, "authRequest", buffer.get_buffer());
+	}
+
+	void handle_authentication_response(server::client_map& clients, const network::address& source,
+	                                    const std::string_view& data)
+	{
+		utils::buffer_deserializer buffer(data);
+		const auto protocol = buffer.read<uint32_t>();
+		if (protocol != game::PROTOCOL)
+		{
+			return;
+		}
+
+		const auto key = buffer.read_string();
+		const auto signature = buffer.read_string();
+
+		utils::cryptography::ecc::key crypto_key{};
+		crypto_key.deserialize(key);
+		if (!crypto_key.is_valid())
+		{
+			return;
+		}
+
+		auto& client = clients[source];
+		if (client.authentication_nonce.empty() //
+			|| crypto_key.get_hash() != client.guid //
+			|| !verify_message(crypto_key, client.authentication_nonce, signature))
+		{
+			return;
+		}
+
+		client.public_key = std::move(crypto_key);
+		client.last_packet = std::chrono::high_resolution_clock::now();
+
+		console::log("Player authenticated: %s", source.to_string().data());
+	}
+
+	void handle_player_state(const network::manager& manager, server::client_map& clients,
+	                         const network::address& source, const std::string_view& data)
 	{
 		utils::buffer_deserializer buffer(data);
 		const auto protocol = buffer.read<uint32_t>();
@@ -19,17 +69,15 @@ namespace
 
 		const auto player_state = buffer.read<game::player>();
 
-		const auto size = clients.size();
-
 		auto& client = clients[source];
 		client.last_packet = std::chrono::high_resolution_clock::now();
 		client.guid = player_state.guid;
 		client.name.assign(player_state.name.data(), strnlen(player_state.name.data(), player_state.name.size()));
 		client.current_state = std::move(player_state.state);
 
-		if (clients.size() != size)
+		if (!client.is_authenticated())
 		{
-			console::log("Player connected: %s", source.to_string().data());
+			send_authentication_request(manager, source, client);
 		}
 	}
 
@@ -38,43 +86,31 @@ namespace
 		std::vector<game::player> states{};
 		states.reserve(clients.size());
 
-		size_t index = 0;
 		for (const auto& val : clients | std::views::values)
 		{
-			if (index != 0)
+			if (!val.is_authenticated())
 			{
-				game::player player{};
-				player.guid = val.guid;
-				player.state = val.current_state;
-				utils::string::copy(player.name, val.name.data());
-
-				states.emplace_back(std::move(player));
+				continue;
 			}
 
-			++index;
+			game::player player{};
+			player.guid = val.guid;
+			player.state = val.current_state;
+			utils::string::copy(player.name, val.name.data());
+
+			states.emplace_back(std::move(player));
 		}
 
-		index = 0;
-		game::player last_state{};
+		utils::buffer_serializer buffer{};
+		buffer.write(game::PROTOCOL);
+		buffer.write_vector(states);
 
 		for (const auto& client : clients)
 		{
-			if (index != 0)
+			if (client.second.is_authenticated())
 			{
-				states[index - 1] = last_state;
+				(void)manager.send(client.first, "states", buffer.get_buffer());
 			}
-
-			utils::buffer_serializer buffer{};
-			buffer.write(game::PROTOCOL);
-			buffer.write_vector(states);
-
-			(void)manager.send(client.first, "states", buffer.get_buffer());
-
-			last_state.guid = client.second.guid;
-			last_state.state = client.second.current_state;
-			utils::string::copy(last_state.name, client.second.name.data());
-
-			++index;
 		}
 	}
 }
@@ -83,6 +119,7 @@ server::server(const uint16_t port)
 	: manager_(port)
 {
 	this->on("state", &handle_player_state);
+	this->on("authResponse", &handle_authentication_response);
 }
 
 uint16_t server::get_ipv4_port() const

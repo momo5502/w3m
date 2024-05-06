@@ -200,6 +200,34 @@ namespace scripting_experiments
 			});
 		}
 
+		void receive_auth_request(const network::address& address, const std::string_view& data)
+		{
+			if (address != network::get_master_server())
+			{
+				return;
+			}
+
+			utils::buffer_deserializer buffer(data);
+			const auto protocol = buffer.read<uint32_t>();
+			if (protocol != game::PROTOCOL)
+			{
+				return;
+			}
+
+			const auto nonce = buffer.read_string();
+
+			const auto& key = utils::identity::get_key();
+			const auto public_key = key.serialize(PK_PUBLIC);
+			const auto signature = sign_message(key, nonce);
+
+			utils::buffer_serializer response{};
+			response.write(game::PROTOCOL);
+			response.write_string(public_key);
+			response.write_string(signature);
+
+			network::send(address, "authResponse", response.get_buffer());
+		}
+
 		size_t get_player_count()
 		{
 			return g_players.access<size_t>([](const players& players)
@@ -218,6 +246,7 @@ namespace scripting_experiments
 			scripting::register_function<set_display_name>(L"W3mSetNpcDisplayName");
 
 			network::on("states", &receive_player_states);
+			network::on("authRequest", &receive_auth_request);
 
 			scheduler::loop([]
 			{

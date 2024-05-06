@@ -1,8 +1,10 @@
 #pragma once
 
 #include <chrono>
+#include <optional>
 
 #include <game/structs.hpp>
+#include <utils/cryptography.hpp>
 
 struct client
 {
@@ -10,4 +12,11 @@ struct client
 	uint64_t guid{};
 	std::string name{};
 	game::player_state current_state{};
+	std::string authentication_nonce{};
+	std::optional<utils::cryptography::ecc::key> public_key{};
+
+	bool is_authenticated() const
+	{
+		return this->public_key.has_value();
+	}
 };
