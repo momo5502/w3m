@@ -12,7 +12,7 @@ namespace
 	{
 		if (client.authentication_nonce.empty())
 		{
-			console::log("Authenticating player: %s", source.to_string().data());
+			console::log("Authenticating player: %s (%llX)", source.to_string().data(), client.guid);
 			client.authentication_nonce = utils::cryptography::random::get_challenge();
 		}
 
@@ -54,7 +54,7 @@ namespace
 		client.public_key = std::move(crypto_key);
 		client.last_packet = std::chrono::high_resolution_clock::now();
 
-		console::log("Player authenticated: %s", source.to_string().data());
+		console::log("Player authenticated: %s (%llX)", source.to_string().data(), client.guid);
 	}
 
 	void handle_player_state(const network::manager& manager, server::client_map& clients,

@@ -174,15 +174,21 @@ namespace scripting_experiments
 				return;
 			}
 
+			const auto own_guid = utils::identity::get_guid();
 			const auto player_data = buffer.read_vector<game::player>();
 
-			g_players.access([&player_data](players& players)
+			g_players.access([&player_data, own_guid](players& players)
 			{
 				players.resize(0);
 				players.reserve(player_data.size());
 
 				for (const auto& player : player_data)
 				{
+					if (player.guid == own_guid)
+					{
+						continue;
+					}
+
 					W3mPlayerState player_state{};
 					player_state.angles = convert(player.state.angles);
 					player_state.position = convert(player.state.position);
