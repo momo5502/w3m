@@ -5,6 +5,8 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
 
 add_library(common ${SRC_FILES})
 
+momo_assign_source_group(${SRC_FILES})
+
 target_link_libraries(common PUBLIC
   RapidJSON
   libtomcrypt

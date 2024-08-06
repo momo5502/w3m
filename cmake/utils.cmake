@@ -270,3 +270,9 @@ macro(momo_target_include_libraries target mode)
     )
   endforeach()
 endmacro()
+
+##########################################
+
+macro(momo_assign_source_group)
+  source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ARGN})
+endmacro(assign_source_group)
