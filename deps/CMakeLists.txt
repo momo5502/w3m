@@ -17,6 +17,7 @@ option(HTTP_ONLY "" ON)
 option(BUILD_CURL_EXE "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(BUILD_STATIC_LIBS "" ON)
+option(BUILD_EXAMPLES "" OFF)
 option(CURL_ENABLE_EXPORT_TARGET "" OFF)
 
 option(CURL_DISABLE_DICT "" ON)
