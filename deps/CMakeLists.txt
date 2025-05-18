@@ -18,6 +18,8 @@ option(BUILD_CURL_EXE "" OFF)
 option(BUILD_SHARED_LIBS "" OFF)
 option(BUILD_STATIC_LIBS "" ON)
 option(BUILD_EXAMPLES "" OFF)
+option(BUILD_TESTING "" OFF)
+
 option(CURL_ENABLE_EXPORT_TARGET "" OFF)
 
 option(CURL_DISABLE_DICT "" ON)
@@ -35,9 +37,18 @@ option(CURL_DISABLE_SMB "" ON)
 option(CURL_DISABLE_TELNET "" ON)
 option(CURL_DISABLE_TFTP "" ON)
 
+option(CURL_USE_LIBPSL "" OFF)
 option(CURL_USE_LIBSSH2 "" OFF)
+option(USE_NGHTTP2 "" OFF)
+option(USE_LIBIDN2 "" OFF)
 
-set(CURL_USE_SCHANNEL ON)
+set(CURL_ZLIB "OFF" CACHE STRING "")
+set(CURL_ZSTD "OFF" CACHE STRING "")
+set(CURL_BROTLI "OFF" CACHE STRING "")
+
+if(MSVC)
+  set(CURL_USE_SCHANNEL ON)
+endif()
 
 add_subdirectory(curl)
 
