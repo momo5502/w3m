@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 #include <tomcrypt.h>
 
 namespace utils::cryptography
