@@ -2,6 +2,10 @@ momo_silence_deprecation_warnings()
 
 ##########################################
 
+option(BUILD_TESTING "" OFF)
+
+##########################################
+
 if (MSVC)
 
 set(ASMJIT_STATIC ON)
