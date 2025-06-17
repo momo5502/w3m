@@ -17,10 +17,10 @@ namespace scripting_filesystem
 
 		void* load_mod_scripts_stub(unknown_array* a1, unknown_array* a2)
 		{
-			const auto res = reinterpret_cast<void* (*)(unknown_array*, unknown_array*)>(0x1402A9D50_g)(a1, a2);
+			const auto res = reinterpret_cast<void* (*)(unknown_array*, unknown_array*)>(0x1413BC3A0_g)(a1, a2);
 
 			// Always say we have mods
-			(*reinterpret_cast<uint8_t**>(0x144DE5FF8_g))[208] |= 1;
+			(*reinterpret_cast<uint8_t**>(0x14530DBF8_g))[0xE8] |= 1;
 
 			return res;
 		}
@@ -117,7 +117,7 @@ namespace scripting_filesystem
 
 		void collect_script(void* a1, scripting::array<scripting::string>* scripts)
 		{
-			reinterpret_cast<void(*)(void*, scripting::array<scripting::string>*)>(0x1402A3ED0_g)(a1, scripts);
+			reinterpret_cast<void(*)(void*, scripting::array<scripting::string>*)>(0x1413C5A30_g)(a1, scripts);
 
 			add_scripts_from_folder(*scripts, game_path::get_appdata_path() / "data");
 			add_scripts_from_folder(*scripts, loader::get_main_module().get_folder() / "data");
@@ -127,12 +127,12 @@ namespace scripting_filesystem
 		{
 			void post_load() override
 			{
-				utils::hook::call(0x1402AB75D_g, load_mod_scripts_stub);
-				utils::hook::call(0x14037213D_g, collect_script);
-				utils::hook::call(0x140382F7D_g, collect_script);
+				utils::hook::call(0x1413BBCF0_g, load_mod_scripts_stub);
+				utils::hook::call(0x1402D338D_g, collect_script);
+				utils::hook::call(0x1414B045E_g, collect_script);
 
 				// Force CRC checks
-				utils::hook::nop(0x140372FC8_g, 2);
+				//utils::hook::nop(0x140372FC8_g, 2);
 			}
 		};
 	}

@@ -58,25 +58,15 @@ namespace console
 		{
 			if (!utils::nt::is_wine())
 			{
-				utils::hook::jump(0x14025D5B0_g, log_message_stub);
+				utils::hook::jump(0x14027E700_g, log_message_stub);
 			}
 
 			// Change console font
-			utils::hook::inject(0x14011668D_g, 0x142148C18_g);
+			utils::hook::inject(0x140119441_g, 0x142373070_g);
+			utils::hook::inject(0x140119465_g, 0x142373070_g);
 
 			// Enable ingame console
-			const auto config_vars = "48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8D 05 ? ? ? ? C6 05 ? ? ? ? ?"_sig;
-
-			for (size_t i = 0; i < config_vars.count(); ++i)
-			{
-				const auto var = config_vars.get(i);
-				const auto array = utils::hook::extract<char**>(var + 3);
-				if (array[2] == "DBGConsoleOn"s)
-				{
-					utils::hook::set<BYTE>(var + 0x19, 1);
-					break;
-				}
-			}
+			utils::hook::set<BYTE>(0x1400F0CBD_g, 1);
 		}
 
 		component_priority priority() const override

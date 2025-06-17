@@ -30,9 +30,9 @@ namespace renderer
 
 		void render_text(CRenderFrame* frame, float x, float y, const scripting::string& text, const color& color)
 		{
-			auto* console = *reinterpret_cast<CDebugConsole**>(0x144E063E0_g);
+			auto* console = *reinterpret_cast<CDebugConsole**>(0x14532DFE0_g);
 			reinterpret_cast<void(*)(CDebugConsole*, CRenderFrame*, float, float, const scripting::string&, uint32_t)>(
-				0x140471800_g)(console, frame, x, y, text, *reinterpret_cast<const uint32_t*>(&color.r));
+				0x14156FB20_g)(console, frame, x, y, text, *reinterpret_cast<const uint32_t*>(&color.r));
 		}
 
 		void renderer_stub(CRenderFrame* frame)
@@ -68,14 +68,14 @@ namespace renderer
 		{
 			void post_load() override
 			{
-				utils::hook::jump(0x1404697CE_g, utils::hook::assemble([](utils::hook::assembler& a)
+				utils::hook::jump(0x141565977_g, utils::hook::assemble([](utils::hook::assembler& a)
 				{
-					a.call(0x14046FCF0_g);
+					a.call(0x141571280_g);
 					a.pushaq();
 					a.mov(rcx, rbx);
 					a.call_aligned(renderer_stub);
 					a.popaq();
-					a.jmp(0x1404697D3_g);
+					a.jmp(0x14156597C_g);
 				}));
 			}
 		};

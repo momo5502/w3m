@@ -24,9 +24,9 @@ namespace scripting
 		game::CFunction* allocate_cfunction(int name_id, game::script_function* function)
 		{
 			auto* perform_memory_allocation = reinterpret_cast<void* (*)(size_t size, size_t maybe_alignment)>(
-				0x140259780_g);
+				0x14027C890_g);
 			auto* CFunction_ctor = reinterpret_cast<game::CFunction * (*)(game::CFunction* str_struct, int* str_id,
-			                                                              game::script_function* func)>(0x1402BAFB0_g);
+			                                                              game::script_function* func)>(0x1413DB730_g);
 
 			auto* memory = static_cast<game::CFunction*>(perform_memory_allocation(sizeof(game::CFunction), 16));
 			if (!memory)
@@ -42,10 +42,10 @@ namespace scripting
 
 		void register_cfunction(game::CFunction& function)
 		{
-			auto* scripting_context_singleton = reinterpret_cast<game::global_script_context * (*)()>(0x14025AC70_g);
+			auto* scripting_context_singleton = reinterpret_cast<game::global_script_context * (*)()>(0x14027DF40_g);
 			auto* register_script_function = reinterpret_cast<void(*)(game::global_script_context* ctx,
 			                                                          game::CFunction* func)>(
-				0x14029AB70_g);
+				0x1413AF000_g);
 
 			auto* ctx = scripting_context_singleton();
 			register_script_function(ctx, &function);
@@ -53,11 +53,9 @@ namespace scripting
 
 		int register_name_string(const wchar_t* name)
 		{
-			auto* register_name = reinterpret_cast<void(*)(int* str_struct, const wchar_t* str)>(0x14029F360_g);
-
-			int name_id{};
-			register_name(&name_id, name);
-			return name_id;
+			auto* critical_section = reinterpret_cast<LPCRITICAL_SECTION(*)()>(0x14027C580_g)();
+			auto* register_name = reinterpret_cast<int(*)(LPCRITICAL_SECTION crit_sec, const wchar_t* str)>(0x14139EE70_g);
+			return register_name(critical_section, name);
 		}
 
 		void perform_script_function_registration(const wchar_t* name, game::script_function* function)
@@ -69,7 +67,7 @@ namespace scripting
 
 		void register_script_functions_stub()
 		{
-			reinterpret_cast<void(*)()>(0x14102D6F0_g)();
+			reinterpret_cast<void(*)()>(0x141F36E90_g)();
 
 			auto& registration_vector = get_registration_vector();
 			for (const auto& entry : registration_vector)
@@ -88,7 +86,7 @@ namespace scripting
 			using function_type = void(uint64_t, game::script_execution_context*, void*);
 
 			const auto index = static_cast<uint32_t>(*(ctx.some_stack++));
-			const auto function = reinterpret_cast<function_type**>(0x144DFE040_g)[index];
+			const auto function = reinterpret_cast<function_type**>(0x14530DC40_g)[index];
 			function(ctx.some_value, &ctx, value);
 		}
 
@@ -100,14 +98,14 @@ namespace scripting
 
 	void* allocate_memory(const size_t size)
 	{
-		return reinterpret_cast<void* (*)(uint64_t, size_t, uint64_t, uint64_t)>(0x1402597F0_g)(0, size, 2, 14);
+		return reinterpret_cast<void* (*)(uint64_t, size_t, uint64_t, uint64_t)>(0x14027CA40_g)(0, size, 2, 14);
 	}
 
 	void free_memory(void* memory)
 	{
 		if (memory)
 		{
-			reinterpret_cast<void(*)(void*)>(0x140259710_g)(memory);
+			reinterpret_cast<void(*)(void*)>(0x14027C780_g)(memory);
 		}
 	}
 
@@ -259,7 +257,7 @@ namespace scripting
 	{
 		void post_load() override
 		{
-			utils::hook::call(0x1410058B7_g, register_script_functions_stub);
+			utils::hook::call(0x141F06477_g, register_script_functions_stub);
 		}
 	};
 }
