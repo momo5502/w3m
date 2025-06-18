@@ -132,7 +132,7 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
     }
 
     movingAgent.SetGameplayMoveDirection(VecHeading(RotForward(playerState.angles)));
-    movingAgent.SetGameplayRelativeMoveSpeed(playerState.speed);
+    movingAgent.SetGameplayRelativeMoveSpeed(playerState.speed * 0.6);
 }
 
 function CreateNewPlayerEntity() : CEntity
