@@ -4,5 +4,5 @@
 
 namespace utils::smbios
 {
-	std::string get_uuid();
+    std::string get_uuid();
 }

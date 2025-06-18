@@ -14,6 +14,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  verify-formatting:
+    name: Verify Formatting
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Verify Formatting
+        uses: jidicula/clang-format-action@v4.15.0
+        with:
+          clang-format-version: "20"
+
   build-windows:
     name: Build Windows
     runs-on: windows-latest
@@ -91,7 +103,7 @@ jobs:
 
   deploy:
     name: Deploy Server
-    needs: [build-windows, build-linux]
+    needs: [build-windows, build-linux, verify-formatting]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main')
     steps:

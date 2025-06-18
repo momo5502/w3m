@@ -3,5 +3,5 @@
 
 namespace game_path
 {
-	std::filesystem::path get_appdata_path();
+    std::filesystem::path get_appdata_path();
 }

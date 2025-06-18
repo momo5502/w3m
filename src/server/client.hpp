@@ -8,15 +8,15 @@
 
 struct client
 {
-	std::chrono::high_resolution_clock::time_point last_packet{};
-	uint64_t guid{};
-	std::string name{};
-	game::player_state current_state{};
-	std::string authentication_nonce{};
-	std::optional<utils::cryptography::ecc::key> public_key{};
+    std::chrono::high_resolution_clock::time_point last_packet{};
+    uint64_t guid{};
+    std::string name{};
+    game::player_state current_state{};
+    std::string authentication_nonce{};
+    std::optional<utils::cryptography::ecc::key> public_key{};
 
-	bool is_authenticated() const
-	{
-		return this->public_key.has_value();
-	}
+    bool is_authenticated() const
+    {
+        return this->public_key.has_value();
+    }
 };

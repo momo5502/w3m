@@ -9,43 +9,42 @@
 
 namespace
 {
-	namespace launcher
-	{
-		bool run_launcher()
-		{
-			uint32_t directx_version{};
+    namespace launcher
+    {
+        bool run_launcher()
+        {
+            uint32_t directx_version{};
 
-			momo::html_ui window(W3M_MODNAME, 500, 300);
+            momo::html_ui window(W3M_MODNAME, 500, 300);
 
-			window.register_handler("launch", [&](const uint32_t version)
-			{
-				directx_version = version;
-				window.close();
-			});
+            window.register_handler("launch", [&](const uint32_t version) {
+                directx_version = version;
+                window.close();
+            });
 
-			window.load_html(utils::nt::load_resource(MAIN_MENU));
+            window.load_html(utils::nt::load_resource(MAIN_MENU));
 
-			momo::html_ui::show_windows();
+            momo::html_ui::show_windows();
 
-			return directx_version == 11;
-		}
+            return directx_version == 11;
+        }
 
-		struct component final : component_interface
-		{
-			void post_start() override
-			{
-				if (!utils::nt::is_wine() && !run_launcher())
-				{
-					component_loader::trigger_premature_shutdown();
-				}
-			}
+        struct component final : component_interface
+        {
+            void post_start() override
+            {
+                if (!utils::nt::is_wine() && !run_launcher())
+                {
+                    component_loader::trigger_premature_shutdown();
+                }
+            }
 
-			component_priority priority() const override
-			{
-				return component_priority::launcher;
-			}
-		};
-	}
+            component_priority priority() const override
+            {
+                return component_priority::launcher;
+            }
+        };
+    }
 }
 
 REGISTER_COMPONENT(launcher::component)

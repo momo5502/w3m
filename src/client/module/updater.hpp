@@ -2,5 +2,5 @@
 
 namespace updater
 {
-	void update();
+    void update();
 }

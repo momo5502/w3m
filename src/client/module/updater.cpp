@@ -6,68 +6,65 @@
 
 namespace updater
 {
-	void update()
-	{
-		/*if (utils::flags::has_flag("noupdate"))
-		{
-			return;
-		}*/
+    void update()
+    {
+        /*if (utils::flags::has_flag("noupdate"))
+        {
+            return;
+        }*/
 
-		try
-		{
-			run(game_path::get_appdata_path());
-		}
-		catch (update_cancelled&)
-		{
-			TerminateProcess(GetCurrentProcess(), 0);
-		}
-		catch (...)
-		{
-		}
-	}
+        try
+        {
+            run(game_path::get_appdata_path());
+        }
+        catch (update_cancelled&)
+        {
+            TerminateProcess(GetCurrentProcess(), 0);
+        }
+        catch (...)
+        {
+        }
+    }
 
-	class component final : public component_interface
-	{
-	public:
-		component()
-		{
-			this->update_thread_ = std::thread([this]
-			{
-				update();
-			});
-		}
+    class component final : public component_interface
+    {
+      public:
+        component()
+        {
+            this->update_thread_ = std::thread([this] { update(); });
+        }
 
-		void pre_destroy() override
-		{
-			join();
-		}
+        void pre_destroy() override
+        {
+            join();
+        }
 
-		void post_start() override
-		{
-			join();
-		}
+        void post_start() override
+        {
+            join();
+        }
 
-		void post_load() override
-		{
-			join();
-		}
+        void post_load() override
+        {
+            join();
+        }
 
-		component_priority priority() const override
-		{
-			return component_priority::updater;
-		}
+        component_priority priority() const override
+        {
+            return component_priority::updater;
+        }
 
-	private:
-		std::thread update_thread_{};
+      private:
+        std::thread update_thread_{};
 
-		void join()
-		{
-			if (this->update_thread_.joinable())
-			{
-				this->update_thread_.join();
-			}
-		}
-	};
+        void join()
+        {
+            if (this->update_thread_.joinable())
+            {
+                this->update_thread_.join();
+            }
+        }
+    };
 }
 
 REGISTER_COMPONENT(updater::component)

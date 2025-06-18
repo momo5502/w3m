@@ -5,14 +5,14 @@
 
 namespace utils
 {
-	class flags
-	{
-	public:
-		flags(int argc, char** argv);
+    class flags
+    {
+      public:
+        flags(int argc, char** argv);
 
-		bool has_flag(std::string flag) const;
+        bool has_flag(std::string flag) const;
 
-	private:
-		std::unordered_set<std::string> flags_{};
-	};
+      private:
+        std::unordered_set<std::string> flags_{};
+    };
 }

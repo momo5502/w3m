@@ -5,49 +5,52 @@
 #include <array>
 
 template <class Type, size_t n>
-constexpr auto ARRAY_COUNT(Type (&)[n]) { return n; }
+constexpr auto ARRAY_COUNT(Type (&)[n])
+{
+    return n;
+}
 
 namespace utils::string
 {
-	const char* va(const char* format, ...);
+    const char* va(const char* format, ...);
 
-	std::vector<std::string> split(const std::string& s, char delim);
+    std::vector<std::string> split(const std::string& s, char delim);
 
-	std::string to_lower(std::string text);
-	std::string to_upper(std::string text);
+    std::string to_lower(std::string text);
+    std::string to_upper(std::string text);
 
-	std::wstring to_lower(std::wstring text);
-	std::wstring to_upper(std::wstring text);
+    std::wstring to_lower(std::wstring text);
+    std::wstring to_upper(std::wstring text);
 
-	bool starts_with(const std::string& text, const std::string& substring);
-	bool ends_with(const std::string& text, const std::string& substring);
+    bool starts_with(const std::string& text, const std::string& substring);
+    bool ends_with(const std::string& text, const std::string& substring);
 
-	bool is_numeric(const std::string& text);
+    bool is_numeric(const std::string& text);
 
-	std::string dump_hex(const std::string& data, const std::string& separator = " ");
+    std::string dump_hex(const std::string& data, const std::string& separator = " ");
 
 #ifdef _WIN32
-	std::string get_clipboard_data();
+    std::string get_clipboard_data();
 #endif
 
-	std::string convert(std::wstring_view wstr);
-	std::wstring convert(std::string_view str);
+    std::string convert(std::wstring_view wstr);
+    std::wstring convert(std::string_view str);
 
-	std::string replace(std::string str, const std::string& from, const std::string& to);
+    std::string replace(std::string str, const std::string& from, const std::string& to);
 
-	void trim(std::string& str);
+    void trim(std::string& str);
 
-	void copy(char* dest, size_t max_size, const char* src);
+    void copy(char* dest, size_t max_size, const char* src);
 
-	template <size_t Size>
-	void copy(char (&dest)[Size], const char* src)
-	{
-		copy(dest, Size, src);
-	}
+    template <size_t Size>
+    void copy(char (&dest)[Size], const char* src)
+    {
+        copy(dest, Size, src);
+    }
 
-	template <size_t Size>
-	void copy(std::array<char, Size>& dest, const char* src)
-	{
-		copy(dest.data(), dest.size(), src);
-	}
+    template <size_t Size>
+    void copy(std::array<char, Size>& dest, const char* src)
+    {
+        copy(dest.data(), dest.size(), src);
+    }
 }
