@@ -53,10 +53,30 @@ namespace
         }
 
         auto& client = clients[source];
-        if (client.authentication_nonce.empty()     //
-            || crypto_key.get_hash() != client.guid //
-            || !verify_message(crypto_key, client.authentication_nonce, signature))
+
+        const auto print_failure = [&](const char* reason) {
+            if (!client.has_printed_failure)
+            {
+                client.has_printed_failure = true;
+                console::log("Authentication failed (%s): %s", source.to_string().data(), reason); //
+            }
+        };
+
+        if (client.authentication_nonce.empty())
         {
+            print_failure("Nonce not set");
+            return;
+        }
+
+        if (crypto_key.get_hash() != client.guid)
+        {
+            print_failure("Key doesn't match GUID");
+            return;
+        }
+
+        if (!verify_message(crypto_key, client.authentication_nonce, signature))
+        {
+            print_failure("Invalid signature");
             return;
         }
 
