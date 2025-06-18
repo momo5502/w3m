@@ -30,8 +30,8 @@ namespace utils::string
 	std::string get_clipboard_data();
 #endif
 
-	std::string convert(const std::wstring& wstr);
-	std::wstring convert(const std::string& str);
+	std::string convert(std::wstring_view wstr);
+	std::wstring convert(std::string_view str);
 
 	std::string replace(std::string str, const std::string& from, const std::string& to);
 

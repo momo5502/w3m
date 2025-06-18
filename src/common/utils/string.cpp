@@ -203,7 +203,7 @@ namespace utils::string
 	}
 #endif
 
-	std::string convert(const std::wstring& wstr)
+	std::string convert(const std::wstring_view wstr)
 	{
 		std::string result;
 		result.reserve(wstr.size());
@@ -216,7 +216,7 @@ namespace utils::string
 		return result;
 	}
 
-	std::wstring convert(const std::string& str)
+	std::wstring convert(const std::string_view str)
 	{
 		std::wstring result;
 		result.reserve(str.size());

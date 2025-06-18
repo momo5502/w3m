@@ -187,7 +187,7 @@ namespace scripting
 
 	std::string string::to_string() const
 	{
-		return utils::string::convert(this->to_wstring());
+		return utils::string::convert(this->to_view());
 	}
 
 	bool string::operator==(const string& obj) const
@@ -197,7 +197,7 @@ namespace scripting
 			return false;
 		}
 
-		return memcmp(this->data(), obj.data(), this->size()) == 0;
+		return memcmp(this->data(), obj.data(), this->size_in_bytes()) == 0;
 	}
 
 	bool string::operator!=(const string& obj) const

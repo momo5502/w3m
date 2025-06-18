@@ -58,6 +58,8 @@ namespace scripting
 	class array
 	{
 	public:
+		using element_type = T;
+
 		array() = default;
 
 		array(const size_t count, T element = T())
@@ -152,6 +154,11 @@ namespace scripting
 		size_t size() const
 		{
 			return this->array_.length;
+		}
+
+		size_t size_in_bytes() const
+		{
+			return this->size() * sizeof(element_type);
 		}
 
 		bool empty() const
