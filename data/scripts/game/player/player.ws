@@ -242,14 +242,16 @@ statemachine import abstract class CPlayer extends CActor
 		{
 			inv.Created();	
 		}
-		if( !spawnData.restored )
+		if( !spawnData.restored &&  this == (CPlayer)thePlayer )
 		{
 			inputHandler = new CPlayerInput in this;
 			theGame.EnableUberMovement( true );
 			((CInGameConfigWrapper)theGame.GetInGameConfigWrapper()).SetVarValue( 'Gameplay', 'EnableUberMovement', 1 );
 		}
-		
-		inputHandler.Initialize(spawnData.restored );
+
+		if (inputHandler) {
+			inputHandler.Initialize(spawnData.restored );
+		}
 		SetAutoCameraCenter( ((CInGameConfigWrapper)theGame.GetInGameConfigWrapper()).GetVarValue( 'Gameplay', 'AutoCameraCenter' ) );
 
 		SetEnemyUpscaling( ((CInGameConfigWrapper)theGame.GetInGameConfigWrapper()).GetVarValue( 'Gameplay', 'EnemyUpscaling' ) );
