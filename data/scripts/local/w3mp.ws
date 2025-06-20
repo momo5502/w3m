@@ -145,16 +145,33 @@ function CreateNewPlayerEntity() : CEntity
     var followerMovingagent : CMovingAgentComponent;
     var followOnFootAI : CAIFollowSideBySideAction;
     var tags : array<name>;
+    var ids : array<SItemUniqueId>;
 
     tags.PushBack('w3m_Player');
 
     rot = thePlayer.GetWorldRotation();	
     pos = thePlayer.GetWorldPosition();
 
-    template = (CEntityTemplate)LoadResource("vesemir", false);
+    template = (CEntityTemplate)LoadResource("characters/npc_entities/main_npc/geralt_npc.w2ent", true);
 
     ent = theGame.CreateEntity(template, pos, rot,,,,,tags);
     npc = (CNewNPC)ent;
+
+    ids.Clear();
+    ids = npc.GetInventory().AddAnItem('Medium armor 03', 1);
+    npc.EquipItem(ids[0]);
+
+    ids.Clear();
+    ids = npc.GetInventory().AddAnItem('Pants 03', 1);
+    npc.EquipItem(ids[0]);
+    
+    ids.Clear();
+    ids = npc.GetInventory().AddAnItem('Boots 01', 1);
+    npc.EquipItem(ids[0]);
+
+    ids.Clear();
+    ids = npc.GetInventory().AddAnItem('Gloves 01', 1);
+    npc.EquipItem(ids[0]);
 
     npc.AddAbility('_canBeFollower', true); 
 
