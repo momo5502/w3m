@@ -17,6 +17,7 @@ struct W3mPlayer
 import function W3mSetNpcDisplayName(npc : CNewNPC, npcName : string);
 import function W3mStorePlayerState(playerState : W3mPlayerState);
 import function W3mGetPlayerStates() : array<W3mPlayer>;
+import function W3mUpdatePlayerName(playerName : string);
 
 function ConvertPlayerMoveType(playerMoveType : EPlayerMoveType) : int
 {
@@ -258,4 +259,26 @@ state MultiplayerState in W3mStateMachine
             parent.players.PushBack(current_player);
         }
     }
+}
+
+function DisplayFeedMessage(msg: string)
+{
+    var hud : CR4ScriptedHud;
+    
+    hud = (CR4ScriptedHud)theGame.GetHud();
+    if (hud)
+    {
+        hud.HudConsoleMsg(msg);
+    }
+}
+
+function DisplayCenterMessage(msg: string)
+{
+    GetWitcherPlayer().DisplayHudMessage(msg);
+}
+
+exec function SetName(playerName: string)
+{
+    W3mUpdatePlayerName(playerName);
+    DisplayFeedMessage("Name changed: " + playerName);
 }

@@ -15,6 +15,7 @@
 #include "renderer.hpp"
 #include "scheduler.hpp"
 #include "scripting.hpp"
+#include "properties.hpp"
 #include "steam_proxy.hpp"
 
 namespace scripting_experiments
@@ -117,19 +118,56 @@ namespace scripting_experiments
             return g_players.access<scripting::array<W3mPlayer>>([](const players& players) { return players; });
         }
 
-        const std::string& get_player_name()
+        std::string get_default_player_name()
         {
-            static const std::string name = []() -> std::string {
-                const auto steam_name = steam_proxy::get_player_name();
-                if (steam_name)
-                {
-                    return steam_name;
-                }
+            const auto steam_name = steam_proxy::get_player_name();
+            if (steam_name)
+            {
+                return steam_name;
+            }
 
-                return utils::nt::get_user_name();
-            }();
+            return utils::nt::get_user_name();
+        }
 
+        void set_stored_player_name(const std::string& name)
+        {
+            properties::set("player_name", name);
+        }
+
+        std::optional<std::string> get_stored_player_name()
+        {
+            std::string name{};
+            if (properties::get("player_name", name))
+            {
+                return name;
+            }
+
+            return std::nullopt;
+        }
+
+        std::string load_player_name()
+        {
+            auto stored_name = get_stored_player_name();
+            if (!stored_name)
+            {
+                stored_name = get_default_player_name();
+                set_stored_player_name(*stored_name);
+            }
+
+            return std::move(*stored_name);
+        }
+
+        std::string& get_player_name()
+        {
+            static std::string name = load_player_name();
             return name;
+        }
+
+        void update_player_name(const scripting::string& wide_name)
+        {
+            auto name = wide_name.to_string();
+            set_stored_player_name(name);
+            get_player_name() = std::move(name);
         }
 
         void store_player_state(const W3mPlayerState& state)
@@ -242,6 +280,7 @@ namespace scripting_experiments
             scripting::register_function<store_player_state>(L"W3mStorePlayerState");
             scripting::register_function<get_player_states>(L"W3mGetPlayerStates");
             scripting::register_function<set_display_name>(L"W3mSetNpcDisplayName");
+            scripting::register_function<update_player_name>(L"W3mUpdatePlayerName");
 
             network::on("states", &receive_player_states);
             network::on("authRequest", &receive_auth_request);
