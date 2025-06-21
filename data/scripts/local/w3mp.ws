@@ -135,6 +135,13 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
     movingAgent.SetGameplayRelativeMoveSpeed(playerState.speed * 0.6);
 }
 
+function AddAndEquip(npc: CNewNPC, item: name) {
+    var ids : array<SItemUniqueId>;
+
+    ids = npc.GetInventory().AddAnItem(item, 1);
+    npc.EquipItem(ids[0]);
+}
+
 function CreateNewPlayerEntity() : CEntity
 {
     var pos : Vector;
@@ -145,7 +152,7 @@ function CreateNewPlayerEntity() : CEntity
     var followerMovingagent : CMovingAgentComponent;
     var followOnFootAI : CAIFollowSideBySideAction;
     var tags : array<name>;
-    var ids : array<SItemUniqueId>;
+
 
     tags.PushBack('w3m_Player');
 
@@ -157,21 +164,14 @@ function CreateNewPlayerEntity() : CEntity
     ent = theGame.CreateEntity(template, pos, rot,,,,,tags);
     npc = (CNewNPC)ent;
 
-    ids.Clear();
-    ids = npc.GetInventory().AddAnItem('Medium armor 03', 1);
-    npc.EquipItem(ids[0]);
-
-    ids.Clear();
-    ids = npc.GetInventory().AddAnItem('Pants 03', 1);
-    npc.EquipItem(ids[0]);
-    
-    ids.Clear();
-    ids = npc.GetInventory().AddAnItem('Boots 01', 1);
-    npc.EquipItem(ids[0]);
-
-    ids.Clear();
-    ids = npc.GetInventory().AddAnItem('Gloves 01', 1);
-    npc.EquipItem(ids[0]);
+    AddAndEquip(npc, 'Autogen steel sword');
+    AddAndEquip(npc, 'Autogen silver sword');
+    AddAndEquip(npc, 'Autogen Pants');
+    AddAndEquip(npc, 'Autogen Gloves');
+    AddAndEquip(npc, 'Autogen Boots');
+    AddAndEquip(npc, 'Autogen Armor');
+    AddAndEquip(npc, 'Shaved With Tail Hairstyle');
+    AddAndEquip(npc, 'head_3');
 
     npc.AddAbility('_canBeFollower', true); 
 
