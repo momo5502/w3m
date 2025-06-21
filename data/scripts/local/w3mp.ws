@@ -115,7 +115,7 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
 
     movingAgent = (CMovingPhysicalAgentComponent)actor.GetMovingAgentComponent();
 
-    if(VecDistance(actor.GetWorldPosition(), playerState.position) > 0.1)
+    if(VecDistance(actor.GetWorldPosition(), playerState.position) > 0.5)
     {
         actor.TeleportWithRotation(targetPos, playerState.angles);
     }
