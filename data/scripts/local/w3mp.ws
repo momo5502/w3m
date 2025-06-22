@@ -128,11 +128,10 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
         movingAgent.SetMoveType(MT_Walk);
     }
 
-    movingAgent.ApplyVelocity(playerState.velocity);
+    //movingAgent.ApplyVelocity(playerState.velocity);
     movingAgent.SetGameplayMoveDirection(angleHeading);
     movingAgent.SetGameplayRelativeMoveSpeed(playerState.speed * 0.6);
-    //movingAgent.SetMoveType(ConvertToMoveType(playerState.moveType));
-    W3mApplyMovementData(movingAgent, playerState.speedValues);
+    //W3mApplyMovementData(movingAgent, playerState.speedValues);
 }
 
 function AddAndEquip(npc: CNewNPC, item: name) {
