@@ -119,9 +119,19 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
         actor.TeleportWithRotation(targetPos, playerState.angles);
     //}
 
+    if(playerState.speed > 1)
+    {
+        movingAgent.SetMoveType(MT_Run);
+    }
+    else
+    {
+        movingAgent.SetMoveType(MT_Walk);
+    }
+
     movingAgent.ApplyVelocity(playerState.velocity);
     movingAgent.SetGameplayMoveDirection(angleHeading);
-    movingAgent.SetMoveType(ConvertToMoveType(playerState.moveType));
+    movingAgent.SetGameplayRelativeMoveSpeed(playerState.speed * 0.6);
+    //movingAgent.SetMoveType(ConvertToMoveType(playerState.moveType));
     W3mApplyMovementData(movingAgent, playerState.speedValues);
 }
 
