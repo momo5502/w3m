@@ -22,6 +22,92 @@ namespace scripting_experiments
 {
     namespace
     {
+
+        template <typename T>
+        struct game_object
+        {
+            uint64_t some_type{};
+            T* object{};
+        };
+
+        template <typename T, size_t Alignment = 4>
+        class game_struct
+        {
+          public:
+            template <typename... Args>
+            explicit game_struct(Args&&... args)
+            {
+                new (&storage_) T(std::forward<Args>(args)...);
+            }
+
+            game_struct(const game_struct& other)
+            {
+                new (&storage_) T(other.get());
+            }
+
+            game_struct(game_struct&& other) noexcept(std::is_nothrow_move_constructible_v<T>)
+            {
+                new (&storage_) T(std::move(other.get()));
+            }
+
+            game_struct& operator=(const game_struct& other)
+            {
+                if (this != &other)
+                {
+                    get() = other.get();
+                }
+
+                return *this;
+            }
+
+            game_struct& operator=(game_struct&& other) noexcept(std::is_nothrow_move_assignable_v<T>)
+            {
+                if (this != &other)
+                {
+                    get() = std::move(other.get());
+                }
+                return *this;
+            }
+
+            ~game_struct()
+            {
+                get().~T();
+            }
+
+            T& operator*()
+            {
+                return get();
+            }
+            const T& operator*() const
+            {
+                return get();
+            }
+
+            T* operator->()
+            {
+                return &get();
+            }
+            const T* operator->() const
+            {
+                return &get();
+            }
+
+          private:
+            alignas(Alignment) std::byte storage_[sizeof(T)];
+
+            T& get()
+            {
+                return *std::launder(reinterpret_cast<T*>(&storage_));
+            }
+
+            const T& get() const
+            {
+                return *std::launder(reinterpret_cast<const T*>(&storage_));
+            }
+        };
+
+        // -------------------------------------------
+
         struct W3mPlayerState
         {
             scripting::array<float> speed_values{};
@@ -36,7 +122,7 @@ namespace scripting_experiments
         {
             uint64_t guid{};
             scripting::string name{};
-            W3mPlayerState state{};
+            game_struct<W3mPlayerState> state{};
         };
 
         struct CNewNPC
@@ -56,14 +142,7 @@ namespace scripting_experiments
             float m_currentSpeedVal;
         };
 
-        template <typename T>
-        struct game_object
-        {
-            uint64_t some_type{};
-            T* object{};
-        };
-
-        using players = std::vector<W3mPlayer>;
+        using players = std::vector<game::player>;
         utils::concurrency::container<players> g_players;
 
         game::vec3_t convert(const scripting::game::EulerAngles& euler_angles)
@@ -115,6 +194,24 @@ namespace scripting_experiments
             return {str.data(), length};
         }
 
+        W3mPlayer convert(const game::player& player)
+        {
+            W3mPlayerState player_state{};
+            player_state.angles = convert(player.state.angles);
+            player_state.position = convert(player.state.position);
+            player_state.velocity = convert(player.state.velocity);
+            player_state.speed_values = player.state.speed_values;
+            player_state.move_type = player.state.move_type;
+            player_state.speed = player.state.speed;
+
+            W3mPlayer w3m_player{};
+            w3m_player.guid = player.guid;
+            w3m_player.name = convert(player.name);
+            *w3m_player.state = std::move(player_state);
+
+            return w3m_player;
+        }
+
         // ----------------------------------------------
 
         scripting::array<float> serialize_movement_data(const game_object<CMovingAgentComponent>* moving_agent)
@@ -158,6 +255,11 @@ namespace scripting_experiments
             mov.m_currentSpeedVal = movement_values[5];
         }
 
+        void debug_print(const scripting::string& str)
+        {
+            puts(str.to_string().c_str());
+        }
+
         void set_display_name(const game_object<CNewNPC>* npc, const scripting::string& name)
         {
             if (npc && npc->object)
@@ -168,7 +270,23 @@ namespace scripting_experiments
 
         scripting::array<W3mPlayer> get_player_states()
         {
-            return g_players.access<scripting::array<W3mPlayer>>([](const players& players) { return players; });
+            return g_players.access<scripting::array<W3mPlayer>>([](const players& players) {
+                scripting::array<W3mPlayer> w3m_players{};
+
+                if (players.empty())
+                {
+                    return w3m_players;
+                }
+
+                w3m_players.resize(players.size());
+
+                for (size_t i = 0; i < players.size(); ++i)
+                {
+                    w3m_players[i] = convert(players[i]);
+                }
+
+                return w3m_players;
+            });
         }
 
         std::string get_default_player_name()
@@ -280,20 +398,7 @@ namespace scripting_experiments
                         continue;
                     }
 
-                    W3mPlayerState player_state{};
-                    player_state.angles = convert(player.state.angles);
-                    player_state.position = convert(player.state.position);
-                    player_state.velocity = convert(player.state.velocity);
-                    player_state.speed_values = player.state.speed_values;
-                    player_state.move_type = player.state.move_type;
-                    player_state.speed = player.state.speed;
-
-                    W3mPlayer w3m_player{};
-                    w3m_player.guid = player.guid;
-                    w3m_player.name = convert(player.name);
-                    w3m_player.state = std::move(player_state);
-
-                    players.emplace_back(std::move(w3m_player));
+                    players.emplace_back(player);
                 }
             });
         }
@@ -342,6 +447,7 @@ namespace scripting_experiments
             scripting::register_function<update_player_name>(L"W3mUpdatePlayerName");
             scripting::register_function<serialize_movement_data>(L"W3mSerializeMovementData");
             scripting::register_function<apply_movement_data>(L"W3mApplyMovementData");
+            scripting::register_function<debug_print>(L"W3mPrint");
 
             network::on("states", &receive_player_states);
             network::on("authRequest", &receive_auth_request);
