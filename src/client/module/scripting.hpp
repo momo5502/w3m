@@ -77,7 +77,7 @@ namespace scripting
             }
         }
 
-        array(const std::vector<T>& data)
+        array(const std::span<const T> data)
             : array(data.data(), data.size())
         {
         }
@@ -129,9 +129,15 @@ namespace scripting
             return *this;
         }
 
-        array& operator=(std::vector<T> vector)
+        array& operator=(const std::span<const T> data)
         {
-            *this = array(std::move(vector));
+            *this = array(data);
+            return *this;
+        }
+
+        array& operator=(std::vector<T>&& data)
+        {
+            *this = array(std::move(data));
             return *this;
         }
 
@@ -319,10 +325,10 @@ namespace scripting
         game::raw_array<T> array_{nullptr, 0};
     };
 
-    class string : public array<wchar_t>
+    class string : /* private */ array<wchar_t>
     {
       public:
-        using array::array;
+        string() = default;
 
         string(const std::string_view& str);
         string& operator=(const std::string_view& str);

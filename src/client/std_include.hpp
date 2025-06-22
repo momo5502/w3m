@@ -42,6 +42,7 @@
 #endif
 
 #include <map>
+#include <span>
 #include <array>
 #include <mutex>
 #include <queue>

@@ -11,12 +11,14 @@ namespace game
     using vec4_t = std::array<double, 4>;
 
     using name_t = std::array<char, 64>;
+    using speed_values = std::array<float, 6>;
 
     struct player_state
     {
         vec3_t angles{};
         vec4_t position{};
         vec4_t velocity{};
+        speed_values speed_val{};
         float speed;
         int32_t move_type{};
     };

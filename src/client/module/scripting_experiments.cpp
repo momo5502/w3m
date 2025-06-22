@@ -24,6 +24,7 @@ namespace scripting_experiments
     {
         struct W3mPlayerState
         {
+            scripting::array<float> speed_values{};
             scripting::game::EulerAngles angles{};
             scripting::game::Vector position{};
             scripting::game::Vector velocity{};
@@ -42,6 +43,17 @@ namespace scripting_experiments
         {
             char pad[704];
             scripting::string display_name;
+        };
+
+        struct CMovingAgentComponent
+        {
+            char pad[0x1168];
+            float m_desiredAbsoluteSpeed;
+            float m_gameplayRelativeMoveSpeed;
+            float m_gameplayMoveDirection;
+            float m_acceleration;
+            float m_deceleration;
+            float m_currentSpeedVal;
         };
 
         template <typename T>
@@ -104,6 +116,47 @@ namespace scripting_experiments
         }
 
         // ----------------------------------------------
+
+        scripting::array<float> serialize_movement_data(const game_object<CMovingAgentComponent>* moving_agent)
+        {
+            scripting::array<float> movement_values{};
+
+            if (!moving_agent || !moving_agent->object)
+            {
+                return movement_values;
+            }
+
+            auto& mov = *moving_agent->object;
+
+            movement_values.push_back(mov.m_desiredAbsoluteSpeed);
+            movement_values.push_back(mov.m_gameplayRelativeMoveSpeed);
+            movement_values.push_back(mov.m_gameplayMoveDirection);
+            movement_values.push_back(mov.m_acceleration);
+            movement_values.push_back(mov.m_deceleration);
+            movement_values.push_back(mov.m_currentSpeedVal);
+
+            return movement_values;
+        }
+
+        void apply_movement_data(const game_object<CMovingAgentComponent>* moving_agent,
+                                 const scripting::array<float>& values)
+        {
+            scripting::array<float> movement_values{};
+
+            if (!moving_agent || !moving_agent->object || values.size() != 6)
+            {
+                return;
+            }
+
+            auto& mov = *moving_agent->object;
+
+            mov.m_desiredAbsoluteSpeed = movement_values[0];
+            mov.m_gameplayRelativeMoveSpeed = movement_values[1];
+            mov.m_gameplayMoveDirection = movement_values[2];
+            mov.m_acceleration = movement_values[3];
+            mov.m_deceleration = movement_values[4];
+            mov.m_currentSpeedVal = movement_values[5];
+        }
 
         void set_display_name(const game_object<CNewNPC>* npc, const scripting::string& name)
         {
@@ -180,6 +233,11 @@ namespace scripting_experiments
             player_state.speed = state.speed;
             player_state.move_type = state.move_type;
 
+            for (size_t i = 0; i < player_state.speed_val.size() && i < state.speed_values.size(); ++i)
+            {
+                player_state.speed_val[i] = state.speed_values[i];
+            }
+
             const auto& username = get_player_name();
 
             game::player player{};
@@ -226,6 +284,7 @@ namespace scripting_experiments
                     player_state.angles = convert(player.state.angles);
                     player_state.position = convert(player.state.position);
                     player_state.velocity = convert(player.state.velocity);
+                    player_state.speed_values = player.state.speed_val;
                     player_state.move_type = player.state.move_type;
                     player_state.speed = player.state.speed;
 
@@ -281,6 +340,8 @@ namespace scripting_experiments
             scripting::register_function<get_player_states>(L"W3mGetPlayerStates");
             scripting::register_function<set_display_name>(L"W3mSetNpcDisplayName");
             scripting::register_function<update_player_name>(L"W3mUpdatePlayerName");
+            scripting::register_function<serialize_movement_data>(L"W3mSerializeMovementData");
+            scripting::register_function<apply_movement_data>(L"W3mApplyMovementData");
 
             network::on("states", &receive_player_states);
             network::on("authRequest", &receive_auth_request);

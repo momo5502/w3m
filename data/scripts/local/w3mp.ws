@@ -1,5 +1,6 @@
 struct W3mPlayerState
 {
+    var speedValues : array<float>;
     var angles : EulerAngles;
     var position : Vector;
     var velocity : Vector;
@@ -18,6 +19,8 @@ import function W3mSetNpcDisplayName(npc : CNewNPC, npcName : string);
 import function W3mStorePlayerState(playerState : W3mPlayerState);
 import function W3mGetPlayerStates() : array<W3mPlayer>;
 import function W3mUpdatePlayerName(playerName : string);
+import function W3mSerializeMovementData(movingAgent : CMovingAgentComponent) : array<float>;
+import function W3mApplyMovementData(movingAgent : CMovingAgentComponent, data: array<float>);
 
 function ConvertPlayerMoveType(playerMoveType : EPlayerMoveType) : int
 {
@@ -83,6 +86,7 @@ function TransmitPlayerState(actor : CActor)
     playerState.velocity = movingAgent.GetVelocity();
     playerState.speed = movingAgent.GetSpeed();
     playerState.moveType = ConvertPlayerMoveType(thePlayer.playerMoveType);
+    playerState.speedValues = W3mSerializeMovementData(movingAgent);
 
     W3mStorePlayerState(playerState);
 }
@@ -127,18 +131,9 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
     //}
 
     movingAgent.ApplyVelocity(playerState.velocity);
-
-    if(playerState.speed > 1)
-    {
-        movingAgent.SetMoveType(MT_Run);
-    }
-    else
-    {
-        movingAgent.SetMoveType(MT_Walk);
-    }
-
     movingAgent.SetGameplayMoveDirection(angleHeading);
-    movingAgent.SetGameplayRelativeMoveSpeed(playerState.speed * 0.6);
+    movingAgent.SetMoveType(ConvertToMoveType(playerState.moveType));
+    W3mApplyMovementData(movingAgent, playerState.speedValues);
 }
 
 function AddAndEquip(npc: CNewNPC, item: name) {
