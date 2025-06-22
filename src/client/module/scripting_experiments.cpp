@@ -69,9 +69,9 @@ namespace scripting_experiments
         game::vec3_t convert(const scripting::game::EulerAngles& euler_angles)
         {
             game::vec3_t angles{};
-            angles[0] = euler_angles.Pitch;
-            angles[1] = euler_angles.Yaw;
-            angles[2] = euler_angles.Roll;
+            angles[0] = euler_angles.Roll;
+            angles[1] = euler_angles.Pitch;
+            angles[2] = euler_angles.Yaw;
 
             return angles;
         }
@@ -79,9 +79,9 @@ namespace scripting_experiments
         scripting::game::EulerAngles convert(const game::vec3_t& angles)
         {
             scripting::game::EulerAngles euler_angles{};
-            euler_angles.Pitch = angles[0];
-            euler_angles.Yaw = angles[1];
-            euler_angles.Roll = angles[2];
+            euler_angles.Roll = angles[0];
+            euler_angles.Pitch = angles[1];
+            euler_angles.Yaw = angles[2];
 
             return euler_angles;
         }

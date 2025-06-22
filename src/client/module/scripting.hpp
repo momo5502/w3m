@@ -5,7 +5,7 @@ namespace scripting
 {
     namespace game
     {
-        struct Vector
+        __declspec(align(16)) struct Vector
         {
             float X{0.0};
             float Y{0.0};
@@ -13,15 +13,12 @@ namespace scripting
             float W{0.0};
         };
 
-#pragma pack(push)
-#pragma pack(1)
         struct EulerAngles
         {
+            float Roll{0.0};
             float Pitch{0.0};
             float Yaw{0.0};
-            float Roll{0.0};
         };
-#pragma pack(pop)
 
         struct CFunction
         {
@@ -38,7 +35,7 @@ namespace scripting
         };
 
 #pragma pack(push)
-#pragma pack(1)
+#pragma pack(4)
         template <typename T>
         struct raw_array
         {
