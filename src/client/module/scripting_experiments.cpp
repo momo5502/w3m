@@ -238,8 +238,6 @@ namespace scripting_experiments
         void apply_movement_data(const game_object<CMovingAgentComponent>* moving_agent,
                                  const scripting::array<float>& values)
         {
-            scripting::array<float> movement_values{};
-
             if (!moving_agent || !moving_agent->object || values.size() != 6)
             {
                 return;
@@ -247,12 +245,12 @@ namespace scripting_experiments
 
             auto& mov = *moving_agent->object;
 
-            mov.m_desiredAbsoluteSpeed = movement_values[0];
-            mov.m_gameplayRelativeMoveSpeed = movement_values[1];
-            mov.m_gameplayMoveDirection = movement_values[2];
-            mov.m_acceleration = movement_values[3];
-            mov.m_deceleration = movement_values[4];
-            mov.m_currentSpeedVal = movement_values[5];
+            mov.m_desiredAbsoluteSpeed = values[0];
+            mov.m_gameplayRelativeMoveSpeed = values[1];
+            mov.m_gameplayMoveDirection = values[2];
+            mov.m_acceleration = values[3];
+            mov.m_deceleration = values[4];
+            mov.m_currentSpeedVal = values[5];
         }
 
         void debug_print(const scripting::string& str)
