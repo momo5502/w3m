@@ -99,6 +99,8 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
     var actorPos : Vector;
     var targetPos : Vector;
     var playerState : W3mPlayerState;
+    var angleHeading : float;
+    var positionHeading : float;
 
     playerState = player.playerState;
 
@@ -116,10 +118,13 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
 
     movingAgent = (CMovingPhysicalAgentComponent)actor.GetMovingAgentComponent();
 
-    if(VecDistance(actor.GetWorldPosition(), playerState.position) > 0.5)
-    {
+    angleHeading = VecHeading(RotForward(playerState.angles));
+    positionHeading = VecHeading(targetPos - actorPos);
+
+   //if(VecDistance(actor.GetWorldPosition(), playerState.position) > 1 || AbsF(angleHeading - positionHeading) > 30)
+    //{
         actor.TeleportWithRotation(targetPos, playerState.angles);
-    }
+    //}
 
     movingAgent.ApplyVelocity(playerState.velocity);
 
@@ -132,7 +137,7 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
         movingAgent.SetMoveType(MT_Walk);
     }
 
-    movingAgent.SetGameplayMoveDirection(VecHeading(RotForward(playerState.angles)));
+    movingAgent.SetGameplayMoveDirection(angleHeading);
     movingAgent.SetGameplayRelativeMoveSpeed(playerState.speed * 0.6);
 }
 
