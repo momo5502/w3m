@@ -233,9 +233,9 @@ namespace scripting_experiments
             player_state.speed = state.speed;
             player_state.move_type = state.move_type;
 
-            for (size_t i = 0; i < player_state.speed_val.size() && i < state.speed_values.size(); ++i)
+            for (size_t i = 0; i < player_state.speed_values.size() && i < state.speed_values.size(); ++i)
             {
-                player_state.speed_val[i] = state.speed_values[i];
+                player_state.speed_values[i] = state.speed_values[i];
             }
 
             const auto& username = get_player_name();
@@ -284,7 +284,7 @@ namespace scripting_experiments
                     player_state.angles = convert(player.state.angles);
                     player_state.position = convert(player.state.position);
                     player_state.velocity = convert(player.state.velocity);
-                    player_state.speed_values = player.state.speed_val;
+                    player_state.speed_values = player.state.speed_values;
                     player_state.move_type = player.state.move_type;
                     player_state.speed = player.state.speed;
 

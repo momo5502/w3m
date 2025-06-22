@@ -5,21 +5,21 @@
 
 namespace game
 {
-    constexpr uint32_t PROTOCOL = 3;
+    constexpr uint32_t PROTOCOL = 4;
 
     using vec3_t = std::array<double, 3>;
     using vec4_t = std::array<double, 4>;
 
     using name_t = std::array<char, 64>;
-    using speed_values = std::array<float, 6>;
+    using speed_t = std::array<float, 6>;
 
     struct player_state
     {
         vec3_t angles{};
         vec4_t position{};
         vec4_t velocity{};
-        speed_values speed_val{};
-        float speed;
+        speed_t speed_values{};
+        float speed; // legacy
         int32_t move_type{};
     };
 
