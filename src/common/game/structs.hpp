@@ -11,7 +11,7 @@ namespace game
     using vec4_t = std::array<double, 4>;
 
     using name_t = std::array<char, 64>;
-    using speed_t = std::array<float, 7>;
+    using speed_t = std::array<float, 8>;
 
     struct player_state
     {

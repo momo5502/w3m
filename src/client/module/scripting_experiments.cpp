@@ -133,9 +133,11 @@ namespace scripting_experiments
 
         struct CMovingAgentComponent
         {
-            char pad[0x1098];
+            char pad[0xF78];
+            float m_relativeMoveSpeed;
+            char pad2[0x11C];
             int32_t m_moveType;
-            char pad2[0xD0];
+            char pad3[0xD0];
             float m_desiredAbsoluteSpeed;
             float m_gameplayRelativeMoveSpeed;
             float m_gameplayMoveDirection;
@@ -145,8 +147,12 @@ namespace scripting_experiments
             float m_lastRelMovementSpeed;
         };
 
+        static_assert(offsetof(CMovingAgentComponent, m_relativeMoveSpeed) == 0xF78);
         static_assert(offsetof(CMovingAgentComponent, m_moveType) == 0x1098);
+        static_assert(offsetof(CMovingAgentComponent, m_desiredAbsoluteSpeed) == 0x116C);
         static_assert(offsetof(CMovingAgentComponent, m_gameplayRelativeMoveSpeed) == 0x1170);
+        static_assert(offsetof(CMovingAgentComponent, m_currentSpeedVal) == 0x1180);
+        static_assert(offsetof(CMovingAgentComponent, m_lastRelMovementSpeed) == 0x1184);
 
         using players = std::vector<game::player>;
         bool g_new_data{false};
@@ -242,6 +248,7 @@ namespace scripting_experiments
 
             auto& mov = *moving_agent->object;
 
+            movement_values.push_back(mov.m_relativeMoveSpeed);
             movement_values.push_back(mov.m_desiredAbsoluteSpeed);
             movement_values.push_back(mov.m_gameplayRelativeMoveSpeed);
             movement_values.push_back(mov.m_gameplayMoveDirection);
@@ -263,13 +270,14 @@ namespace scripting_experiments
 
             auto& mov = *moving_agent->object;
 
-            mov.m_desiredAbsoluteSpeed = values[0];
-            mov.m_gameplayRelativeMoveSpeed = values[1];
-            mov.m_gameplayMoveDirection = values[2];
-            mov.m_acceleration = values[3];
-            mov.m_deceleration = values[4];
-            mov.m_currentSpeedVal = values[5];
-            mov.m_lastRelMovementSpeed = values[6];
+            mov.m_relativeMoveSpeed = values[0];
+            mov.m_desiredAbsoluteSpeed = values[1];
+            mov.m_gameplayRelativeMoveSpeed = values[2];
+            mov.m_gameplayMoveDirection = values[3];
+            mov.m_acceleration = values[4];
+            mov.m_deceleration = values[5];
+            mov.m_currentSpeedVal = values[6];
+            mov.m_lastRelMovementSpeed = values[7];
         }
 
         void debug_print(const scripting::string& str)

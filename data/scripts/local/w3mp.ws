@@ -78,45 +78,23 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
     var targetPos : Vector;
     var playerState : W3mPlayerState;
     var angleHeading : float;
-    var positionHeading : float;
 
     playerState = player.playerState;
-
 
     W3mSetNpcDisplayName((CNewNPC)actor, player.playerName);
 
     actorPos = actor.GetWorldPosition();
     targetPos = playerState.position;
 
-    if(AbsF(actorPos.Z -  targetPos.Z) < 0.25)
-    {
-        targetPos.Z = actorPos.Z;
-    }
-
     movingAgent = (CMovingPhysicalAgentComponent)actor.GetMovingAgentComponent();
 
     angleHeading = VecHeading(RotForward(playerState.angles));
-    positionHeading = VecHeading(targetPos - actorPos);
 
-   //if(VecDistance(actor.GetWorldPosition(), playerState.position) > 1 || AbsF(angleHeading - positionHeading) > 30)
-    //{
-        actor.TeleportWithRotation(targetPos, playerState.angles);
-    //}
-
-    /*if(playerState.speed > 1)
-    {
-        movingAgent.SetMoveType(MT_Run);
-    }
-    else
-    {
-        movingAgent.SetMoveType(MT_Walk);
-    }*/
+    actor.TeleportWithRotation(targetPos, playerState.angles);
 
     movingAgent.SetMoveType(ConvertToMoveType(playerState.moveType));
-
-    //movingAgent.ApplyVelocity(playerState.velocity);
+    movingAgent.ApplyVelocity(playerState.velocity);
     movingAgent.SetGameplayMoveDirection(angleHeading);
-    //movingAgent.SetGameplayRelativeMoveSpeed(playerState.speed * 0.6);
     W3mApplyMovementData(movingAgent, playerState.speedValues);
 }
 
