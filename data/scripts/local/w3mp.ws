@@ -19,30 +19,11 @@ import function W3mPrint(msg : string);
 import function W3mSetNpcDisplayName(npc : CNewNPC, npcName : string);
 import function W3mStorePlayerState(playerState : W3mPlayerState);
 import function W3mGetPlayerStates() : array<W3mPlayer>;
+import function W3mHasNewStates() : bool;
 import function W3mUpdatePlayerName(playerName : string);
+import function W3mGetMoveType(movingAgent : CMovingAgentComponent) : int;
 import function W3mSerializeMovementData(movingAgent : CMovingAgentComponent) : array<float>;
 import function W3mApplyMovementData(movingAgent : CMovingAgentComponent, data: array<float>);
-
-function ConvertPlayerMoveType(playerMoveType : EPlayerMoveType) : int
-{
-    switch( playerMoveType)
-    {
-        case PMT_Idle:
-            return 0;
-            
-        case PMT_Walk:
-            return 1;	
-
-        case PMT_Run:
-            return 2;	
-            
-        case PMT_Sprint:
-            return 3;
-
-        default:
-            return 0;
-    }
-}
 
 function ConvertToMoveType(moveType : int) : EMoveType
 {
@@ -52,13 +33,16 @@ function ConvertToMoveType(moveType : int) : EMoveType
             return MT_Walk;
             
         case 1:
-            return MT_Walk;	
+            return MT_Run;	
 
         case 2:
-            return MT_Run;
+            return MT_FastRun;
             
         case 3:
             return MT_Sprint;
+
+        case 4:
+            return MT_AbsSpeed;
 
         default:
             return MT_Walk;
@@ -76,7 +60,7 @@ function TransmitPlayerState(actor : CActor)
     playerState.angles = actor.GetWorldRotation();
     playerState.velocity = movingAgent.GetVelocity();
     playerState.speed = movingAgent.GetSpeed();
-    playerState.moveType = ConvertPlayerMoveType(thePlayer.playerMoveType);
+    playerState.moveType = W3mGetMoveType(movingAgent);
     playerState.speedValues = W3mSerializeMovementData(movingAgent);
 
     W3mStorePlayerState(playerState);
@@ -119,19 +103,21 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
         actor.TeleportWithRotation(targetPos, playerState.angles);
     //}
 
-    if(playerState.speed > 1)
+    /*if(playerState.speed > 1)
     {
         movingAgent.SetMoveType(MT_Run);
     }
     else
     {
         movingAgent.SetMoveType(MT_Walk);
-    }
+    }*/
+
+    movingAgent.SetMoveType(ConvertToMoveType(playerState.moveType));
 
     //movingAgent.ApplyVelocity(playerState.velocity);
     movingAgent.SetGameplayMoveDirection(angleHeading);
-    movingAgent.SetGameplayRelativeMoveSpeed(playerState.speed * 0.6);
-    //W3mApplyMovementData(movingAgent, playerState.speedValues);
+    //movingAgent.SetGameplayRelativeMoveSpeed(playerState.speed * 0.6);
+    W3mApplyMovementData(movingAgent, playerState.speedValues);
 }
 
 function AddAndEquip(npc: CNewNPC, item: name) {
@@ -229,6 +215,10 @@ state MultiplayerState in W3mStateMachine
     {
         var index : int;
         var player_states : array<W3mPlayer>;
+
+        if (!W3mHasNewStates()) {
+            return;
+        }
 
         player_states = W3mGetPlayerStates();
         AdjustPlayers(player_states.Size());

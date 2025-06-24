@@ -133,7 +133,9 @@ namespace scripting_experiments
 
         struct CMovingAgentComponent
         {
-            char pad[0x1168];
+            char pad[0x1098];
+            int32_t m_moveType;
+            char pad2[0xD0];
             float m_desiredAbsoluteSpeed;
             float m_gameplayRelativeMoveSpeed;
             float m_gameplayMoveDirection;
@@ -143,7 +145,11 @@ namespace scripting_experiments
             float m_lastRelMovementSpeed;
         };
 
+        static_assert(offsetof(CMovingAgentComponent, m_moveType) == 0x1098);
+        static_assert(offsetof(CMovingAgentComponent, m_gameplayRelativeMoveSpeed) == 0x1170);
+
         using players = std::vector<game::player>;
+        bool g_new_data{false};
         utils::concurrency::container<players> g_players;
 
         game::vec3_t convert(const scripting::game::EulerAngles& euler_angles)
@@ -215,6 +221,16 @@ namespace scripting_experiments
 
         // ----------------------------------------------
 
+        int32_t get_move_type(const game_object<CMovingAgentComponent>* moving_agent)
+        {
+            if (!moving_agent || !moving_agent->object)
+            {
+                return 0;
+            }
+
+            return moving_agent->object->m_moveType;
+        }
+
         scripting::array<float> serialize_movement_data(const game_object<CMovingAgentComponent>* moving_agent)
         {
             scripting::array<float> movement_values{};
@@ -272,6 +288,7 @@ namespace scripting_experiments
         scripting::array<W3mPlayer> get_player_states()
         {
             return g_players.access<scripting::array<W3mPlayer>>([](const players& players) {
+                g_new_data = false;
                 scripting::array<W3mPlayer> w3m_players{};
 
                 if (players.empty())
@@ -288,6 +305,12 @@ namespace scripting_experiments
 
                 return w3m_players;
             });
+        }
+
+        bool has_new_player_states()
+        {
+            const auto _ = g_players.acquire_lock();
+            return g_new_data;
         }
 
         std::string get_default_player_name()
@@ -389,6 +412,7 @@ namespace scripting_experiments
             const auto player_data = buffer.read_vector<game::player>();
 
             g_players.access([&player_data, own_guid](players& players) {
+                g_new_data = true;
                 players.resize(0);
                 players.reserve(player_data.size());
 
@@ -446,10 +470,12 @@ namespace scripting_experiments
         {
             scripting::register_function<store_player_state>(L"W3mStorePlayerState");
             scripting::register_function<get_player_states>(L"W3mGetPlayerStates");
+            scripting::register_function<has_new_player_states>(L"W3mHasNewStates");
             scripting::register_function<set_display_name>(L"W3mSetNpcDisplayName");
             scripting::register_function<update_player_name>(L"W3mUpdatePlayerName");
             scripting::register_function<serialize_movement_data>(L"W3mSerializeMovementData");
             scripting::register_function<apply_movement_data>(L"W3mApplyMovementData");
+            scripting::register_function<get_move_type>(L"W3mGetMoveType");
             scripting::register_function<debug_print>(L"W3mPrint");
 
             network::on("states", &receive_player_states);
