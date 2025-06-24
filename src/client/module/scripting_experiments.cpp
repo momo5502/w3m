@@ -158,9 +158,9 @@ namespace scripting_experiments
         scripting::game::EulerAngles convert(const game::vec3_t& angles)
         {
             scripting::game::EulerAngles euler_angles{};
-            euler_angles.Roll = angles[0];
-            euler_angles.Pitch = angles[1];
-            euler_angles.Yaw = angles[2];
+            euler_angles.Roll = static_cast<float>(angles[0]);
+            euler_angles.Pitch = static_cast<float>(angles[1]);
+            euler_angles.Yaw = static_cast<float>(angles[2]);
 
             return euler_angles;
         }
@@ -179,10 +179,10 @@ namespace scripting_experiments
         scripting::game::Vector convert(const game::vec4_t& vector)
         {
             scripting::game::Vector game_vector{};
-            game_vector.X = vector[0];
-            game_vector.Y = vector[1];
-            game_vector.Z = vector[2];
-            game_vector.W = vector[3];
+            game_vector.X = static_cast<float>(vector[0]);
+            game_vector.Y = static_cast<float>(vector[1]);
+            game_vector.Z = static_cast<float>(vector[2]);
+            game_vector.W = static_cast<float>(vector[3]);
 
             return game_vector;
         }
@@ -431,7 +431,9 @@ namespace scripting_experiments
 
         size_t get_player_count()
         {
-            return g_players.access<size_t>([](const players& players) { return players.size(); });
+            return g_players.access<size_t>([](const players& players) {
+                return players.size(); //
+            });
         }
     }
 
