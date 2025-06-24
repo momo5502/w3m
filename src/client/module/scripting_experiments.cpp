@@ -140,6 +140,7 @@ namespace scripting_experiments
             float m_acceleration;
             float m_deceleration;
             float m_currentSpeedVal;
+            float m_lastRelMovementSpeed;
         };
 
         using players = std::vector<game::player>;
@@ -231,6 +232,7 @@ namespace scripting_experiments
             movement_values.push_back(mov.m_acceleration);
             movement_values.push_back(mov.m_deceleration);
             movement_values.push_back(mov.m_currentSpeedVal);
+            movement_values.push_back(mov.m_lastRelMovementSpeed);
 
             return movement_values;
         }
@@ -238,7 +240,7 @@ namespace scripting_experiments
         void apply_movement_data(const game_object<CMovingAgentComponent>* moving_agent,
                                  const scripting::array<float>& values)
         {
-            if (!moving_agent || !moving_agent->object || values.size() != 6)
+            if (!moving_agent || !moving_agent->object || values.size() != game::speed_t().size())
             {
                 return;
             }
@@ -251,6 +253,7 @@ namespace scripting_experiments
             mov.m_acceleration = values[3];
             mov.m_deceleration = values[4];
             mov.m_currentSpeedVal = values[5];
+            mov.m_lastRelMovementSpeed = values[6];
         }
 
         void debug_print(const scripting::string& str)
