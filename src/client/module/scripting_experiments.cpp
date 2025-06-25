@@ -1,6 +1,7 @@
 #include "../std_include.hpp"
 
 #include "../loader/component_loader.hpp"
+#include "../loader/loader.hpp"
 
 #include <game/structs.hpp>
 
@@ -110,7 +111,6 @@ namespace scripting_experiments
 
         struct W3mPlayerState
         {
-            scripting::array<float> speed_values{};
             scripting::game::EulerAngles angles{};
             scripting::game::Vector position{};
             scripting::game::Vector velocity{};
@@ -145,12 +145,20 @@ namespace scripting_experiments
             float m_deceleration;
             float m_currentSpeedVal;
             float m_lastRelMovementSpeed;
+
+            float ConvertSpeedAbsToRel(const float speedAbs) const
+            {
+                auto* func = reinterpret_cast<float(__thiscall*)(const CMovingAgentComponent*, float)>(0x14151DB00_g);
+                return func(this, speedAbs);
+            }
         };
 
         static_assert(offsetof(CMovingAgentComponent, m_relativeMoveSpeed) == 0xF78);
         static_assert(offsetof(CMovingAgentComponent, m_moveType) == 0x1098);
         static_assert(offsetof(CMovingAgentComponent, m_desiredAbsoluteSpeed) == 0x116C);
         static_assert(offsetof(CMovingAgentComponent, m_gameplayRelativeMoveSpeed) == 0x1170);
+        static_assert(offsetof(CMovingAgentComponent, m_acceleration) == 0x1178);
+        static_assert(offsetof(CMovingAgentComponent, m_deceleration) == 0x117C);
         static_assert(offsetof(CMovingAgentComponent, m_currentSpeedVal) == 0x1180);
         static_assert(offsetof(CMovingAgentComponent, m_lastRelMovementSpeed) == 0x1184);
 
@@ -213,7 +221,6 @@ namespace scripting_experiments
             player_state.angles = convert(player.state.angles);
             player_state.position = convert(player.state.position);
             player_state.velocity = convert(player.state.velocity);
-            player_state.speed_values = player.state.speed_values;
             player_state.move_type = player.state.move_type;
             player_state.speed = player.state.speed;
 
@@ -225,8 +232,6 @@ namespace scripting_experiments
             return w3m_player;
         }
 
-        // ----------------------------------------------
-
         int32_t get_move_type(const game_object<CMovingAgentComponent>* moving_agent)
         {
             if (!moving_agent || !moving_agent->object)
@@ -237,47 +242,22 @@ namespace scripting_experiments
             return moving_agent->object->m_moveType;
         }
 
-        scripting::array<float> serialize_movement_data(const game_object<CMovingAgentComponent>* moving_agent)
+        void set_speed(const game_object<CMovingAgentComponent>* moving_agent, const float abs_speed)
         {
-            scripting::array<float> movement_values{};
-
             if (!moving_agent || !moving_agent->object)
-            {
-                return movement_values;
-            }
-
-            auto& mov = *moving_agent->object;
-
-            movement_values.push_back(mov.m_relativeMoveSpeed);
-            movement_values.push_back(mov.m_desiredAbsoluteSpeed);
-            movement_values.push_back(mov.m_gameplayRelativeMoveSpeed);
-            movement_values.push_back(mov.m_gameplayMoveDirection);
-            movement_values.push_back(mov.m_acceleration);
-            movement_values.push_back(mov.m_deceleration);
-            movement_values.push_back(mov.m_currentSpeedVal);
-            movement_values.push_back(mov.m_lastRelMovementSpeed);
-
-            return movement_values;
-        }
-
-        void apply_movement_data(const game_object<CMovingAgentComponent>* moving_agent,
-                                 const scripting::array<float>& values)
-        {
-            if (!moving_agent || !moving_agent->object || values.size() != game::speed_t().size())
             {
                 return;
             }
 
-            auto& mov = *moving_agent->object;
+            auto& agent = *moving_agent->object;
 
-            mov.m_relativeMoveSpeed = values[0];
-            mov.m_desiredAbsoluteSpeed = values[1];
-            mov.m_gameplayRelativeMoveSpeed = values[2];
-            mov.m_gameplayMoveDirection = values[3];
-            mov.m_acceleration = values[4];
-            mov.m_deceleration = values[5];
-            mov.m_currentSpeedVal = values[6];
-            mov.m_lastRelMovementSpeed = values[7];
+            const auto rel_speed = agent.ConvertSpeedAbsToRel(abs_speed);
+
+            agent.m_desiredAbsoluteSpeed = abs_speed;
+            agent.m_currentSpeedVal = abs_speed;
+            agent.m_relativeMoveSpeed = rel_speed;
+            agent.m_lastRelMovementSpeed = rel_speed;
+            agent.m_gameplayRelativeMoveSpeed = rel_speed;
         }
 
         void debug_print(const scripting::string& str)
@@ -383,11 +363,6 @@ namespace scripting_experiments
             player_state.speed = state.speed;
             player_state.move_type = state.move_type;
 
-            for (size_t i = 0; i < player_state.speed_values.size() && i < state.speed_values.size(); ++i)
-            {
-                player_state.speed_values[i] = state.speed_values[i];
-            }
-
             const auto& username = get_player_name();
 
             game::player player{};
@@ -481,9 +456,8 @@ namespace scripting_experiments
             scripting::register_function<has_new_player_states>(L"W3mHasNewStates");
             scripting::register_function<set_display_name>(L"W3mSetNpcDisplayName");
             scripting::register_function<update_player_name>(L"W3mUpdatePlayerName");
-            scripting::register_function<serialize_movement_data>(L"W3mSerializeMovementData");
-            scripting::register_function<apply_movement_data>(L"W3mApplyMovementData");
             scripting::register_function<get_move_type>(L"W3mGetMoveType");
+            scripting::register_function<set_speed>(L"W3mSetSpeed");
             scripting::register_function<debug_print>(L"W3mPrint");
 
             network::on("states", &receive_player_states);
