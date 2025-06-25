@@ -21,7 +21,6 @@ import function W3mPrint(msg : string);
 import function W3mSetNpcDisplayName(npc : CNewNPC, npcName : string);
 import function W3mStorePlayerState(playerState : W3mPlayerState);
 import function W3mGetPlayerStates() : array<W3mPlayer>;
-import function W3mHasNewStates() : bool;
 import function W3mUpdatePlayerName(playerName : string);
 import function W3mGetMoveType(movingAgent : CMovingAgentComponent) : int;
 import function W3mSetSpeed(movingAgent : CMovingAgentComponent, absSpeed: float);
@@ -78,6 +77,11 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
     var targetPos : Vector;
     var playerState : W3mPlayerState;
     var angleHeading : float;
+
+    if (player.playerState.Size() < 1)
+    {
+        return;
+    }
 
     playerState = player.playerState[0];
 
@@ -194,10 +198,6 @@ state MultiplayerState in W3mStateMachine
     {
         var index : int;
         var player_states : array<W3mPlayer>;
-
-        if (!W3mHasNewStates()) {
-            return;
-        }
 
         player_states = W3mGetPlayerStates();
         AdjustPlayers(player_states.Size());

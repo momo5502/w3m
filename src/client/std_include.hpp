@@ -42,6 +42,7 @@
 #endif
 
 #include <map>
+#include <set>
 #include <span>
 #include <array>
 #include <mutex>

@@ -14,6 +14,7 @@ struct client
     game::player_state current_state{};
     std::string authentication_nonce{};
     std::optional<utils::cryptography::ecc::key> public_key{};
+    uint64_t state_id{0};
     bool has_printed_failure{false};
 
     bool is_authenticated() const

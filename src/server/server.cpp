@@ -131,6 +131,7 @@ namespace
         client.guid = player_state.guid;
         client.name.assign(player_state.name.data(), strnlen(player_state.name.data(), player_state.name.size()));
         client.current_state = std::move(player_state.state);
+        client.state_id += 1;
 
         if (!client.is_authenticated())
         {
@@ -153,6 +154,7 @@ namespace
             game::player player{};
             player.guid = val.guid;
             player.state = val.current_state;
+            player.state.state_id = val.state_id;
             utils::string::copy(player.name, val.name.data());
 
             states.emplace_back(std::move(player));

@@ -162,8 +162,12 @@ namespace scripting_experiments
         static_assert(offsetof(CMovingAgentComponent, m_currentSpeedVal) == 0x1180);
         static_assert(offsetof(CMovingAgentComponent, m_lastRelMovementSpeed) == 0x1184);
 
-        using players = std::vector<game::player>;
-        bool g_new_data{false};
+        struct players
+        {
+            std::vector<game::player> infos;
+            std::map<uint64_t, uint64_t> state_ids{};
+        };
+
         utils::concurrency::container<players> g_players;
 
         game::vec3_t convert(const scripting::game::EulerAngles& euler_angles)
@@ -215,19 +219,23 @@ namespace scripting_experiments
             return {str.data(), length};
         }
 
-        W3mPlayer convert(const game::player& player)
+        W3mPlayer convert(const game::player& player, const bool attach_state)
         {
-            W3mPlayerState player_state{};
-            player_state.angles = convert(player.state.angles);
-            player_state.position = convert(player.state.position);
-            player_state.velocity = convert(player.state.velocity);
-            player_state.move_type = player.state.move_type;
-            player_state.speed = player.state.speed;
-
             W3mPlayer w3m_player{};
             w3m_player.guid = player.guid;
             w3m_player.name = convert(player.name);
-            w3m_player.state.push_back(std::move(player_state));
+
+            if (attach_state)
+            {
+                W3mPlayerState player_state{};
+                player_state.angles = convert(player.state.angles);
+                player_state.position = convert(player.state.position);
+                player_state.velocity = convert(player.state.velocity);
+                player_state.move_type = player.state.move_type;
+                player_state.speed = player.state.speed;
+
+                w3m_player.state.push_back(std::move(player_state));
+            }
 
             return w3m_player;
         }
@@ -275,30 +283,29 @@ namespace scripting_experiments
 
         scripting::array<W3mPlayer> get_player_states()
         {
-            return g_players.access<scripting::array<W3mPlayer>>([](const players& players) {
-                g_new_data = false;
+            return g_players.access<scripting::array<W3mPlayer>>([](players& players) {
                 scripting::array<W3mPlayer> w3m_players{};
 
-                if (players.empty())
+                if (players.infos.empty())
                 {
                     return w3m_players;
                 }
 
-                w3m_players.resize(players.size());
+                w3m_players.resize(players.infos.size());
 
-                for (size_t i = 0; i < players.size(); ++i)
+                for (size_t i = 0; i < players.infos.size(); ++i)
                 {
-                    w3m_players[i] = convert(players[i]);
+                    const auto& info = players.infos[i];
+
+                    auto& last_state = players.state_ids[info.guid];
+                    const auto has_new_state = info.state.state_id > last_state;
+                    last_state = info.state.state_id;
+
+                    w3m_players[i] = convert(info, has_new_state);
                 }
 
                 return w3m_players;
             });
-        }
-
-        bool has_new_player_states()
-        {
-            const auto _ = g_players.acquire_lock();
-            return g_new_data;
         }
 
         std::string get_default_player_name()
@@ -395,9 +402,10 @@ namespace scripting_experiments
             const auto player_data = buffer.read_vector<game::player>();
 
             g_players.access([&player_data, own_guid](players& players) {
-                g_new_data = true;
-                players.resize(0);
-                players.reserve(player_data.size());
+                players.infos.resize(0);
+                players.infos.reserve(player_data.size());
+
+                std::set<uint64_t> guids{};
 
                 for (const auto& player : player_data)
                 {
@@ -406,7 +414,19 @@ namespace scripting_experiments
                         continue;
                     }
 
-                    players.emplace_back(player);
+                    guids.insert(player.guid);
+                    players.infos.emplace_back(player);
+                }
+
+                for (auto i = players.state_ids.begin(); i != players.state_ids.end();)
+                {
+                    if (guids.contains(i->first))
+                    {
+                        ++i;
+                        continue;
+                    }
+
+                    i = players.state_ids.erase(i);
                 }
             });
         }
@@ -442,7 +462,7 @@ namespace scripting_experiments
         size_t get_player_count()
         {
             return g_players.access<size_t>([](const players& players) {
-                return players.size(); //
+                return players.infos.size(); //
             });
         }
     }
@@ -453,7 +473,6 @@ namespace scripting_experiments
         {
             scripting::register_function<store_player_state>(L"W3mStorePlayerState");
             scripting::register_function<get_player_states>(L"W3mGetPlayerStates");
-            scripting::register_function<has_new_player_states>(L"W3mHasNewStates");
             scripting::register_function<set_display_name>(L"W3mSetNpcDisplayName");
             scripting::register_function<update_player_name>(L"W3mUpdatePlayerName");
             scripting::register_function<get_move_type>(L"W3mGetMoveType");

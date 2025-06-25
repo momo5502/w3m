@@ -5,7 +5,7 @@
 
 namespace game
 {
-    constexpr uint32_t PROTOCOL = 5;
+    constexpr uint32_t PROTOCOL = 6;
 
     using vec3_t = std::array<double, 3>;
     using vec4_t = std::array<double, 4>;
@@ -19,6 +19,7 @@ namespace game
         vec4_t velocity{};
         float speed;
         int32_t move_type{};
+        uint64_t state_id{};
     };
 
     struct player
