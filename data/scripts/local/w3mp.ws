@@ -90,6 +90,11 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
     actorPos = actor.GetWorldPosition();
     targetPos = playerState.position;
 
+    if (AbsF(actorPos.Z -  targetPos.Z) < 0.25)
+    {
+        targetPos.Z = actorPos.Z;
+    }
+
     movingAgent = (CMovingPhysicalAgentComponent)actor.GetMovingAgentComponent();
 
     angleHeading = VecHeading(RotForward(playerState.angles));
