@@ -11,7 +11,10 @@ struct W3mPlayer
 {
     var guid : Uint64;
     var playerName : string;
-    var playerState : W3mPlayerState;
+    // Always has 1 entry. Technically the array is not needed
+    // The idea is only to force proper alignment of the playerState.
+    // The W3mPlayerState struct seems to be wrongly aligned (4 instead of 16) when being a member 
+    var playerState : array<W3mPlayerState>;
 }
 
 import function W3mPrint(msg : string);
@@ -76,7 +79,7 @@ function ApplyPlayerState(actor : CActor, player : W3mPlayer)
     var playerState : W3mPlayerState;
     var angleHeading : float;
 
-    playerState = player.playerState;
+    playerState = player.playerState[0];
 
     W3mSetNpcDisplayName((CNewNPC)actor, player.playerName);
 

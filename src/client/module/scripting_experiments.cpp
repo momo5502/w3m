@@ -122,7 +122,7 @@ namespace scripting_experiments
         {
             uint64_t guid{};
             scripting::string name{};
-            game_struct<W3mPlayerState> state{};
+            scripting::array<W3mPlayerState> state{};
         };
 
         struct CNewNPC
@@ -227,7 +227,7 @@ namespace scripting_experiments
             W3mPlayer w3m_player{};
             w3m_player.guid = player.guid;
             w3m_player.name = convert(player.name);
-            *w3m_player.state = std::move(player_state);
+            w3m_player.state.push_back(std::move(player_state));
 
             return w3m_player;
         }
