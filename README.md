@@ -7,4 +7,4 @@
 
 An attempt at modding Witcher 3 and adding multiplayer support.
 
-![preview](https://momo5502.com/random/w3m.gif "W3m Preview")
+![preview](https://momo5502.com/random/w3m-test.png "W3m Preview")
