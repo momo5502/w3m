@@ -108,18 +108,18 @@ jobs:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main')
     steps:
       - name: Download master server binary
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Linux Release Artifacts
 
       - name: Download release data artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Windows Release Data Artifacts
           path: data
 
       - name: Download release binaries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: Windows Release Binaries
 
