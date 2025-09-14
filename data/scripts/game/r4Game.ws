@@ -56,7 +56,6 @@ import class CR4Game extends CCommonGame
 	public var deathSaveLockId : int;
 	private var currentPresence : name;
 	private var restoreUsableItemL : bool;
-	public var w3mStateMachine : W3mStateMachine;
 	
 	private saved var savedEnchanterFunds 			: int;
 	private saved var gameplayFactsForRemoval 		: array<SGameplayFactRemoval>;
@@ -71,15 +70,6 @@ import class CR4Game extends CCommonGame
 	function EnableUberMovement( flag : bool )
 	{
 		uberMovement = flag;
-	}
-
-	public function StartMultiplayer()
-	{
-		if (!w3mStateMachine)
-		{
-			w3mStateMachine = new W3mStateMachine in this;
-			w3mStateMachine.start();
-		}
 	}
 	
 	public function IsUberMovementEnabled() : bool
@@ -203,7 +193,7 @@ import class CR4Game extends CCommonGame
 	event  OnGameLoadInitFinishedSuccess()
 	{
 		GetGuiManager().GetRootMenu().CloseMenu();
-		this.StartMultiplayer();
+		StartMultiplayer();
 	}
 	
 	public function IsFocusModeActive() : bool

@@ -1,3 +1,20 @@
+@addField(CR4Game)
+var w3mStateMachine : W3mStateMachine;
+
+@addMethod(CR4Game)
+public function InitializeMultiplayer()
+{
+    if (!w3mStateMachine)
+    {
+        w3mStateMachine = new W3mStateMachine in this;
+        w3mStateMachine.start();
+    }
+}
+
+function StartMultiplayer() {
+    theGame.InitializeMultiplayer();
+}
+
 struct W3mPlayerState
 {
     var angles : EulerAngles;
