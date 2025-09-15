@@ -6,6 +6,7 @@
 #include <game/structs.hpp>
 
 #include <utils/nt.hpp>
+#include <utils/hook.hpp>
 #include <utils/string.hpp>
 #include <utils/byte_buffer.hpp>
 #include <utils/concurrency.hpp>
@@ -23,7 +24,6 @@ namespace scripting_experiments
 {
     namespace
     {
-
         template <typename T>
         struct game_object
         {
@@ -465,12 +465,29 @@ namespace scripting_experiments
                 return players.infos.size(); //
             });
         }
+
+        utils::hook::detour get_load_game_progress_hook{};
+
+        uint64_t get_load_game_progress_stub(void* a1, void* a2, void* a3)
+        {
+            constexpr auto LOAD_ReadyToLoad = 2;
+            const auto progress = get_load_game_progress_hook.invoke<uint64_t>(a1, a2, a3);
+
+            if (progress == LOAD_ReadyToLoad)
+            {
+                scripting::call_game_function(L"StartMultiplayer");
+            }
+
+            return progress;
+        }
     }
 
     struct component final : component_interface
     {
         void post_load() override
         {
+            get_load_game_progress_hook.create(0x1418D64F0_g, get_load_game_progress_stub);
+
             scripting::register_function<store_player_state>(L"W3mStorePlayerState");
             scripting::register_function<get_player_states>(L"W3mGetPlayerStates");
             scripting::register_function<set_display_name>(L"W3mSetNpcDisplayName");

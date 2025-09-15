@@ -450,4 +450,7 @@ namespace scripting
         auto* dispatcher = detail::create_dispatcher_function<Function>();
         detail::register_script_function(name, dispatcher);
     }
+
+    int register_name_string(const wchar_t* name);
+    void call_game_function(const wchar_t* name);
 }

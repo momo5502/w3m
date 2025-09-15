@@ -50,14 +50,6 @@ namespace scripting
             register_script_function(ctx, &function);
         }
 
-        int register_name_string(const wchar_t* name)
-        {
-            auto* critical_section = reinterpret_cast<LPCRITICAL_SECTION (*)()>(0x14027C580_g)();
-            auto* register_name =
-                reinterpret_cast<int (*)(LPCRITICAL_SECTION crit_sec, const wchar_t* str)>(0x14139EE70_g);
-            return register_name(critical_section, name);
-        }
-
         void perform_script_function_registration(const wchar_t* name, game::script_function* function)
         {
             const auto name_id = register_name_string(name);
@@ -251,6 +243,21 @@ namespace scripting
     bool string::operator!=(const std::wstring_view& obj) const
     {
         return !this->operator==(obj);
+    }
+
+    int register_name_string(const wchar_t* name)
+    {
+        auto* critical_section = reinterpret_cast<LPCRITICAL_SECTION (*)()>(0x14027C580_g)();
+        auto* register_name = reinterpret_cast<int (*)(LPCRITICAL_SECTION crit_sec, const wchar_t* str)>(0x14139EE70_g);
+        return register_name(critical_section, name);
+    }
+
+    void call_game_function(const wchar_t* name)
+    {
+        const auto function_name = register_name_string(name);
+
+        auto* call_event = reinterpret_cast<void (*)(void* ctx, const int* cname)>(0x1402A4A20_g);
+        call_event(nullptr, &function_name);
     }
 
     struct component final : component_interface
