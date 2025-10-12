@@ -25,8 +25,7 @@ namespace game_path
             std::filesystem::path install_path{};
 
             HKEY reg_key;
-            if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software\\WOW6432Node\\Valve\\Steam", 0, KEY_QUERY_VALUE,
-                              &reg_key) == ERROR_SUCCESS)
+            if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"Software\\WOW6432Node\\Valve\\Steam", 0, KEY_QUERY_VALUE, &reg_key) == ERROR_SUCCESS)
             {
                 wchar_t path[MAX_PATH] = {0};
                 DWORD length = sizeof(path);

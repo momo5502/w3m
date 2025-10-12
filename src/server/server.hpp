@@ -31,7 +31,6 @@ class server
     using callback = std::function<void(client_map&, const network::address&, const std::string_view&)>;
     void on(const std::string& command, callback callback);
 
-    using reply_callback =
-        std::function<void(const network::manager&, client_map&, const network::address&, const std::string_view&)>;
+    using reply_callback = std::function<void(const network::manager&, client_map&, const network::address&, const std::string_view&)>;
     void on(const std::string& command, reply_callback callback);
 };

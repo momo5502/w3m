@@ -25,8 +25,7 @@ namespace network
         using callback_map = std::unordered_map<std::string, callback>;
 
         void on(const std::string& command, callback callback);
-        bool send(const address& address, const std::string& command, const std::string& data = {},
-                  char separator = ' ') const;
+        bool send(const address& address, const std::string& command, const std::string& data = {}, char separator = ' ') const;
 
         bool send_data(const address& address, const void* data, size_t length) const;
         bool send_data(const address& address, const std::string& data) const;

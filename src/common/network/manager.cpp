@@ -42,8 +42,8 @@ namespace network
             throw std::runtime_error("Failed to bind socket");
         }
 
-        void dispatch_command(const utils::concurrency::container<manager::callback_map>& callbacks,
-                              const address& source, const std::string_view& command, const std::string_view& data)
+        void dispatch_command(const utils::concurrency::container<manager::callback_map>& callbacks, const address& source,
+                              const std::string_view& command, const std::string_view& data)
         {
             const auto lower_command = utils::string::to_lower(std::string{command.begin(), command.end()});
 
@@ -128,8 +128,8 @@ namespace network
         : socket_v4_(create_and_bind_socket(AF_INET, port)),
           socket_v6_(create_and_bind_socket(AF_INET6, port))
     {
-        thread_ = utils::thread::create_named_jthread(
-            "Network Dispatcher", [this](const std::stop_token& stop_token) { this->packet_receiver(stop_token); });
+        thread_ = utils::thread::create_named_jthread("Network Dispatcher",
+                                                      [this](const std::stop_token& stop_token) { this->packet_receiver(stop_token); });
     }
 
     void manager::packet_receiver(const std::stop_token& stop_token)
@@ -150,12 +150,10 @@ namespace network
 
     void manager::on(const std::string& command, callback callback)
     {
-        this->callbacks_.access(
-            [&](callback_map& callbacks) { callbacks[utils::string::to_lower(command)] = std::move(callback); });
+        this->callbacks_.access([&](callback_map& callbacks) { callbacks[utils::string::to_lower(command)] = std::move(callback); });
     }
 
-    bool manager::send(const address& address, const std::string& command, const std::string& data,
-                       const char separator) const
+    bool manager::send(const address& address, const std::string& command, const std::string& data, const char separator) const
     {
         std::string packet = "\xFF\xFF\xFF\xFF";
         packet.append(command);

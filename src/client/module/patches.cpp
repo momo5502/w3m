@@ -15,8 +15,7 @@ namespace patches
             utils::hook::set<uint8_t>(0x141495479_g, 0xEB);
 
             // Register unique mutex to allow parallel instances
-            utils::hook::copy_string(0x1423291F8_g,
-                                     ("w3m-mutex-" + std::to_string(static_cast<uint64_t>(time(nullptr)))).data());
+            utils::hook::copy_string(0x1423291F8_g, ("w3m-mutex-" + std::to_string(static_cast<uint64_t>(time(nullptr)))).data());
         }
     };
 }

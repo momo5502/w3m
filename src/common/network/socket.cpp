@@ -22,8 +22,7 @@ namespace network
         if (af == AF_INET6)
         {
             int i = 1;
-            setsockopt(this->socket_, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<char*>(&i),
-                       static_cast<int>(sizeof(i)));
+            setsockopt(this->socket_, IPPROTO_IPV6, IPV6_V6ONLY, reinterpret_cast<char*>(&i), static_cast<int>(sizeof(i)));
         }
     }
 
@@ -73,8 +72,8 @@ namespace network
 
     bool socket::send(const address& target, const void* data, const size_t size) const
     {
-        const int res = sendto(this->socket_, static_cast<const char*>(data), static_cast<int>(size), 0,
-                               &target.get_addr(), target.get_size());
+        const int res =
+            sendto(this->socket_, static_cast<const char*>(data), static_cast<int>(size), 0, &target.get_addr(), target.get_size());
         return res == static_cast<int>(size);
     }
 
@@ -88,8 +87,7 @@ namespace network
         char buffer[0x2000];
         socklen_t len = source.get_max_size();
 
-        const auto result =
-            recvfrom(this->socket_, buffer, static_cast<int>(sizeof(buffer)), 0, &source.get_addr(), &len);
+        const auto result = recvfrom(this->socket_, buffer, static_cast<int>(sizeof(buffer)), 0, &source.get_addr(), &len);
         if (result == SOCKET_ERROR)
         {
             return false;

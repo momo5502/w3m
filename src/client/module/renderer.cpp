@@ -30,8 +30,8 @@ namespace renderer
         void render_text(CRenderFrame* frame, float x, float y, const scripting::string& text, const color& color)
         {
             auto* console = *reinterpret_cast<CDebugConsole**>(0x14532DFE0_g);
-            reinterpret_cast<void (*)(CDebugConsole*, CRenderFrame*, float, float, const scripting::string&, uint32_t)>(
-                0x14156FB20_g)(console, frame, x, y, text, *reinterpret_cast<const uint32_t*>(&color.r));
+            reinterpret_cast<void (*)(CDebugConsole*, CRenderFrame*, float, float, const scripting::string&, uint32_t)>(0x14156FB20_g)(
+                console, frame, x, y, text, *reinterpret_cast<const uint32_t*>(&color.r));
         }
 
         void renderer_stub(CRenderFrame* frame)

@@ -354,8 +354,8 @@ namespace utils::hook
         }
     }
 
-    std::optional<std::pair<void*, void*>> iat(const nt::library& library, const std::string& target_library,
-                                               const std::string& process, void* stub)
+    std::optional<std::pair<void*, void*>> iat(const nt::library& library, const std::string& target_library, const std::string& process,
+                                               void* stub)
     {
         if (!library.is_valid())
             return {};
@@ -463,8 +463,7 @@ namespace utils::hook
 
     void jump(void* pointer, void* data, const bool use_far, const bool use_safe)
     {
-        static const unsigned char jump_data[] = {0x48, 0xb8, 0x88, 0x77, 0x66, 0x55,
-                                                  0x44, 0x33, 0x22, 0x11, 0xff, 0xe0};
+        static const unsigned char jump_data[] = {0x48, 0xb8, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0xff, 0xe0};
 
         static const unsigned char jump_data_safe[] = {0xFF, 0x25, 0x00, 0x00, 0x00, 0x00};
 

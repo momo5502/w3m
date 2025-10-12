@@ -14,8 +14,8 @@ namespace utils::http
             std::exception_ptr exception{};
         };
 
-        int progress_callback(void* clientp, const curl_off_t /*dltotal*/, const curl_off_t dlnow,
-                              const curl_off_t /*ultotal*/, const curl_off_t /*ulnow*/)
+        int progress_callback(void* clientp, const curl_off_t /*dltotal*/, const curl_off_t dlnow, const curl_off_t /*ultotal*/,
+                              const curl_off_t /*ulnow*/)
         {
             auto* helper = static_cast<progress_helper*>(clientp);
 
@@ -44,9 +44,8 @@ namespace utils::http
             return total_size;
         }
 
-        std::optional<std::string> perform_request(const std::string& url, const std::string* post_body,
-                                                   const headers& headers, const std::function<void(size_t)>& callback,
-                                                   const uint32_t retries)
+        std::optional<std::string> perform_request(const std::string& url, const std::string* post_body, const headers& headers,
+                                                   const std::function<void(size_t)>& callback, const uint32_t retries)
         {
             curl_slist* header_list = nullptr;
             auto* curl = curl_easy_init();
@@ -102,8 +101,7 @@ namespace utils::http
                         return {std::move(buffer)};
                     }
 
-                    throw std::runtime_error("Bad status code " + std::to_string(http_code) +
-                                             " met while trying to download file " + url);
+                    throw std::runtime_error("Bad status code " + std::to_string(http_code) + " met while trying to download file " + url);
                 }
 
                 if (helper.exception)
@@ -130,14 +128,13 @@ namespace utils::http
         return perform_request(url, &post_body, headers, callback, retries);
     }
 
-    std::future<std::optional<std::string>> post_data_async(const std::string& url, const std::string& post_body,
-                                                            const headers& headers)
+    std::future<std::optional<std::string>> post_data_async(const std::string& url, const std::string& post_body, const headers& headers)
     {
         return std::async(std::launch::async, [url, headers, post_body] { return post_data(url, post_body, headers); });
     }
 
-    std::optional<std::string> get_data(const std::string& url, const headers& headers,
-                                        const std::function<void(size_t)>& callback, const uint32_t retries)
+    std::optional<std::string> get_data(const std::string& url, const headers& headers, const std::function<void(size_t)>& callback,
+                                        const uint32_t retries)
     {
         return perform_request(url, {}, headers, callback, retries);
     }

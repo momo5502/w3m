@@ -76,26 +76,23 @@ namespace
                 const auto x_pixels = GetSystemMetrics(SM_CXFULLSCREEN);
                 const auto y_pixels = GetSystemMetrics(SM_CYFULLSCREEN);
 
-                auto image = static_cast<HWND>(
-                    LoadImageA(this->main_, MAKEINTRESOURCE(IMAGE_SPLASH), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR));
+                auto image = static_cast<HWND>(LoadImageA(this->main_, MAKEINTRESOURCE(IMAGE_SPLASH), IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR));
                 if (!image)
                 {
                     return;
                 }
 
-                this->window_ =
-                    CreateWindowExA(WS_EX_APPWINDOW, "Witcher Splash Screen", W3M_MODNAME, WS_POPUP | WS_SYSMENU,
-                                    (x_pixels - initial_width) / 2, (y_pixels - initial_height) / 2, initial_width,
-                                    initial_height, nullptr, nullptr, this->main_, nullptr);
+                this->window_ = CreateWindowExA(WS_EX_APPWINDOW, "Witcher Splash Screen", W3M_MODNAME, WS_POPUP | WS_SYSMENU,
+                                                (x_pixels - initial_width) / 2, (y_pixels - initial_height) / 2, initial_width,
+                                                initial_height, nullptr, nullptr, this->main_, nullptr);
 
                 if (!this->window_)
                 {
                     return;
                 }
 
-                const auto image_window =
-                    CreateWindowExA(0, "Static", nullptr, WS_CHILD | WS_VISIBLE | 0xEu, 0, 0, initial_width,
-                                    initial_height, this->window_, nullptr, this->main_, nullptr);
+                const auto image_window = CreateWindowExA(0, "Static", nullptr, WS_CHILD | WS_VISIBLE | 0xEu, 0, 0, initial_width,
+                                                          initial_height, this->window_, nullptr, this->main_, nullptr);
                 if (!image_window)
                 {
                     return;
@@ -114,8 +111,7 @@ namespace
                 rect.right = rect.left + width;
                 rect.bottom = rect.top + height;
                 AdjustWindowRect(&rect, WS_CHILD | WS_VISIBLE | 0xEu, 0);
-                SetWindowPos(this->window_, nullptr, rect.left, rect.top, rect.right - rect.left,
-                             rect.bottom - rect.top, SWP_NOZORDER);
+                SetWindowPos(this->window_, nullptr, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOZORDER);
 
                 ShowWindow(this->window_, SW_SHOW);
                 UpdateWindow(this->window_);

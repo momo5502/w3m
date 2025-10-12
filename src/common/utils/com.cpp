@@ -132,8 +132,7 @@ namespace utils::com
         initialize_com();
 
         CComPtr<IProgressDialog> progress_dialog{};
-        if (FAILED(
-                CoCreateInstance(CLSID_ProgressDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&progress_dialog))))
+        if (FAILED(CoCreateInstance(CLSID_ProgressDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&progress_dialog))))
         {
             throw std::runtime_error("Failed to create co instance");
         }

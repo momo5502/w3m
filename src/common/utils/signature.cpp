@@ -121,8 +121,7 @@ namespace utils::hook
         {
             const auto address = start + i;
             const auto value = _mm_loadu_si128(reinterpret_cast<const __m128i*>(address));
-            const auto comparison =
-                _mm_cmpestrm(value, 16, comparand, static_cast<int>(this->mask_.size()), _SIDD_CMP_EQUAL_EACH);
+            const auto comparison = _mm_cmpestrm(value, 16, comparand, static_cast<int>(this->mask_.size()), _SIDD_CMP_EQUAL_EACH);
 
             const auto matches = _mm_and_si128(mask, comparison);
             const auto equivalence = _mm_xor_si128(mask, matches);

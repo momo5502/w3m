@@ -30,8 +30,8 @@ namespace scripting_filesystem
             std::vector<std::filesystem::path> files{};
 
             std::error_code ec{};
-            for (const auto& file : std::filesystem::recursive_directory_iterator(
-                     base, std::filesystem::directory_options::skip_permission_denied, ec))
+            for (const auto& file :
+                 std::filesystem::recursive_directory_iterator(base, std::filesystem::directory_options::skip_permission_denied, ec))
             {
                 ec = {};
                 if (!file.is_regular_file(ec) || ec)
@@ -67,8 +67,7 @@ namespace scripting_filesystem
             return scripts;
         }
 
-        void remove_overriden_base_scripts(std::vector<scripting::string>& base_scripts,
-                                           const std::vector<std::wstring>& custom_scripts)
+        void remove_overriden_base_scripts(std::vector<scripting::string>& base_scripts, const std::vector<std::wstring>& custom_scripts)
         {
             const std::wstring separator = L"\\scripts\\";
 

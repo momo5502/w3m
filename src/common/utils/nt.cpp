@@ -247,8 +247,8 @@ namespace utils::nt
                 continue;
             }
 
-            if (RegCreateKeyExA(current_key, part.data(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr,
-                                &new_key, nullptr) != ERROR_SUCCESS)
+            if (RegCreateKeyExA(current_key, part.data(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &new_key,
+                                nullptr) != ERROR_SUCCESS)
             {
                 return {};
             }
@@ -317,8 +317,8 @@ namespace utils::nt
         GetCurrentDirectoryA(sizeof(current_dir), current_dir);
         auto* const command_line = GetCommandLineA();
 
-        CreateProcessA(self.get_path().generic_string().data(), command_line, nullptr, nullptr, false, NULL, nullptr,
-                       current_dir, &startup_info, &process_info);
+        CreateProcessA(self.get_path().generic_string().data(), command_line, nullptr, nullptr, false, NULL, nullptr, current_dir,
+                       &startup_info, &process_info);
 
         if (process_info.hThread && process_info.hThread != INVALID_HANDLE_VALUE)
             CloseHandle(process_info.hThread);

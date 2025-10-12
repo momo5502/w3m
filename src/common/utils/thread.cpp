@@ -70,8 +70,7 @@ namespace utils::thread
 
         do
         {
-            const auto check_size =
-                entry.dwSize < FIELD_OFFSET(THREADENTRY32, th32OwnerProcessID) + sizeof(entry.th32OwnerProcessID);
+            const auto check_size = entry.dwSize < FIELD_OFFSET(THREADENTRY32, th32OwnerProcessID) + sizeof(entry.th32OwnerProcessID);
             entry.dwSize = sizeof(entry);
 
             if (check_size && entry.th32OwnerProcessID == GetCurrentProcessId())

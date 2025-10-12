@@ -467,7 +467,6 @@ namespace scripting_experiments
         }
 
         utils::hook::detour get_load_game_progress_hook{};
-
         uint64_t get_load_game_progress_stub(void* a1, void* a2, void* a3)
         {
             constexpr auto LOAD_ReadyToLoad = 2;
@@ -500,10 +499,7 @@ namespace scripting_experiments
             network::on("authRequest", &receive_auth_request);
 
             scheduler::loop(
-                [] {
-                    renderer::draw_text("Players: " + std::to_string(get_player_count()), {60.0f, 30.0f},
-                                        {0xFF, 0xFF, 0xFF, 0xFF});
-                },
+                [] { renderer::draw_text("Players: " + std::to_string(get_player_count()), {60.0f, 30.0f}, {0xFF, 0xFF, 0xFF, 0xFF}); },
                 scheduler::renderer);
         }
     };

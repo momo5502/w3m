@@ -338,8 +338,8 @@ namespace utils::cryptography
         const auto hash = sha512::compute(message);
 
         auto result = 0;
-        return (ecc_verify_hash(cs(signature.data()), ul(signature.size()), cs(hash.data()), ul(hash.size()), &result,
-                                &key.get()) == CRYPT_OK &&
+        return (ecc_verify_hash(cs(signature.data()), ul(signature.size()), cs(hash.data()), ul(hash.size()), &result, &key.get()) ==
+                    CRYPT_OK &&
                 result != 0);
     }
 
@@ -350,8 +350,8 @@ namespace utils::cryptography
 
         auto out_len = ul(out_data.size());
         auto crypt = [&]() {
-            return ecc_encrypt_key(cs(data.data()), ul(data.size()), cs(out_data.data()), &out_len, prng_.get_state(),
-                                   prng_.get_id(), find_hash("sha512"), &key.get());
+            return ecc_encrypt_key(cs(data.data()), ul(data.size()), cs(out_data.data()), &out_len, prng_.get_state(), prng_.get_id(),
+                                   find_hash("sha512"), &key.get());
         };
 
         auto res = crypt();
@@ -378,9 +378,7 @@ namespace utils::cryptography
         out_data.resize(std::max(ul(data.size() * 3), ul(0x100)));
 
         auto out_len = ul(out_data.size());
-        auto crypt = [&]() {
-            return ecc_decrypt_key(cs(data.data()), ul(data.size()), cs(out_data.data()), &out_len, &key.get());
-        };
+        auto crypt = [&]() { return ecc_decrypt_key(cs(data.data()), ul(data.size()), cs(out_data.data()), &out_len, &key.get()); };
 
         auto res = crypt();
 
@@ -411,8 +409,8 @@ namespace utils::cryptography
 
         auto out_len = ul(out_data.size());
         auto crypt = [&]() {
-            return rsa_encrypt_key(cs(data.data()), ul(data.size()), cs(out_data.data()), &out_len, cs(hash.data()),
-                                   ul(hash.size()), prng_.get_state(), prng_.get_id(), find_hash("sha512"), &new_key);
+            return rsa_encrypt_key(cs(data.data()), ul(data.size()), cs(out_data.data()), &out_len, cs(hash.data()), ul(hash.size()),
+                                   prng_.get_state(), prng_.get_id(), find_hash("sha512"), &new_key);
         };
 
         auto res = crypt();

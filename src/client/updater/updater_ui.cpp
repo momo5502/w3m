@@ -114,8 +114,7 @@ namespace updater
         }
         else
         {
-            this->progress_ui_.set_line(
-                1, utils::string::va("Updating files... (%zu/%zu)", downloaded_file_count, total_file_count));
+            this->progress_ui_.set_line(1, utils::string::va("Updating files... (%zu/%zu)", downloaded_file_count, total_file_count));
         }
 
         this->progress_ui_.set_line(2, this->get_relevant_file_name());

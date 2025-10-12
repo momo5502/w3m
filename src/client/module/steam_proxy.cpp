@@ -37,8 +37,7 @@ namespace steam_proxy
             for (auto i = 1; i <= 999; ++i)
             {
                 std::string name = utils::string::va("CLIENTENGINE_INTERFACE_VERSION%03i", i);
-                auto* const temp_client_engine =
-                    steam_client_module.invoke<void*>("CreateInterface", name.data(), nullptr);
+                auto* const temp_client_engine = steam_client_module.invoke<void*>("CreateInterface", name.data(), nullptr);
                 if (temp_client_engine)
                     return temp_client_engine;
             }
@@ -55,8 +54,7 @@ namespace steam_proxy
             }
 
             HKEY reg_key;
-            if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, R"(Software\WOW6432Node\Valve\Steam)", 0, KEY_QUERY_VALUE,
-                              &reg_key) == ERROR_SUCCESS)
+            if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, R"(Software\WOW6432Node\Valve\Steam)", 0, KEY_QUERY_VALUE, &reg_key) == ERROR_SUCCESS)
             {
                 char path[MAX_PATH] = {0};
                 DWORD length = sizeof(path);
@@ -158,8 +156,7 @@ namespace steam_proxy
 
             const auto self = utils::nt::library::get_by_address(start_mod_unsafe);
             const auto path = self.get_path();
-            const auto* cmdline =
-                utils::string::va("\"%s\" -proc %d", path.generic_string().data(), GetCurrentProcessId());
+            const auto* cmdline = utils::string::va("\"%s\" -proc %d", path.generic_string().data(), GetCurrentProcessId());
 
             steam::game_id game_id;
             game_id.raw.type = 1; // k_EGameIDTypeGameMod
@@ -168,8 +165,8 @@ namespace steam_proxy
             const auto* mod_id = "w3m";
             game_id.raw.mod_id = *reinterpret_cast<const unsigned int*>(mod_id) | 0x80000000;
 
-            client_user.invoke<bool>("SpawnProcess", path.generic_string().data(), cmdline, our_directory,
-                                     &game_id.bits, title.data(), 0, 0, 0);
+            client_user.invoke<bool>("SpawnProcess", path.generic_string().data(), cmdline, our_directory, &game_id.bits, title.data(), 0,
+                                     0, 0);
         }
 
         void start_mod(const std::string& title, const size_t app_id)

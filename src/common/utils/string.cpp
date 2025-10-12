@@ -73,16 +73,14 @@ namespace utils::string
 
     std::string to_lower(std::string text)
     {
-        std::ranges::transform(text, text.begin(),
-                               [](const unsigned char input) { return static_cast<char>(std::tolower(input)); });
+        std::ranges::transform(text, text.begin(), [](const unsigned char input) { return static_cast<char>(std::tolower(input)); });
 
         return text;
     }
 
     std::string to_upper(std::string text)
     {
-        std::ranges::transform(text, text.begin(),
-                               [](const unsigned char input) { return static_cast<char>(std::toupper(input)); });
+        std::ranges::transform(text, text.begin(), [](const unsigned char input) { return static_cast<char>(std::toupper(input)); });
 
         return text;
     }
@@ -241,17 +239,14 @@ namespace utils::string
 
     std::string& ltrim(std::string& str)
     {
-        str.erase(str.begin(),
-                  std::ranges::find_if(str, [](const unsigned char input) { return !std::isspace(input); }));
+        str.erase(str.begin(), std::ranges::find_if(str, [](const unsigned char input) { return !std::isspace(input); }));
 
         return str;
     }
 
     std::string& rtrim(std::string& str)
     {
-        str.erase(std::find_if(str.rbegin(), str.rend(), [](const unsigned char input) { return !std::isspace(input); })
-                      .base(),
-                  str.end());
+        str.erase(std::find_if(str.rbegin(), str.rend(), [](const unsigned char input) { return !std::isspace(input); }).base(), str.end());
 
         return str;
     }

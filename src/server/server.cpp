@@ -32,8 +32,7 @@ namespace
         (void)manager.send(victim, "killed", buffer.get_buffer());
     }
 
-    void handle_authentication_response(server::client_map& clients, const network::address& source,
-                                        const std::string_view& data)
+    void handle_authentication_response(server::client_map& clients, const network::address& source, const std::string_view& data)
     {
         utils::buffer_deserializer buffer(data);
         const auto protocol = buffer.read<uint32_t>();
@@ -86,8 +85,8 @@ namespace
         console::log("Player authenticated: %s (%llX)", source.to_string().data(), client.guid);
     }
 
-    void handle_player_kill(const network::manager& manager, server::client_map& clients,
-                            const network::address& source, const std::string_view& data)
+    void handle_player_kill(const network::manager& manager, server::client_map& clients, const network::address& source,
+                            const std::string_view& data)
     {
         utils::buffer_deserializer buffer(data);
         const auto protocol = buffer.read<uint32_t>();
@@ -114,8 +113,8 @@ namespace
         }
     }
 
-    void handle_player_state(const network::manager& manager, server::client_map& clients,
-                             const network::address& source, const std::string_view& data)
+    void handle_player_state(const network::manager& manager, server::client_map& clients, const network::address& source,
+                             const std::string_view& data)
     {
         utils::buffer_deserializer buffer(data);
         const auto protocol = buffer.read<uint32_t>();
@@ -234,15 +233,13 @@ void server::run_frame()
 
 void server::on(const std::string& command, callback callback)
 {
-    this->on(command,
-             [c = std::move(callback)](const network::manager&, client_map& clients, const network::address& source,
-                                       const std::string_view& data) { c(clients, source, data); });
+    this->on(command, [c = std::move(callback)](const network::manager&, client_map& clients, const network::address& source,
+                                                const std::string_view& data) { c(clients, source, data); });
 }
 
 void server::on(const std::string& command, reply_callback callback)
 {
-    this->manager_.on(command,
-                      [this, c = std::move(callback)](const network::address& source, const std::string_view& data) {
-                          this->clients_.access([&](client_map& clients) { c(this->manager_, clients, source, data); });
-                      });
+    this->manager_.on(command, [this, c = std::move(callback)](const network::address& source, const std::string_view& data) {
+        this->clients_.access([&](client_map& clients) { c(this->manager_, clients, source, data); });
+    });
 }

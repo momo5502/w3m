@@ -19,18 +19,15 @@ namespace loader
 
         void load_imports(const utils::nt::library& target, const resolver& import_resolver)
         {
-            const auto* const import_directory =
-                &target.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+            const auto* const import_directory = &target.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
 
-            const auto* descriptor =
-                reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(target.get_ptr() + import_directory->VirtualAddress);
+            const auto* descriptor = reinterpret_cast<PIMAGE_IMPORT_DESCRIPTOR>(target.get_ptr() + import_directory->VirtualAddress);
 
             while (descriptor->Name)
             {
                 std::string name = reinterpret_cast<LPSTR>(target.get_ptr() + descriptor->Name);
 
-                const auto* name_table_entry =
-                    reinterpret_cast<uintptr_t*>(target.get_ptr() + descriptor->OriginalFirstThunk);
+                const auto* name_table_entry = reinterpret_cast<uintptr_t*>(target.get_ptr() + descriptor->OriginalFirstThunk);
                 auto* address_table_entry = reinterpret_cast<uintptr_t*>(target.get_ptr() + descriptor->FirstThunk);
 
                 if (!descriptor->OriginalFirstThunk)
@@ -51,8 +48,7 @@ namespace loader
                     }
                     else
                     {
-                        const auto* import =
-                            reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(target.get_ptr() + *name_table_entry);
+                        const auto* import = reinterpret_cast<PIMAGE_IMPORT_BY_NAME>(target.get_ptr() + *name_table_entry);
                         function_name = import->Name;
                         function_procname = function_name.data();
                     }
@@ -71,8 +67,8 @@ namespace loader
 
                     if (!function)
                     {
-                        throw std::runtime_error(utils::string::va("Unable to load import '%s' from library '%s'",
-                                                                   function_name.data(), name.data()));
+                        throw std::runtime_error(
+                            utils::string::va("Unable to load import '%s' from library '%s'", function_name.data(), name.data()));
                     }
 
                     utils::hook::set(address_table_entry, reinterpret_cast<uintptr_t>(function));
@@ -96,8 +92,7 @@ namespace loader
             const auto initial_base = target.get_optional_header()->ImageBase;
             const auto delta = reinterpret_cast<ptrdiff_t>(current_base) - initial_base;
 
-            const PIMAGE_DATA_DIRECTORY directory =
-                &target.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
+            const PIMAGE_DATA_DIRECTORY directory = &target.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
             if (directory->Size == 0)
             {
                 return;
@@ -109,8 +104,8 @@ namespace loader
                 unsigned char* dest = current_base + relocation->VirtualAddress;
 
                 auto* rel_info = offset_pointer<uint16_t*>(relocation, sizeof(IMAGE_BASE_RELOCATION));
-                const auto* rel_info_end = offset_pointer<uint16_t*>(
-                    rel_info, static_cast<ptrdiff_t>(relocation->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)));
+                const auto* rel_info_end =
+                    offset_pointer<uint16_t*>(rel_info, static_cast<ptrdiff_t>(relocation->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)));
 
                 for (; rel_info < rel_info_end; ++rel_info)
                 {
@@ -148,11 +143,9 @@ namespace loader
             if (source.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size)
             {
                 const auto* const target_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(
-                    target.get_ptr() +
-                    target.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+                    target.get_ptr() + target.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
                 const auto* const source_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(
-                    source.get_ptr() +
-                    source.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
+                    source.get_ptr() + source.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
 
                 auto* target_tls_start = reinterpret_cast<PVOID>(target_tls->StartAddressOfRawData);
                 const auto* tls_start = reinterpret_cast<PVOID>(source_tls->StartAddressOfRawData);

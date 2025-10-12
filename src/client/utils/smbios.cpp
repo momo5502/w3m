@@ -49,12 +49,9 @@ namespace utils::smbios
             }
 
             char uuid[16] = {0};
-            *reinterpret_cast<unsigned long*>(uuid + 0) =
-                _byteswap_ulong(*reinterpret_cast<const unsigned long*>(data + 0));
-            *reinterpret_cast<unsigned short*>(uuid + 4) =
-                _byteswap_ushort(*reinterpret_cast<const unsigned short*>(data + 4));
-            *reinterpret_cast<unsigned short*>(uuid + 6) =
-                _byteswap_ushort(*reinterpret_cast<const unsigned short*>(data + 6));
+            *reinterpret_cast<unsigned long*>(uuid + 0) = _byteswap_ulong(*reinterpret_cast<const unsigned long*>(data + 0));
+            *reinterpret_cast<unsigned short*>(uuid + 4) = _byteswap_ushort(*reinterpret_cast<const unsigned short*>(data + 4));
+            *reinterpret_cast<unsigned short*>(uuid + 6) = _byteswap_ushort(*reinterpret_cast<const unsigned short*>(data + 6));
             memcpy(uuid + 8, data + 8, 8);
 
             return std::string(uuid, sizeof(uuid));

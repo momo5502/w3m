@@ -23,10 +23,10 @@ namespace scripting
 
         game::CFunction* allocate_cfunction(int name_id, game::script_function* function)
         {
-            auto* perform_memory_allocation =
-                reinterpret_cast<void* (*)(size_t size, size_t maybe_alignment)>(0x14027C890_g);
-            auto* CFunction_ctor = reinterpret_cast<game::CFunction* (*)(game::CFunction * str_struct, int* str_id,
-                                                                         game::script_function* func)>(0x1413DB730_g);
+            auto* perform_memory_allocation = reinterpret_cast<void* (*)(size_t size, size_t maybe_alignment)>(0x14027C890_g);
+            auto* CFunction_ctor =
+                reinterpret_cast<game::CFunction* (*)(game::CFunction * str_struct, int* str_id, game::script_function* func)>(
+                    0x1413DB730_g);
 
             auto* memory = static_cast<game::CFunction*>(perform_memory_allocation(sizeof(game::CFunction), 16));
             if (!memory)

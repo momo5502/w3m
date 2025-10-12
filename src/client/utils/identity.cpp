@@ -45,8 +45,7 @@ namespace utils::identity
             DATA_BLOB data_in{}, data_out{};
             data_in.pbData = reinterpret_cast<uint8_t*>(input.data());
             data_in.cbData = static_cast<DWORD>(input.size());
-            if (CryptProtectData(&data_in, nullptr, nullptr, nullptr, nullptr, CRYPTPROTECT_LOCAL_MACHINE, &data_out) !=
-                TRUE)
+            if (CryptProtectData(&data_in, nullptr, nullptr, nullptr, nullptr, CRYPTPROTECT_LOCAL_MACHINE, &data_out) != TRUE)
             {
                 return {};
             }

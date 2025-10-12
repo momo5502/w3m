@@ -49,8 +49,7 @@ namespace network
         int get_address_family() const;
 
         static bool sleep_sockets(const std::span<const socket*>& sockets, std::chrono::milliseconds timeout);
-        static bool sleep_sockets_until(const std::span<const socket*>& sockets,
-                                        std::chrono::high_resolution_clock::time_point time_point);
+        static bool sleep_sockets_until(const std::span<const socket*>& sockets, std::chrono::high_resolution_clock::time_point time_point);
 
       private:
         int address_family_{AF_UNSPEC};

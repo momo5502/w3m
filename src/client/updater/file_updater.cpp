@@ -66,9 +66,9 @@ namespace updater
 
         std::string get_cache_buster()
         {
-            return "?" + std::to_string(std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                            std::chrono::system_clock::now().time_since_epoch())
-                                            .count());
+            return "?" +
+                   std::to_string(
+                       std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
         }
 
         std::vector<file_info> get_file_infos()
@@ -115,8 +115,7 @@ namespace updater
         }
     }
 
-    file_updater::file_updater(progress_listener& listener, std::filesystem::path base,
-                               std::filesystem::path process_file)
+    file_updater::file_updater(progress_listener& listener, std::filesystem::path base, std::filesystem::path process_file)
         : listener_(listener),
           base_(std::move(base)),
           process_file_(std::move(process_file)),
@@ -150,8 +149,7 @@ namespace updater
     {
         const auto url = get_update_folder() + file.name + "?" + file.hash;
 
-        const auto data = utils::http::get_data(
-            url, {}, [&](const size_t progress) { this->listener_.file_progress(file, progress); });
+        const auto data = utils::http::get_data(url, {}, [&](const size_t progress) { this->listener_.file_progress(file, progress); });
 
         if (!data || (data->size() != file.size || get_hash(*data) != file.hash))
         {

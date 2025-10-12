@@ -66,8 +66,7 @@ namespace scheduler
             {
                 callbacks_.access([&](task_list& tasks) {
                     new_callbacks_.access([&](task_list& new_tasks) {
-                        tasks.insert(tasks.end(), std::move_iterator(new_tasks.begin()),
-                                     std::move_iterator(new_tasks.end()));
+                        tasks.insert(tasks.end(), std::move_iterator(new_tasks.begin()), std::move_iterator(new_tasks.end()));
                         new_tasks = {};
                     });
                 });

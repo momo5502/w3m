@@ -14,11 +14,10 @@ namespace component_loader
 
         component_vector& get_components()
         {
-            static component_vector_container components(new component_vector,
-                                                         [](const component_vector* component_vector) {
-                                                             pre_destroy();
-                                                             delete component_vector;
-                                                         });
+            static component_vector_container components(new component_vector, [](const component_vector* component_vector) {
+                pre_destroy();
+                delete component_vector;
+            });
 
             return *components;
         }
@@ -29,9 +28,8 @@ namespace component_loader
         auto& components = get_components();
         components.emplace_back(std::move(component));
 
-        std::ranges::stable_sort(components, [](const component_entry& a, const component_entry& b) {
-            return a->priority() > b->priority();
-        });
+        std::ranges::stable_sort(components,
+                                 [](const component_entry& a, const component_entry& b) { return a->priority() > b->priority(); });
     }
 
     bool post_start()
