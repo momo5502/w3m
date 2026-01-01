@@ -54,7 +54,7 @@ jobs:
         run: cmake --workflow --preset=${{matrix.preset}}
 
       - name: Upload Binary
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Windows ${{matrix.configuration}} Binaries
           path: |
@@ -64,7 +64,7 @@ jobs:
             build/${{matrix.preset}}/artifacts/server.pdb
 
       - name: Upload Data Artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Windows ${{matrix.configuration}} Data Artifacts
           path: |
@@ -95,7 +95,7 @@ jobs:
         run: cmake --workflow --preset=${{matrix.preset}}
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Linux ${{matrix.configuration}} Artifacts
           path: |
