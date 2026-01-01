@@ -345,11 +345,12 @@ namespace utils::cryptography
 
         auto result = 0;
 
-        ltc_ecc_sig_opts options{             
+        ltc_ecc_sig_opts options{
             .type = LTC_ECCSIG_ANSIX962,
         };
-        
-        const auto res = ecc_verify_hash_v2(cs(signature.data()), ul(signature.size()), cs(hash.data()), ul(hash.size()), &options, &result, &key.get());
+
+        const auto res =
+            ecc_verify_hash_v2(cs(signature.data()), ul(signature.size()), cs(hash.data()), ul(hash.size()), &options, &result, &key.get());
         return res == CRYPT_OK && result != 0;
     }
 
