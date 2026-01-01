@@ -325,7 +325,13 @@ namespace utils::cryptography
 
         const auto hash = sha512::compute(message);
 
-        ecc_sign_hash(cs(hash.data()), ul(hash.size()), buffer, &length, prng_.get_state(), prng_.get_id(), &key.get());
+        ltc_ecc_sig_opts options{
+            .type = LTC_ECCSIG_ANSIX962,
+            .prng = prng_.get_state(),
+            .wprng = prng_.get_id(),
+        };
+
+        ecc_sign_hash_v2(cs(hash.data()), ul(hash.size()), buffer, &length, &options, &key.get());
 
         return std::string(cs(buffer), length);
     }
@@ -338,9 +344,14 @@ namespace utils::cryptography
         const auto hash = sha512::compute(message);
 
         auto result = 0;
-        return (ecc_verify_hash(cs(signature.data()), ul(signature.size()), cs(hash.data()), ul(hash.size()), &result, &key.get()) ==
-                    CRYPT_OK &&
-                result != 0);
+
+        ltc_ecc_sig_opts options{
+            .type = LTC_ECCSIG_ANSIX962,
+        };
+
+        const auto res =
+            ecc_verify_hash_v2(cs(signature.data()), ul(signature.size()), cs(hash.data()), ul(hash.size()), &options, &result, &key.get());
+        return res == CRYPT_OK && result != 0;
     }
 
     bool ecc::encrypt(const key& key, std::string& data)
